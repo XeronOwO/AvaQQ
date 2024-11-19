@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using Avalonia.Controls;
+using System;
 using System.Text.Json;
 
 namespace AvaQQ.SDK;
@@ -12,11 +12,7 @@ public static class Constants
 	/// <summary>
 	/// Storage directory.
 	/// </summary>
-	public static string StorageDirectory { get; } = Directory.Exists("AvaQQ")
-			&& File.Exists(".gitignore")
-			&& File.Exists("AvaQQ.sln")
-			? ".temp"
-			: ".";
+	public static string StorageDirectory { get; } = Design.IsDesignMode ? ".design" : ".";
 
 	/// <summary>
 	/// Connection timeout.

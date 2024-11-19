@@ -13,7 +13,6 @@ namespace AvaQQ.Desktop;
 
 internal class AppService(IServiceProvider serviceProvider, IHost host, ILifetimeController lifetime) : BackgroundService
 {
-	// Avalonia configuration, don't remove; also used by visual designer.
 	public AppBuilder BuildAvaloniaApp()
 	{
 		// https://github.com/wieslawsoltes/Svg.Skia?tab=readme-ov-file#avalonia-previewer
@@ -21,7 +20,15 @@ internal class AppService(IServiceProvider serviceProvider, IHost host, ILifetim
 		GC.KeepAlive(typeof(SvgImageExtension).Assembly);
 		GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
 
-		return AppBuilder.Configure(serviceProvider.GetRequiredService<AppBase>)
+		return AppBuilder.Configure(() =>
+			{
+				var app = (App)serviceProvider.GetRequiredService<AppBase>();
+				// Due to the way Avalonia Designer works,
+				// we have to set the ServiceProvider and Lifetime manually
+				app.ServiceProvider = serviceProvider;
+				app.Lifetime = lifetime;
+				return app;
+			})
 			.UsePlatformDetect()
 			.WithInterFont()
 			.LogToTrace()

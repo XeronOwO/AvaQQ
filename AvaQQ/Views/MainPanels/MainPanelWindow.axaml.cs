@@ -20,7 +20,8 @@ public partial class MainPanelWindow : Window
 	private async void MainPanelWindow_Loaded(object? sender, RoutedEventArgs e)
 	{
 		if (Application.Current is not App app
-			|| DataContext is not MainPanelViewModel model)
+			|| DataContext is not MainPanelViewModel model
+			|| Design.IsDesignMode)
 		{
 			return;
 		}

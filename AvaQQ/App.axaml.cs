@@ -10,10 +10,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AvaQQ;
 
-public partial class App(
-	IServiceProvider serviceProvider,
-	ILifetimeController lifetime) : AppBase
+public partial class App : AppBase
 {
+	// Due to the way Avalonia Designer works,
+	// we have to set the ServiceProvider and Lifetime manually
+	public IServiceProvider ServiceProvider { get; set; } = null!;
+
+	public ILifetimeController Lifetime { get; set; } = null!;
+
 	public override void Initialize()
 	{
 		AvaloniaXamlLoader.Load(this);
@@ -23,7 +27,7 @@ public partial class App(
 	{
 		base.OnFrameworkInitializationCompleted();
 
-		PluginManager.LoadPlugins(serviceProvider);
+		PluginManager.LoadPlugins(ServiceProvider);
 
 		OpenConnectWindow(); // Controls the lifetime manually
 
@@ -76,7 +80,7 @@ public partial class App(
 
 		if (Adapter is null)
 		{
-			lifetime.Stop();
+			Lifetime.Stop();
 		}
 		else
 		{

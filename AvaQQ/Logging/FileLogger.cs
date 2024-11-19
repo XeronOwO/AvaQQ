@@ -1,4 +1,5 @@
-﻿using AvaQQ.SDK;
+﻿using Avalonia.Controls;
+using AvaQQ.SDK;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
@@ -46,16 +47,19 @@ internal class FileLogger(
 			return;
 		}
 
-		var creationTime = File.GetCreationTime(_logFilePath);
-		var outputFilePath = Path.Combine(
-			_logDirectory,
-			$"{creationTime:yyyy-MM-dd-HH-mm-ss}.log.gz"
-		);
-		using var outputStream = new FileStream(outputFilePath, FileMode.Create);
-		using var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize);
-		using var inputStream = new FileStream(_logFilePath, FileMode.Open);
-		inputStream.CopyTo(gZipStream);
-		inputStream.Close();
+		if (!Design.IsDesignMode)
+		{
+			var creationTime = File.GetCreationTime(_logFilePath);
+			var outputFilePath = Path.Combine(
+				_logDirectory,
+				$"{creationTime:yyyy-MM-dd-HH-mm-ss}.log.gz"
+			);
+			using var outputStream = new FileStream(outputFilePath, FileMode.Create);
+			using var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize);
+			using var inputStream = new FileStream(_logFilePath, FileMode.Open);
+			inputStream.CopyTo(gZipStream);
+			inputStream.Close();
+		}
 
 		File.Delete(_logFilePath);
 	}
