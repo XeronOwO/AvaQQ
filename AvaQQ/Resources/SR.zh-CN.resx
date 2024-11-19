@@ -151,7 +151,7 @@
     <value>ConnectWindow 已打开。</value>
   </data>
   <data name="ExceptionMainPanelWindowAlreadyOpened" xml:space="preserve">
-    <value>MainPanelWindow 已打开。</value>
+    <value>MainPanel 已打开。</value>
   </data>
   <data name="ExceptionConnectWindowNotOpened" xml:space="preserve">
     <value>ConnectWindow 未打开。</value>
@@ -161,5 +161,26 @@
   </data>
   <data name="ExceptionAvatarDiameterMustEven" xml:space="preserve">
     <value>头像直径必须为偶数。</value>
+  </data>
+  <data name="ErrorFailedToLoadSearchingDirectory" xml:space="preserve">
+    <value>加载搜索目录 "{0}" 失败。</value>
+  </data>
+  <data name="ExceptionCircularReferenceDetected" xml:space="preserve">
+    <value>加载插件时发现循环引用。</value>
+  </data>
+  <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
+    <value>找不到ID为 "{0}" 的依赖插件。</value>
+  </data>
+  <data name="ErrorFailedToDiscoverPlugin" xml:space="preserve">
+    <value>在 "{0}" 寻找插件失败。</value>
+  </data>
+  <data name="ErrorErrorWhilePreloadingPlugins" xml:space="preserve">
+    <value>预加载插件时出错。</value>
+  </data>
+  <data name="ErrorFailedToLoadPluginAssembly" xml:space="preserve">
+    <value>加载插件程序集 "{0}" 失败。</value>
+  </data>
+  <data name="ErrorErrorWhileInvokingPluginMethod" xml:space="preserve">
+    <value>在插件 "{1}" 中调用函数 "{0}" 时出错。</value>
   </data>
 </root>

@@ -68,5 +68,14 @@ namespace AvaQQ.SDK.Resources {
                 return ResourceManager.GetString("ExceptionFailedToLoadConfiguration", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Failed to load plugins. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionFailedToLoadPlugins {
+            get {
+                return ResourceManager.GetString("ExceptionFailedToLoadPlugins", resourceCulture);
+            }
+        }
     }
 }

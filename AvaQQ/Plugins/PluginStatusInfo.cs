@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace AvaQQ.Plugins;
 
@@ -9,8 +8,4 @@ internal class PluginStatusInfo
 
 	[JsonIgnore]
 	public bool Visited { get; set; } = false;
-}
-
-internal class PluginStatusInfos : Dictionary<string, PluginStatusInfo>
-{
 }

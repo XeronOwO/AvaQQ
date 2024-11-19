@@ -6,6 +6,6 @@ namespace AvaQQ;
 public static class ServiceCollectionExtensions
 {
 	public static IServiceCollection AddAvaQQ(this IServiceCollection services)
-		=> services.AddSingleton<App>()
+		=> services.AddSingleton<AppBase, App>()
 			.AddSingleton<ILifetimeController, LifetimeController>();
 }

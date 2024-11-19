@@ -1,4 +1,5 @@
 ﻿using AvaQQ.Logging;
+using AvaQQ.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,7 @@ internal class Program
 				services.AddAvaQQ()
 					.AddHostedService<AppService>()
 			)
+			.ConfigurePlugins()
 			.Build()
 			.Run();
 }

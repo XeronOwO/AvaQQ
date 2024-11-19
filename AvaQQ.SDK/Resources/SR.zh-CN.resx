@@ -120,4 +120,7 @@
   <data name="ExceptionFailedToLoadConfiguration" xml:space="preserve">
     <value>配置文件 "{0}" 加载失败。</value>
   </data>
+  <data name="ExceptionFailedToLoadPlugins" xml:space="preserve">
+    <value>加载插件失败。</value>
+  </data>
 </root>

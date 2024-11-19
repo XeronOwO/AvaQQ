@@ -162,4 +162,25 @@
   <data name="ExceptionAvatarDiameterMustEven" xml:space="preserve">
     <value>The diameter of the avatar must be an even number.</value>
   </data>
+  <data name="ErrorFailedToLoadSearchingDirectory" xml:space="preserve">
+    <value>Failed to load searching directory "{0}".</value>
+  </data>
+  <data name="ExceptionCircularReferenceDetected" xml:space="preserve">
+    <value>Circular reference detected while loading plugin.</value>
+  </data>
+  <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
+    <value>Plugin dependency with id "{0}" not found.</value>
+  </data>
+  <data name="ErrorFailedToDiscoverPlugin" xml:space="preserve">
+    <value>Failed to discover plugin in "{0}".</value>
+  </data>
+  <data name="ErrorErrorWhilePreloadingPlugins" xml:space="preserve">
+    <value>Error while preloading plugins.</value>
+  </data>
+  <data name="ErrorFailedToLoadPluginAssembly" xml:space="preserve">
+    <value>Failed to load plugin assembly "{0}".</value>
+  </data>
+  <data name="ErrorErrorWhileInvokingPluginMethod" xml:space="preserve">
+    <value>Error while invoking method "{0}" in plugin "{1}".</value>
+  </data>
 </root>

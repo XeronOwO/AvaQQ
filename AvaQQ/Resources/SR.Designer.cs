@@ -61,6 +61,51 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Error while invoking method &quot;{0}&quot; in plugin &quot;{1}&quot;. 的本地化字符串。
+        /// </summary>
+        internal static string ErrorErrorWhileInvokingPluginMethod {
+            get {
+                return ResourceManager.GetString("ErrorErrorWhileInvokingPluginMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Error while preloading plugins. 的本地化字符串。
+        /// </summary>
+        internal static string ErrorErrorWhilePreloadingPlugins {
+            get {
+                return ResourceManager.GetString("ErrorErrorWhilePreloadingPlugins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to discover plugin in &quot;{0}&quot;. 的本地化字符串。
+        /// </summary>
+        internal static string ErrorFailedToDiscoverPlugin {
+            get {
+                return ResourceManager.GetString("ErrorFailedToDiscoverPlugin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to load plugin assembly &quot;{0}&quot;. 的本地化字符串。
+        /// </summary>
+        internal static string ErrorFailedToLoadPluginAssembly {
+            get {
+                return ResourceManager.GetString("ErrorFailedToLoadPluginAssembly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to load searching directory &quot;{0}&quot;. 的本地化字符串。
+        /// </summary>
+        internal static string ErrorFailedToLoadSearchingDirectory {
+            get {
+                return ResourceManager.GetString("ErrorFailedToLoadSearchingDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Adapter was not set. 的本地化字符串。
         /// </summary>
         internal static string ExceptionAdapterNotSet {
@@ -75,6 +120,15 @@ namespace AvaQQ.Resources {
         internal static string ExceptionAvatarDiameterMustEven {
             get {
                 return ResourceManager.GetString("ExceptionAvatarDiameterMustEven", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Circular reference detected while loading plugin. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionCircularReferenceDetected {
+            get {
+                return ResourceManager.GetString("ExceptionCircularReferenceDetected", resourceCulture);
             }
         }
         
@@ -120,6 +174,15 @@ namespace AvaQQ.Resources {
         internal static string ExceptionMainPanelWindowNotOpened {
             get {
                 return ResourceManager.GetString("ExceptionMainPanelWindowNotOpened", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Plugin dependency with id &quot;{0}&quot; not found. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionPluginDependencyNotFound {
+            get {
+                return ResourceManager.GetString("ExceptionPluginDependencyNotFound", resourceCulture);
             }
         }
         

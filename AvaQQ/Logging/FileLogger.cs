@@ -1,8 +1,10 @@
 ﻿using AvaQQ.SDK;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 
 namespace AvaQQ.Logging;
 
@@ -22,12 +24,19 @@ internal class FileLogger(
 
 	static FileLogger()
 	{
-		if (!Directory.Exists(_logDirectory))
+		try
 		{
-			Directory.CreateDirectory(_logDirectory);
-		}
+			if (!Directory.Exists(_logDirectory))
+			{
+				Directory.CreateDirectory(_logDirectory);
+			}
 
-		CompressLatestLog();
+			CompressLatestLog();
+		}
+		catch (Exception e)
+		{
+			Debug.WriteLine(e);
+		}
 	}
 
 	private static void CompressLatestLog()
@@ -37,23 +46,18 @@ internal class FileLogger(
 			return;
 		}
 
-		try
-		{
-			var creationTime = File.GetCreationTime(_logFilePath);
-			var outputFilePath = Path.Combine(
-				_logDirectory,
-				$"{creationTime:yyyy-MM-dd-HH-mm-ss}.log.gz"
-			);
-			using var outputStream = new FileStream(outputFilePath, FileMode.Create);
-			using var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize);
-			using var inputStream = new FileStream(_logFilePath, FileMode.Open);
-			inputStream.CopyTo(gZipStream);
+		var creationTime = File.GetCreationTime(_logFilePath);
+		var outputFilePath = Path.Combine(
+			_logDirectory,
+			$"{creationTime:yyyy-MM-dd-HH-mm-ss}.log.gz"
+		);
+		using var outputStream = new FileStream(outputFilePath, FileMode.Create);
+		using var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize);
+		using var inputStream = new FileStream(_logFilePath, FileMode.Open);
+		inputStream.CopyTo(gZipStream);
+		inputStream.Close();
 
-			File.Delete(_logFilePath);
-		}
-		catch (Exception)
-		{
-		}
+		File.Delete(_logFilePath);
 	}
 
 	public IDisposable? BeginScope<TState>(TState state) where TState : notnull
@@ -76,13 +80,20 @@ internal class FileLogger(
 
 		try
 		{
+			var sb = new StringBuilder();
+			sb.AppendLine($"{GetLogLevelString(logLevel)}: {name}[{eventId.Id}] @ {DateTime.Now}");
+			sb.AppendLine($"      {formatter(state, exception)}");
+			if (exception is not null)
+			{
+				sb.AppendLine(exception.ToString());
+			}
+
 			File.AppendAllText(
 				_logFilePath,
-				$"{GetLogLevelString(logLevel)}: {name}[{eventId.Id}] @{DateTime.Now}{Environment.NewLine}" +
-				$"      {formatter(state, exception)}{Environment.NewLine}"
+				sb.ToString()
 			);
 		}
-		catch (Exception)
+		catch
 		{
 		}
 	}

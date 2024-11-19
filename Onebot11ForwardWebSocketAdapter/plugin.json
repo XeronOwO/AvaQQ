@@ -1,0 +1,9 @@
+{
+	"Id": "Onebot11ForwardWebSocketAdapter",
+	"Name": "Onebot 11 Forward Web Socket Adapter",
+	"Description": "Onebot 11 Forward Web Socket Adapter",
+	"Authors": [ "XeronOwO" ],
+	"Version": "1.0.0",
+	"Assemblies": [ "Onebot11ForwardWebSocketAdapter.dll" ],
+	"Dependencies": []
+}

@@ -10,17 +10,21 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AvaQQ;
 
-public partial class App(ILifetimeController lifetime) : AppBase
+public partial class App(
+	IServiceProvider serviceProvider,
+	ILifetimeController lifetime) : AppBase
 {
 	public override void Initialize()
 	{
 		AvaloniaXamlLoader.Load(this);
-
-		PluginManager.LoadPlugins();
 	}
 
 	public override void OnFrameworkInitializationCompleted()
 	{
+		base.OnFrameworkInitializationCompleted();
+
+		PluginManager.LoadPlugins(serviceProvider);
+
 		OpenConnectWindow(); // Controls the lifetime manually
 
 		//if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -31,8 +35,6 @@ public partial class App(ILifetimeController lifetime) : AppBase
 		//{
 		//	singleViewPlatform.MainView = window;
 		//}
-
-		base.OnFrameworkInitializationCompleted();
 	}
 
 	private Adapter? _adapter;
@@ -74,7 +76,7 @@ public partial class App(ILifetimeController lifetime) : AppBase
 
 		if (Adapter is null)
 		{
-			lifetime.CancellationTokenSource.Cancel();
+			lifetime.Stop();
 		}
 		else
 		{

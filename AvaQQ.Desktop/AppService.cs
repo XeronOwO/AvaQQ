@@ -21,7 +21,7 @@ internal class AppService(IServiceProvider serviceProvider, IHost host, ILifetim
 		GC.KeepAlive(typeof(SvgImageExtension).Assembly);
 		GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
 
-		return AppBuilder.Configure(serviceProvider.GetRequiredService<App>)
+		return AppBuilder.Configure(serviceProvider.GetRequiredService<AppBase>)
 			.UsePlatformDetect()
 			.WithInterFont()
 			.LogToTrace()
@@ -36,7 +36,9 @@ internal class AppService(IServiceProvider serviceProvider, IHost host, ILifetim
 			{
 				if (application is App app)
 				{
+#pragma warning disable CS0618
 					app.Run(lifetime.CancellationTokenSource.Token);
+#pragma warning restore CS0618
 					_ = host.StopAsync();
 				}
 			}, Environment.GetCommandLineArgs());

@@ -120,4 +120,7 @@
   <data name="ExceptionFailedToLoadConfiguration" xml:space="preserve">
     <value>Failed to load configuration: "{0}".</value>
   </data>
+  <data name="ExceptionFailedToLoadPlugins" xml:space="preserve">
+    <value>Failed to load plugins.</value>
+  </data>
 </root>

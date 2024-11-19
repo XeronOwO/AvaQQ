@@ -1,14 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using AvaQQ.SDK;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace AvaQQ.Plugins;
 
 internal class PluginInfo
 {
-	public string Id { get; set; } = string.Empty;
+	public bool Enabled { get; set; } = true;
 
-	public string Name { get; set; } = string.Empty;
+	[JsonIgnore]
+	public bool Visited { get; set; } = false;
 
-	public string[] Assemblies { get; set; } = [];
+	[JsonIgnore]
+	public string Directory { get; set; } = string.Empty;
+
+	[JsonIgnore]
+	public PluginDetailInfo Detail { get; set; } = new();
+
+	[JsonIgnore]
+	public Plugin[] PluginInstances { get; set; } = [];
 }
 
 internal class PluginInfos : Dictionary<string, PluginInfo>
