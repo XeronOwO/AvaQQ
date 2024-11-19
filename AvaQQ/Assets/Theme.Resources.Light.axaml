@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+										xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<ResourceDictionary.ThemeDictionaries>
+		<ResourceDictionary x:Key="Light">
+			<SolidColorBrush x:Key="ControlBrush">#3F51B5</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlDisabledBrush">#3F51B5</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlDisabledTextBrush">Gray</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlFocusBrush">#7986CB</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlPointoverBrush">#7986CB</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlPressedBrush">#303F9F</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlSelectedBrush">#303F9F</SolidColorBrush>
+			
+			<SolidColorBrush x:Key="ControlBorderBrush">Gray</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlBorderDisabledBrush">#3F51B5</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlBorderDisabledTextBrush">Gray</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlBorderFocusBrush">#7986CB</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlBorderPointoverBrush">#7986CB</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlBorderPressedBrush">#303F9F</SolidColorBrush>
+			
+			<SolidColorBrush x:Key="TextBrush">Black</SolidColorBrush>
+			<SolidColorBrush x:Key="ControlTextBrush">White</SolidColorBrush>
+			
+			<SolidColorBrush x:Key="WindowBackgroundBrush">White</SolidColorBrush>
+		</ResourceDictionary>
+	</ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>
