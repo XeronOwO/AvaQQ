@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 
 namespace AvaQQ.Logging;
 
@@ -38,15 +37,23 @@ internal class FileLogger(
 			return;
 		}
 
-		var creationTime = File.GetCreationTime(_logFilePath);
-		var outputFilePath = Path.Combine(
-			_logDirectory,
-			$"{creationTime:yyyy-MM-dd-HH-mm-ss}.log.gz"
-		);
-		using var outputStream = new FileStream(outputFilePath, FileMode.Create);
-		using var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize);
-		using var inputStream = new FileStream(_logFilePath, FileMode.Open);
-		inputStream.CopyTo(gZipStream);
+		try
+		{
+			var creationTime = File.GetCreationTime(_logFilePath);
+			var outputFilePath = Path.Combine(
+				_logDirectory,
+				$"{creationTime:yyyy-MM-dd-HH-mm-ss}.log.gz"
+			);
+			using var outputStream = new FileStream(outputFilePath, FileMode.Create);
+			using var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize);
+			using var inputStream = new FileStream(_logFilePath, FileMode.Open);
+			inputStream.CopyTo(gZipStream);
+
+			File.Delete(_logFilePath);
+		}
+		catch (Exception)
+		{
+		}
 	}
 
 	public IDisposable? BeginScope<TState>(TState state) where TState : notnull
@@ -67,11 +74,17 @@ internal class FileLogger(
 			return;
 		}
 
-		File.AppendAllText(
-			_logFilePath,
-			$"{GetLogLevelString(logLevel)}: {name}[{eventId.Id}] @{DateTime.Now}{Environment.NewLine}" +
-			$"      {formatter(state, exception)}{Environment.NewLine}"
-		);
+		try
+		{
+			File.AppendAllText(
+				_logFilePath,
+				$"{GetLogLevelString(logLevel)}: {name}[{eventId.Id}] @{DateTime.Now}{Environment.NewLine}" +
+				$"      {formatter(state, exception)}{Environment.NewLine}"
+			);
+		}
+		catch (Exception)
+		{
+		}
 	}
 
 	private static string GetLogLevelString(LogLevel logLevel)
