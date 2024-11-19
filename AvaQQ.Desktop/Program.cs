@@ -1,11 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.ReactiveUI;
-using Avalonia.Svg.Skia;
+﻿using AvaQQ.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Threading;
 
 namespace AvaQQ.Desktop;
 
@@ -16,31 +13,15 @@ internal class Program
 	// yet and stuff might break.
 	[STAThread]
 	public static void Main(string[] args)
-		=> BuildAvaloniaApp(args).Start(AppMain, args);
-
-	// Avalonia configuration, don't remove; also used by visual designer.
-	public static AppBuilder BuildAvaloniaApp(string[] args)
-	{
-		// https://github.com/wieslawsoltes/Svg.Skia?tab=readme-ov-file#avalonia-previewer
-		// To make svg controls work with Avalonia Previewer
-		GC.KeepAlive(typeof(SvgImageExtension).Assembly);
-		GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
-
-		return AppBuilder.Configure<App>()
-			.UsePlatformDetect()
-			.WithInterFont()
-			.LogToTrace()
-			.UseReactiveUI();
-	}
-
-	private static readonly CancellationTokenSource _cts = new();
-
-	private static void AppMain(Application app, string[] args)
-	{
-		if (app is App app1)
-		{
-			app1.LifetimeCTS = _cts;
-			app1.Run(_cts.Token);
-		}
-	}
+		=> Host.CreateDefaultBuilder(args)
+			.ConfigureLogging(logging =>
+				logging.ClearProviders()
+					.AddFileLogger()
+			)
+			.ConfigureServices(services =>
+				services.AddAvaQQ()
+					.AddHostedService<AppService>()
+			)
+			.Build()
+			.Run();
 }

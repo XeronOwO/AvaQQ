@@ -7,11 +7,10 @@ using AvaQQ.Views.Connecting;
 using AvaQQ.Views.MainPanels;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 
 namespace AvaQQ;
 
-public partial class App : AppBase
+public partial class App(ILifetimeController lifetime) : AppBase
 {
 	public override void Initialize()
 	{
@@ -36,13 +35,12 @@ public partial class App : AppBase
 		base.OnFrameworkInitializationCompleted();
 	}
 
-	public CancellationTokenSource LifetimeCTS { get; set; } = new();
-
 	private Adapter? _adapter;
 
 	public override Adapter? Adapter => _adapter;
 
-	public override Adapter EnsuredAdapter => Adapter ?? throw new InvalidOperationException(SR.ExceptionAdapterNotSet);
+	public override Adapter EnsuredAdapter => Adapter
+		?? throw new InvalidOperationException(SR.ExceptionAdapterNotSet);
 
 	#region Connect Window
 
@@ -76,7 +74,7 @@ public partial class App : AppBase
 
 		if (Adapter is null)
 		{
-			LifetimeCTS.Cancel();
+			lifetime.CancellationTokenSource.Cancel();
 		}
 		else
 		{
