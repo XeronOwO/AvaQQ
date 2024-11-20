@@ -2,14 +2,15 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 
 namespace AvaQQ.SDK;
 
 /// <summary>
-/// Represents a configuration manager.
+/// 配置管理器
 /// </summary>
-/// <typeparam name="T">Configuration data</typeparam>
+/// <typeparam name="T">配置数据结构</typeparam>
 public class Configuration<T>
 	where T : class, new()
 {
@@ -20,8 +21,8 @@ public class Configuration<T>
 	private static string? _name;
 
 	/// <summary>
-	/// Gets or sets the name of the configuration file.<br/>
-	/// Default value is the name of the type with the suffix "Configuration" removed and converted to snake case.
+	/// 获取或设置配置文件的名称。<br/>
+	/// 默认值为类型的名称，去除后缀 "Configuration" 并转换为蛇形命名法。
 	/// </summary>
 	[AllowNull]
 	public static string Name
@@ -30,12 +31,20 @@ public class Configuration<T>
 		{
 			if (_name is null)
 			{
-				var name = typeof(T).Name;
+				var type = typeof(T);
+				if (type.GetCustomAttribute<ConfigurationNameAttribute>() is { } attribute)
+				{
+					_name = attribute.Name;
+					return _name;
+				}
+
+				var name = type.Name;
 				if (name.EndsWith(IgnoredNameSuffix, StringComparison.OrdinalIgnoreCase))
 				{
 					name = name[..^IgnoredNameSuffix.Length];
 				}
 				_name = JsonNamingPolicy.SnakeCaseLower.ConvertName(name) + ".json";
+				return _name;
 			}
 
 			return _name;
@@ -44,14 +53,14 @@ public class Configuration<T>
 	}
 
 	/// <summary>
-	/// Gets the path of the configuration file.
+	/// 获取配置文件的路径。
 	/// </summary>
 	public static string ConfigPath => Path.Combine(_baseDirectory, Name);
 
 	private static Lazy<T> _lazyInstance;
 
 	/// <summary>
-	/// Gets the instance of the configuration.
+	/// 获取配置的实例。
 	/// </summary>
 	public static T Instance => _lazyInstance.Value;
 
@@ -68,7 +77,7 @@ public class Configuration<T>
 	}
 
 	/// <summary>
-	/// Reloads the configuration.
+	/// 重新加载配置。
 	/// </summary>
 	[MemberNotNull(nameof(_lazyInstance))]
 	public static void Reload()
@@ -96,7 +105,7 @@ public class Configuration<T>
 	}
 
 	/// <summary>
-	/// Saves the configuration.
+	/// 保存配置。
 	/// </summary>
 	public static void Save()
 	{

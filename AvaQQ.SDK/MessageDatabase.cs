@@ -1,7 +1,7 @@
 ﻿namespace AvaQQ.SDK;
 
 /// <summary>
-/// Represents a database that stores messages.
+/// 存储消息的数据库
 /// </summary>
 public abstract class MessageDatabase
 {

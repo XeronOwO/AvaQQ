@@ -1,12 +1,15 @@
 using Avalonia;
 using Avalonia.Controls;
-using AvaQQ.SDK;
+using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK.ViewModels;
+using AvaQQ.ViewModels;
+using AvaQQ.Views.MainPanels;
 using System;
 using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
 
 namespace AvaQQ.Views.Connecting;
 
-public partial class ConnectWindow : Window
+public partial class ConnectWindow : Window, IConnectWindow
 {
 	public ConnectWindow()
 	{
@@ -15,8 +18,6 @@ public partial class ConnectWindow : Window
 		Closed += ConnectWindow_Closed;
 	}
 
-	public Adapter? Adapter { get; set; }
-
 	private void ConnectWindow_Closed(object? sender, EventArgs e)
 	{
 		if (Application.Current is not App app)
@@ -24,7 +25,45 @@ public partial class ConnectWindow : Window
 			return;
 		}
 
-		app.OnConnectWindowClosed(Adapter);
 		ConnectConfig.Save();
+		if (app.Adapter is null)
+		{
+			app.Lifetime.Stop();
+		}
+	}
+
+	public void BeginConnect()
+	{
+		if (DataContext is not ConnectViewModel model)
+		{
+			return;
+		}
+
+		model.IsConnecting = true;
+	}
+
+	public void EndConnect(IAdapter? adapter)
+	{
+		if (DataContext is not ConnectViewModel model)
+		{
+			return;
+		}
+
+		model.IsConnecting = false;
+
+		if (Application.Current is not App app
+			|| adapter is null)
+		{
+			return;
+		}
+
+		app.Adapter = adapter;
+		Close();
+
+		app.MainPanelWindow = new MainPanelWindow()
+		{
+			DataContext = new MainPanelViewModel(),
+		};
+		app.MainPanelWindow.Show();
 	}
 }

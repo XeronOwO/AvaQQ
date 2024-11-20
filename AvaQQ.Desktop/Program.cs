@@ -1,13 +1,13 @@
-﻿using Avalonia.Svg.Skia;
-using Avalonia;
+﻿using Avalonia;
+using Avalonia.ReactiveUI;
+using Avalonia.Svg.Skia;
 using AvaQQ.Logging;
 using AvaQQ.Plugins;
+using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using Avalonia.ReactiveUI;
-using AvaQQ.SDK;
 
 namespace AvaQQ.Desktop;
 
@@ -54,8 +54,9 @@ internal class Program
 					.Build();
 
 				var app = (App)builder.Services.GetRequiredService<AppBase>();
-				// Due to the way Avalonia Designer works,
-				// we have to set the ServiceProvider and Lifetime manually
+				// 受制于 Avalonia Designer 的工作方式，
+				// 必须手动设置 ServiceProvider 和 Lifetime，
+				// 而且必须要有无参构造函数
 				app.ServiceProvider = builder.Services;
 				app.Lifetime = builder.Services.GetRequiredService<ILifetimeController>();
 				return app;

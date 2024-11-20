@@ -1,11 +1,11 @@
 ﻿using Avalonia.Controls;
 using AvaQQ.SDK;
+using AvaQQ.SDK.Logging;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 
 namespace AvaQQ.Logging;
 
@@ -84,35 +84,21 @@ internal class FileLogger(
 
 		try
 		{
-			var sb = new StringBuilder();
-			sb.AppendLine($"{GetLogLevelString(logLevel)}: {name}[{eventId.Id}] @ {DateTime.Now}");
-			sb.AppendLine($"      {formatter(state, exception)}");
-			if (exception is not null)
-			{
-				sb.AppendLine(exception.ToString());
-			}
-
 			File.AppendAllText(
 				_logFilePath,
-				sb.ToString()
+				SimpleLogFormatter.Format(
+					name,
+					DateTime.Now,
+					logLevel,
+					eventId,
+					state,
+					exception,
+					formatter
+				)
 			);
 		}
 		catch
 		{
 		}
-	}
-
-	private static string GetLogLevelString(LogLevel logLevel)
-	{
-		return logLevel switch
-		{
-			LogLevel.Trace => "trce",
-			LogLevel.Debug => "dbug",
-			LogLevel.Information => "info",
-			LogLevel.Warning => "warn",
-			LogLevel.Error => "fail",
-			LogLevel.Critical => "crit",
-			_ => throw new ArgumentOutOfRangeException(nameof(logLevel))
-		};
 	}
 }

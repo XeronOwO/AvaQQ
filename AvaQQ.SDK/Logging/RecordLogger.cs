@@ -27,6 +27,6 @@ internal class RecordLogger(LogRecorder recorder, string name) : ILogger
 			return;
 		}
 
-		recorder.Record(name, logLevel, eventId, state, exception, formatter);
+		recorder.Record(name, DateTime.Now, logLevel, eventId, state, exception, formatter);
 	}
 }

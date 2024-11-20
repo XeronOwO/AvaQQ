@@ -1,4 +1,6 @@
-﻿namespace AvaQQ.ViewModels;
+﻿using AvaQQ.SDK;
+
+namespace AvaQQ.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {

@@ -1,49 +1,49 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:AvaQQ.ViewModels"
-             xmlns:connect="clr-namespace:AvaQQ.Views.Connecting"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
-             x:Class="AvaQQ.Views.Connecting.ConnectView"
-             x:DataType="vm:ConnectViewModel">
-  <Design.DataContext>
-    <vm:ConnectViewModel/>
-  </Design.DataContext>
-  
-  <Panel>
-    <Rectangle Fill="{DynamicResource BackgroundBrush}"
-               Opacity="{DynamicResource BackgroundOpacity}"
-               HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch"/>
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-      <TextBlock Text="AvaQQ"
-                 HorizontalAlignment="Center"
-                 VerticalAlignment="Center"
-                 Foreground="{DynamicResource PrimaryBrush}"
-                 Height="50"
-                 FontWeight="Bold"
-                 FontSize="48"/>
-      <ComboBox x:Name="adapterSelector"
-                SelectedIndex="0"
-                MinWidth="250"
-                BorderBrush="{DynamicResource PrimaryBrush}"
-                IsEnabled="{Binding IsNotConnecting}"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"
-                SelectionChanged="OnSelectAdapter"
-                Margin="0,50,0,0">
-        <ComboBox.Styles>
-          <Style Selector="ComboBoxItem">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-          </Style>
-        </ComboBox.Styles>
-      </ComboBox>
-      <Grid x:Name="gridAdapterOptions">
-      </Grid>
-    </StackPanel>
-  </Panel>
-  
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+						 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+						 xmlns:vm="clr-namespace:AvaQQ.ViewModels"
+						 xmlns:connect="clr-namespace:AvaQQ.Views.Connecting"
+						 mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+						 x:Class="AvaQQ.Views.Connecting.ConnectView"
+						 x:DataType="vm:ConnectViewModel">
+	<Design.DataContext>
+		<vm:ConnectViewModel/>
+	</Design.DataContext>
+	
+	<Panel>
+		<Rectangle Fill="{DynamicResource BackgroundBrush}"
+							 Opacity="{DynamicResource BackgroundOpacity}"
+							 HorizontalAlignment="Stretch"
+							 VerticalAlignment="Stretch"/>
+		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+			<TextBlock Text="AvaQQ"
+								 HorizontalAlignment="Center"
+								 VerticalAlignment="Center"
+								 Foreground="{DynamicResource PrimaryBrush}"
+								 Height="50"
+								 FontWeight="Bold"
+								 FontSize="48"/>
+			<ComboBox x:Name="adapterSelector"
+								SelectedIndex="0"
+								MinWidth="250"
+								BorderBrush="{DynamicResource PrimaryBrush}"
+								IsEnabled="{Binding IsNotConnecting}"
+								HorizontalAlignment="Stretch"
+								HorizontalContentAlignment="Center"
+								VerticalContentAlignment="Center"
+								SelectionChanged="OnSelectAdapter"
+								Margin="0,50,0,0">
+				<ComboBox.Styles>
+					<Style Selector="ComboBoxItem">
+						<Setter Property="HorizontalContentAlignment" Value="Center"/>
+						<Setter Property="VerticalContentAlignment" Value="Center"/>
+					</Style>
+				</ComboBox.Styles>
+			</ComboBox>
+			<Grid x:Name="gridAdapterOptions">
+			</Grid>
+		</StackPanel>
+	</Panel>
+	
 </UserControl>

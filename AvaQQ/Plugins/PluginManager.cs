@@ -216,7 +216,7 @@ internal class PluginManager
 	private static void LoadSearchingDirectories()
 	{
 		List<string> searchDirectories = [_rootDirectory];
-		List<string> cache = []; // Detect circular reference
+		List<string> cache = []; // 检测循环引用
 
 		LoadSearchingDirectories(searchDirectories, cache);
 

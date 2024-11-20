@@ -1,31 +1,23 @@
-﻿using AvaQQ.SDK;
+﻿using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Logging;
 using Makabaka;
 using Makabaka.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.IO;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace AvaQQ.Adapters;
+namespace Onebot11ForwardWebSocketAdapter;
 
-internal class Onebot11ForwardWebSocketAdapter : Adapter
+internal class Adapter : IAdapter
 {
 	private readonly MakabakaApp _makabaka;
 
 	private readonly TaskCompletionSource _connectCompletionSource = new();
 
-	public override LogRecorder Logs { get; } = new();
+	private readonly LogRecorder _logRecorder = new();
 
-	public override long Uin => _makabaka.BotContext.SelfId;
-
-	public override async Task<string> GetNameAsync()
-		=> (await _makabaka.BotContext.GetLoginInfoAsync()).Result.Nickname;
-
-	public Onebot11ForwardWebSocketAdapter(string url, string accessToken)
+	public Adapter(string url, string accessToken)
 	{
 		var json = new
 		{
@@ -43,12 +35,17 @@ internal class Onebot11ForwardWebSocketAdapter : Adapter
 		};
 
 		var builder = new MakabakaAppBuilder();
-		builder.Services.ConfigureRecordLogger(Logs);
+		builder.Services.ConfigureRecordLogger(_logRecorder);
 		builder.Configuration.AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json))));
 		_makabaka = builder.Build();
 	}
 
-	public override async Task<bool> ConnectAsync(TimeSpan timeout)
+	public long Uin => _makabaka.BotContext.SelfId;
+
+	public async Task<string> GetNicknameAsync()
+		=> (await _makabaka.BotContext.GetLoginInfoAsync()).Result.Nickname;
+
+	public async Task<(bool, LogRecorder)> TryConnectAsync(TimeSpan timeout)
 	{
 		_makabaka.BotContext.OnLifecycle += FirstOnLifecycle;
 		_ = _makabaka.RunAsync();
@@ -58,10 +55,10 @@ internal class Onebot11ForwardWebSocketAdapter : Adapter
 		if (!_connectCompletionSource.Task.IsCompletedSuccessfully)
 		{
 			await _makabaka.StopAsync();
-			return false;
+			return (false, _logRecorder);
 		}
 
-		return true;
+		return (true, _logRecorder);
 	}
 
 	private Task FirstOnLifecycle(object sender, LifecycleEventArgs e)
@@ -84,7 +81,6 @@ internal class Onebot11ForwardWebSocketAdapter : Adapter
 		{
 			if (disposing)
 			{
-
 			}
 
 			_makabaka.Dispose();
@@ -92,12 +88,12 @@ internal class Onebot11ForwardWebSocketAdapter : Adapter
 		}
 	}
 
-	~Onebot11ForwardWebSocketAdapter()
+	~Adapter()
 	{
 		Dispose(disposing: false);
 	}
 
-	public override void Dispose()
+	public void Dispose()
 	{
 		Dispose(disposing: true);
 		GC.SuppressFinalize(this);

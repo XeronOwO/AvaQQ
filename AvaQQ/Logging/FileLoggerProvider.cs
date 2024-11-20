@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Collections.Concurrent;
 using System;
+using System.Collections.Concurrent;
 
 namespace AvaQQ.Logging;
 

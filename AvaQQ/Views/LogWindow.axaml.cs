@@ -16,7 +16,7 @@ public partial class LogWindow : Window
 		if (Clipboard is not null
 			&& DataContext is LogViewModel model)
 		{
-			await Clipboard.SetTextAsync(model.LogsText);
+			await Clipboard.SetTextAsync(model.Content);
 		}
 	}
 }

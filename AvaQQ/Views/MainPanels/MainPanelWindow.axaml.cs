@@ -27,7 +27,7 @@ public partial class MainPanelWindow : Window
 		}
 
 		model.HeaderUin = app.EnsuredAdapter.Uin;
-		model.HeaderName = await app.EnsuredAdapter.GetNameAsync();
+		model.HeaderName = await app.EnsuredAdapter.GetNicknameAsync();
 	}
 
 	private void MainPanelWindow_Closed(object? sender, EventArgs e)
@@ -38,6 +38,6 @@ public partial class MainPanelWindow : Window
 		}
 
 		MainPanelConfig.Save();
-		app.OnMainPanelWindowClosed();
+		app.MainPanelWindow = null;
 	}
 }

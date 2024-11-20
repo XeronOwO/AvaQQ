@@ -2,21 +2,22 @@
 using AvaQQ.Plugins;
 using AvaQQ.Resources;
 using AvaQQ.SDK;
+using AvaQQ.SDK.Adapters;
 using AvaQQ.ViewModels;
 using AvaQQ.Views.Connecting;
 using AvaQQ.Views.MainPanels;
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace AvaQQ;
 
 public partial class App : AppBase
 {
-	// Due to the way Avalonia Designer works,
-	// we have to set the ServiceProvider and Lifetime manually
-	public IServiceProvider ServiceProvider { get; set; } = null!;
+	// 受制于 Avalonia Designer 的工作方式，
+	// 必须手动设置 ServiceProvider 和 Lifetime，
+	// 而且必须要有无参构造函数
+	public override IServiceProvider ServiceProvider { get; set; } = null!;
 
-	public ILifetimeController Lifetime { get; set; } = null!;
+	public override ILifetimeController Lifetime { get; set; } = null!;
 
 	public override void Initialize()
 	{
@@ -29,8 +30,6 @@ public partial class App : AppBase
 
 		PluginManager.LoadPlugins(ServiceProvider);
 
-		OpenConnectWindow(); // Controls the lifetime manually
-
 		//if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		//{
 		//	desktop.MainWindow = window;
@@ -39,28 +38,7 @@ public partial class App : AppBase
 		//{
 		//	singleViewPlatform.MainView = window;
 		//}
-	}
 
-	private Adapter? _adapter;
-
-	public override Adapter? Adapter => _adapter;
-
-	public override Adapter EnsuredAdapter => Adapter
-		?? throw new InvalidOperationException(SR.ExceptionAdapterNotSet);
-
-	#region Connect Window
-
-	public ConnectWindow? ConnectWindow { get; private set; }
-
-	[MemberNotNull(nameof(ConnectWindow))]
-	public void OpenConnectWindow()
-	{
-		if (ConnectWindow is not null)
-		{
-			throw new InvalidOperationException(SR.ExceptionConnectWindowAlreadyOpened);
-		}
-
-		_adapter = null;
 		ConnectWindow = new ConnectWindow()
 		{
 			DataContext = new ConnectViewModel(),
@@ -68,70 +46,12 @@ public partial class App : AppBase
 		ConnectWindow.Show();
 	}
 
-	public void OnConnectWindowClosed(Adapter? adapter)
-	{
-		if (ConnectWindow is null)
-		{
-			throw new InvalidOperationException(SR.ExceptionConnectWindowNotOpened);
-		}
+	public override IAdapter? Adapter { get; set; }
 
-		_adapter = adapter;
-		ConnectWindow = null;
+	public override IAdapter EnsuredAdapter => Adapter
+		?? throw new InvalidOperationException(SR.ExceptionAdapterNotSet);
 
-		if (Adapter is null)
-		{
-			Lifetime.Stop();
-		}
-		else
-		{
-			OpenMainPanelWindow();
-		}
-	}
+	public ConnectWindow? ConnectWindow { get; set; }
 
-	#endregion
-
-	#region Main Panel Window
-
-	public MainPanelWindow? MainPanelWindow { get; private set; }
-
-	[MemberNotNull(nameof(MainPanelWindow))]
-	public void OpenMainPanelWindow()
-	{
-		_ = EnsuredAdapter;
-		if (MainPanelWindow is not null)
-		{
-			throw new InvalidOperationException(SR.ExceptionMainPanelWindowAlreadyOpened);
-		}
-
-		MainPanelWindow = new MainPanelWindow()
-		{
-			DataContext = new MainPanelViewModel(),
-		};
-		MainPanelWindow.Show();
-	}
-
-	public void OnMainPanelWindowClosed()
-	{
-		if (MainPanelWindow is null)
-		{
-			throw new InvalidOperationException(SR.ExceptionMainPanelWindowNotOpened);
-		}
-
-		MainPanelWindow = null;
-	}
-
-	[MemberNotNull(nameof(MainPanelWindow))]
-	public void ShowMainPanelWindow()
-	{
-		if (MainPanelWindow is null)
-		{
-			OpenMainPanelWindow();
-			return;
-		}
-
-		MainPanelWindow.Show();
-		MainPanelWindow.Focus();
-	}
-
-	#endregion
+	public MainPanelWindow? MainPanelWindow { get; set; }
 }

@@ -64,6 +64,9 @@
     <Compile Update="Views\Connecting\SpinnerControl.axaml.cs">
       <DependentUpon>SpinnerControl.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\MainPanels\MainPanelView.axaml.cs">
+      <DependentUpon>MainPanelView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

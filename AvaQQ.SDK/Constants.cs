@@ -5,22 +5,22 @@ using System.Text.Json;
 namespace AvaQQ.SDK;
 
 /// <summary>
-/// Constants.
+/// 常量
 /// </summary>
 public static class Constants
 {
 	/// <summary>
-	/// Storage directory.
+	/// 存储目录
 	/// </summary>
 	public static string StorageDirectory { get; } = Design.IsDesignMode ? ".design" : ".";
 
 	/// <summary>
-	/// Connection timeout.
+	/// 链接超时时间
 	/// </summary>
 	public static TimeSpan ConnectionSpan { get; set; } = TimeSpan.FromSeconds(10);
 
 	/// <summary>
-	/// Configuration serialization options.
+	/// 配置存储序列化选项
 	/// </summary>
 	public static JsonSerializerOptions ConfigSerializationOptions { get; } = new()
 	{

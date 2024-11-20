@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace AvaQQ.Resources;
+namespace AvaQQ;
 
 internal static class Shared
 {

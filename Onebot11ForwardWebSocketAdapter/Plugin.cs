@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using AvaQQ.SDK.Adapters;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Onebot11ForwardWebSocketAdapter;
 
@@ -6,16 +10,28 @@ public class Plugin : AvaQQ.SDK.Plugin
 {
 	public override void OnPreload(IHostBuilder hostBuilder)
 	{
-		throw new Exception($"{nameof(OnPreload)} Exception");
+		Debug.WriteLine(nameof(OnPreload));
+
+		hostBuilder.ConfigureServices(services =>
+		{
+			services.AddSingleton<AdapterSelection>();
+		});
 	}
 
-	public override void OnLoad(IServiceProvider serviceProvider)
+	private ILogger<Plugin> _logger = null!;
+
+	public override void OnLoad(IServiceProvider services)
 	{
-		throw new Exception($"{nameof(OnLoad)} Exception");
+		_logger = services.GetRequiredService<ILogger<Plugin>>();
+		_logger.LogInformation(nameof(OnLoad));
+
+		services.GetRequiredService<IAdapterSelectionProvider>().Add(
+			services.GetRequiredService<AdapterSelection>()
+		);
 	}
 
 	public override void OnUnload()
 	{
-		throw new Exception($"{nameof(OnUnload)} Exception");
+		_logger.LogInformation(nameof(OnUnload));
 	}
 }

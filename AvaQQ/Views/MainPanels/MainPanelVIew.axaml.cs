@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace AvaQQ.Views.MainPanels;
 
-public partial class MainPanelVIew : UserControl
+public partial class MainPanelView : UserControl
 {
-	public MainPanelVIew()
+	public MainPanelView()
 	{
 		InitializeComponent();
 	}

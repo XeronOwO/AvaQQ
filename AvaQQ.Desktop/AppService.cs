@@ -23,8 +23,9 @@ internal class AppService(IServiceProvider serviceProvider, IHost host, ILifetim
 		return AppBuilder.Configure(() =>
 			{
 				var app = (App)serviceProvider.GetRequiredService<AppBase>();
-				// Due to the way Avalonia Designer works,
-				// we have to set the ServiceProvider and Lifetime manually
+				// 受制于 Avalonia Designer 的工作方式，
+				// 必须手动设置 ServiceProvider 和 Lifetime，
+				// 而且必须要有无参构造函数
 				app.ServiceProvider = serviceProvider;
 				app.Lifetime = lifetime;
 				return app;
@@ -43,9 +44,7 @@ internal class AppService(IServiceProvider serviceProvider, IHost host, ILifetim
 			{
 				if (application is App app)
 				{
-#pragma warning disable CS0618
 					app.Run(lifetime.CancellationTokenSource.Token);
-#pragma warning restore CS0618
 					_ = host.StopAsync();
 				}
 			}, Environment.GetCommandLineArgs());

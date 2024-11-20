@@ -1,22 +1,20 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 
 namespace AvaQQ.SDK;
 
 /// <summary>
-/// Represents a controller that manages the lifetime of the application.
+/// 应用生命周期控制器
 /// </summary>
 public interface ILifetimeController
 {
 	/// <summary>
-	/// Gets the cancellation token source that is used to stop the application.<br/>
-	/// DO NOT call <see cref="CancellationTokenSource.Cancel()"/> directly, use <see cref="Stop"/> instead.
+	/// 获取一个 CancellationTokenSource，用于停止应用。<br/>
+	/// 请勿直接调用 <see cref="CancellationTokenSource.Cancel()"/>，请使用 <see cref="Stop"/>。
 	/// </summary>
-	[Obsolete("DO NOT call CancellationTokenSource.Cancel() directly, use Stop instead.")]
 	CancellationTokenSource CancellationTokenSource { get; }
 
 	/// <summary>
-	/// Stops the application.
+	/// 停止应用
 	/// </summary>
 	void Stop();
 }

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
+using AvaQQ.SDK;
 using AvaQQ.Utils;
 using ReactiveUI;
 using System.Threading.Tasks;

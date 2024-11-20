@@ -1,5 +1,4 @@
 ﻿using Avalonia.Media.Imaging;
-using AvaQQ.Resources;
 using System;
 using System.Threading.Tasks;
 

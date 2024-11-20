@@ -1,19 +1,32 @@
 ﻿using Avalonia;
+using AvaQQ.SDK.Adapters;
+using System;
 
 namespace AvaQQ.SDK;
 
 /// <summary>
-/// Represents the base class of the application.
+/// 应用程序的基类。
 /// </summary>
 public abstract class AppBase : Application
 {
 	/// <summary>
-	/// Gets the adapter of the application.
+	/// 服务提供器
 	/// </summary>
-	public abstract Adapter? Adapter { get; }
+	public abstract IServiceProvider ServiceProvider { get; set; }
 
 	/// <summary>
-	/// Gets the ensured adapter of the application.
+	/// 生命周期控制器
 	/// </summary>
-	public abstract Adapter EnsuredAdapter { get; }
+	public abstract ILifetimeController Lifetime { get; set; }
+
+	/// <summary>
+	/// 获取应用程序的适配器。
+	/// </summary>
+	public abstract IAdapter? Adapter { get; set; }
+
+	/// <summary>
+	/// 获取应用程序的适配器，如果没有则抛出异常。
+	/// </summary>
+	/// <exception cref="InvalidOperationException"/>
+	public abstract IAdapter EnsuredAdapter { get; }
 }

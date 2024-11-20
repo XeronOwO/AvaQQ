@@ -4,15 +4,15 @@ using Microsoft.Extensions.Logging;
 namespace AvaQQ.SDK.Logging;
 
 /// <summary>
-/// Extension methods for the <see cref="IServiceCollection"/> interface.
+/// 日志构建器扩展
 /// </summary>
 public static class LoggingBuilderExtensions
 {
 	/// <summary>
-	/// Configures the logging system to use the specified <see cref="LogRecorder"/>.
+	/// 配置记录日志器
 	/// </summary>
-	/// <param name="services">The <see cref="IServiceCollection"/> to add the logging services to.</param>
-	/// <param name="recorder">The <see cref="LogRecorder"/> to use.</param>
+	/// <param name="services">服务</param>
+	/// <param name="recorder">日志记录器</param>
 	public static IServiceCollection ConfigureRecordLogger(this IServiceCollection services, LogRecorder recorder)
 	{
 		return services.AddLogging(builder =>
