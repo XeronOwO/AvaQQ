@@ -15,11 +15,11 @@
 				RowDefinitions="auto"
 				ColumnDefinitions="auto,*,auto">
 		
-		<!--Avatar-->
+		<!-- 头像 -->
 		<Grid Grid.Column="0"
 					Margin="10">
 			
-			<!--Round Border-->
+			<!-- 头像圆形边框 -->
 			<Rectangle Fill="{DynamicResource ControlBrush}">
 				<Rectangle.Clip>
 					<CombinedGeometry GeometryCombineMode="Exclude">
@@ -33,7 +33,7 @@
 				</Rectangle.Clip>
 			</Rectangle>
 			
-			<!--Round Image-->
+			<!-- 圆形裁剪图片 -->
 			<Image Height="40"
 						 Width="40"
 						 Source="{Binding HeaderAvatar^}"
@@ -66,7 +66,7 @@
 			</Button>
 		</Grid>
 		
-		<!--Info-->
+		<!-- 用户信息 -->
 		<Grid Grid.Column="1"
 					Margin="10">
 			<Grid RowDefinitions="auto,auto"
@@ -88,11 +88,11 @@
 			</Grid>
 		</Grid>
 		
-		<!--More-->
+		<!-- 更多 -->
 		<Grid Grid.Column="2"
 					Margin="10"
 					VerticalAlignment="Center">
-			<Button Background="Transparent"
+			<Button Classes="transparent"
 							Padding="0"
 							Click="ButtonMore_Click">
 				<Button.Styles>

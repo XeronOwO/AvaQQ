@@ -21,13 +21,14 @@ public partial class MainPanelWindow : Window
 	{
 		if (Application.Current is not App app
 			|| DataContext is not MainPanelViewModel model
-			|| Design.IsDesignMode)
+			|| Design.IsDesignMode
+			|| app.Adapter is not { } adapter)
 		{
 			return;
 		}
 
-		model.HeaderUin = app.EnsuredAdapter.Uin;
-		model.HeaderName = await app.EnsuredAdapter.GetNicknameAsync();
+		model.HeaderUin = adapter.Uin;
+		model.HeaderName = await adapter.GetNicknameAsync();
 	}
 
 	private void MainPanelWindow_Closed(object? sender, EventArgs e)

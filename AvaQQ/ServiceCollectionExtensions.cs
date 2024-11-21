@@ -1,7 +1,9 @@
 ﻿using AvaQQ.Adapters;
 using AvaQQ.Logging;
+using AvaQQ.MainPanels;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK.MainPanels;
 using AvaQQ.SDK.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,5 +15,6 @@ public static class ServiceCollectionExtensions
 		=> services.AddSingleton<AppBase, App>()
 		.AddSingleton<ILifetimeController, LifetimeController>()
 		.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
-		.AddSingleton<ILogWindowProvider, LogWindowProvider>();
+		.AddSingleton<ILogWindowProvider, LogWindowProvider>()
+		.AddSingleton<ICategorySelectionProvider, CategorySelectionProvider>();
 }

@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+						 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+						 xmlns:vm="using:AvaQQ.ViewModels"
+						 xmlns:mp="clr-namespace:AvaQQ.Views.MainPanels"
+						 mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="500"
+						 x:Class="AvaQQ.Views.MainPanels.CategorizedListView">
+	
+	<Grid RowDefinitions="auto auto *">
+		<!-- 顶部栏 -->
+		<Grid Grid.Row="0" ColumnDefinitions="* auto" Margin="10,0">
+			<!-- 分类选择 -->
+			<mp:CategorySelectionView Grid.Column="0"
+																x:Name="categorySelectionView"/>
+			
+			<!-- 分类自定义按钮 -->
+			<Button Grid.Column="1"
+							Classes="transparent"
+							Padding="0"
+							Margin="5,5,0,5"
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center">
+				<Button.Styles>
+					<Style Selector="Button Line">
+						<Setter Property="Stroke" Value="{DynamicResource TextBrush}"/>
+					</Style>
+					<Style Selector="Button:pointerover Line">
+						<Setter Property="Stroke" Value="{DynamicResource ControlTextBrush}"/>
+					</Style>
+				</Button.Styles>
+				<Canvas Width="24" Height="24">
+					<Line StartPoint="4,6" EndPoint="20,6" StrokeThickness="2" StrokeLineCap="Round"/>
+					<Line StartPoint="4,12" EndPoint="20,12" StrokeThickness="2" StrokeLineCap="Round"/>
+					<Line StartPoint="4,18" EndPoint="20,18" StrokeThickness="2" StrokeLineCap="Round"/>
+				</Canvas>
+			</Button>
+		</Grid>
+		
+		<!-- 分割线 -->
+		<Grid Grid.Row="1">
+			<Rectangle Height="1"
+								 HorizontalAlignment="Stretch"
+								 Fill="{DynamicResource ControlBrush}"/>
+		</Grid>
+		
+		<!-- 下方列表 -->
+		<Grid x:Name="gridContent" Grid.Row="2">
+			
+		</Grid>
+	</Grid>
+</UserControl>

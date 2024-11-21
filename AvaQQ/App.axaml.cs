@@ -1,6 +1,5 @@
 ﻿using Avalonia.Markup.Xaml;
 using AvaQQ.Plugins;
-using AvaQQ.Resources;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.ViewModels;
@@ -47,9 +46,6 @@ public partial class App : AppBase
 	}
 
 	public override IAdapter? Adapter { get; set; }
-
-	public override IAdapter EnsuredAdapter => Adapter
-		?? throw new InvalidOperationException(SR.ExceptionAdapterNotSet);
 
 	public ConnectWindow? ConnectWindow { get; set; }
 

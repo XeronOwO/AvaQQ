@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using AvaQQ.Adapters;
 using AvaQQ.SDK.Adapters;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
@@ -15,8 +14,6 @@ public partial class ConnectView : UserControl
 	{
 		InitializeComponent();
 
-		var defaultSelection = new SelectAdapterSelection();
-		adapterSelector.Items.Add(defaultSelection);
 		if (Application.Current is App app)
 		{
 			var selections = app.ServiceProvider.GetRequiredService<IAdapterSelectionProvider>();
@@ -28,7 +25,7 @@ public partial class ConnectView : UserControl
 
 		adapterSelector.SelectedItem = adapterSelector.Items.Where(
 			x => x is not null && x.ToString() == ConnectConfig.Instance.AdapterIndex
-		).FirstOrDefault(defaultSelection);
+		).FirstOrDefault();
 
 		Loaded += ConnectView_Loaded;
 	}

@@ -214,6 +214,24 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Friend 的本地化字符串。
+        /// </summary>
+        internal static string TextFriend {
+            get {
+                return ResourceManager.GetString("TextFriend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Group 的本地化字符串。
+        /// </summary>
+        internal static string TextGroup {
+            get {
+                return ResourceManager.GetString("TextGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Input Access Token... 的本地化字符串。
         /// </summary>
         internal static string TextInputAccessToken {
@@ -246,6 +264,15 @@ namespace AvaQQ.Resources {
         internal static string TextOnebot11ForwardWebSocketAdapter {
             get {
                 return ResourceManager.GetString("TextOnebot11ForwardWebSocketAdapter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Recent 的本地化字符串。
+        /// </summary>
+        internal static string TextRecent {
+            get {
+                return ResourceManager.GetString("TextRecent", resourceCulture);
             }
         }
         

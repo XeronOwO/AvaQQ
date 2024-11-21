@@ -26,7 +26,6 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
-    <PackageReference Include="Makabaka" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,6 +62,9 @@
     </Compile>
     <Compile Update="Views\Connecting\SpinnerControl.axaml.cs">
       <DependentUpon>SpinnerControl.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\MainPanels\CategorizedListView.axaml.cs">
+      <DependentUpon>CategorizedListView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\MainPanels\MainPanelView.axaml.cs">
       <DependentUpon>MainPanelView.axaml</DependentUpon>

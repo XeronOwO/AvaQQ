@@ -17,13 +17,13 @@
 				<mp:HeaderView/>
 			</Grid>
 			<Grid Grid.Row="1">
-				<!--Splitter-->
+				<!-- 分割线 -->
 				<Rectangle Height="2"
 									 HorizontalAlignment="Stretch"
 									 Fill="{DynamicResource ControlBrush}"/>
 			</Grid>
 			<Grid Grid.Row="2">
-				
+				<mp:CategorizedListView/>
 			</Grid>
 			<Grid Grid.Row="3">
 

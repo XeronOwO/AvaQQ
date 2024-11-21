@@ -183,4 +183,13 @@
   <data name="ErrorErrorWhileInvokingPluginMethod" xml:space="preserve">
     <value>Error while invoking method "{0}" in plugin "{1}".</value>
   </data>
+  <data name="TextRecent" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="TextFriend" xml:space="preserve">
+    <value>Friend</value>
+  </data>
+  <data name="TextGroup" xml:space="preserve">
+    <value>Group</value>
+  </data>
 </root>

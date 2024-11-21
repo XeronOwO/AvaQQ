@@ -23,10 +23,4 @@ public abstract class AppBase : Application
 	/// 获取应用程序的适配器。
 	/// </summary>
 	public abstract IAdapter? Adapter { get; set; }
-
-	/// <summary>
-	/// 获取应用程序的适配器，如果没有则抛出异常。
-	/// </summary>
-	/// <exception cref="InvalidOperationException"/>
-	public abstract IAdapter EnsuredAdapter { get; }
 }
