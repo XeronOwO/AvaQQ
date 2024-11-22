@@ -45,12 +45,6 @@ internal class PluginManager
 			InvokePluginPreLoad(hostBuilder);
 
 			SavePluginInfos();
-
-			if (Application.Current is AppBase app)
-			{
-				app.ServiceProvider.GetRequiredService<ILifetimeController>().Stopping +=
-					(sender, e) => UnloadPlugins(app.ServiceProvider);
-			}
 		}
 		catch (Exception e)
 		{
@@ -299,6 +293,34 @@ internal class PluginManager
 					logger.LogError(e,
 						"Error while invoking plugin method `{Method}` in `{Plugin}`.",
 						nameof(Plugin.OnLoad),
+						instance.GetType().FullName
+					);
+				}
+			}
+		}
+	}
+
+	#endregion
+
+	#region Post Load
+
+	public static void PostLoadPlugins(IServiceProvider serviceProvider)
+	{
+		var logger = serviceProvider.GetRequiredService<ILogger<PluginManager>>();
+
+		foreach (var (_, pluginInfo) in _pluginInfos)
+		{
+			foreach (var instance in pluginInfo.PluginInstances)
+			{
+				try
+				{
+					instance.OnPostLoad(serviceProvider);
+				}
+				catch (Exception e)
+				{
+					logger.LogError(e,
+						"Error while invoking plugin method `{Method}` in `{Plugin}`.",
+						nameof(Plugin.OnPostLoad),
 						instance.GetType().FullName
 					);
 				}

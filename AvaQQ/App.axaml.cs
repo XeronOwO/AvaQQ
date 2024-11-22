@@ -36,6 +36,7 @@ public partial class App : AppBase
 		base.OnFrameworkInitializationCompleted();
 
 		PluginManager.LoadPlugins(ServiceProvider);
+		PluginManager.PostLoadPlugins(ServiceProvider);
 
 		//if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		//{
@@ -57,6 +58,8 @@ public partial class App : AppBase
 
 	private void App_Stopping(object? sender, EventArgs e)
 	{
+		PluginManager.UnloadPlugins(ServiceProvider);
+
 		if (Adapter is not null)
 		{
 			Adapter.Dispose();

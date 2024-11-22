@@ -30,6 +30,12 @@ public class Plugin : AvaQQ.SDK.Plugin
 		);
 	}
 
+	public override void OnPostLoad(IServiceProvider services)
+	{
+		_logger = services.GetRequiredService<ILogger<Plugin>>();
+		_logger.LogInformation(nameof(OnPostLoad));
+	}
+
 	public override void OnUnload()
 	{
 		_logger.LogInformation(nameof(OnUnload));
