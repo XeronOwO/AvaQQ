@@ -16,7 +16,7 @@ namespace AvaQQ.Plugins;
 
 internal class PluginManager
 {
-	private static readonly string _rootDirectory = Path.GetDirectoryName(typeof(PluginManager).Assembly.Location)!;
+	private static readonly string _rootDirectory = Environment.CurrentDirectory;
 
 	private static readonly string _pluginsDirectory = Path.Combine(_rootDirectory, "plugins");
 

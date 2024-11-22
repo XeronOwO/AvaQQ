@@ -5,14 +5,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Makabaka" Version="2.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AvaQQ.SDK\AvaQQ.SDK.csproj" />
+    <ProjectReference Include="..\AvaQQ.SDK\AvaQQ.SDK.csproj">
+      <Private>False</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+		<PackageReference Include="Makabaka" Version="2.0.0">
+			<Private>False</Private>
+		</PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -37,7 +40,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY /Y $(OutputPath)plugin.json ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\&#xD;&#xA;XCOPY /Y $(OutputPath)$(MSBuildProjectName).* ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\" />
+    <Exec Command="XCOPY /Y $(OutputPath)** ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\" />
   </Target>
 
 </Project>
