@@ -5,7 +5,7 @@ using ReactiveUI;
 using System.Threading.Tasks;
 using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
-namespace AvaQQ.ViewModels;
+namespace AvaQQ.ViewModels.MainPanels;
 
 internal class MainPanelViewModel : ViewModelBase
 {

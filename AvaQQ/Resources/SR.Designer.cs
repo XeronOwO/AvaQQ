@@ -232,6 +232,15 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Please enter filter keywords 的本地化字符串。
+        /// </summary>
+        internal static string TextInputFilterKeywords {
+            get {
+                return ResourceManager.GetString("TextInputFilterKeywords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Input URL... 的本地化字符串。
         /// </summary>
         internal static string TextInputUrl {

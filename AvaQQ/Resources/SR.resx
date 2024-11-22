@@ -189,4 +189,7 @@
   <data name="TextGroup" xml:space="preserve">
     <value>Group</value>
   </data>
+  <data name="TextInputFilterKeywords" xml:space="preserve">
+    <value>Please enter filter keywords</value>
+  </data>
 </root>

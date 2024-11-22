@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.ViewModels;
 using AvaQQ.ViewModels;
+using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
 using System;
 using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;

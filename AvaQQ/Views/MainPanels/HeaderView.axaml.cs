@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using AvaQQ.ViewModels;
+using AvaQQ.ViewModels.MainPanels;
 
 namespace AvaQQ.Views.MainPanels;
 

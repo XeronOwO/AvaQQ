@@ -189,4 +189,7 @@
   <data name="TextGroup" xml:space="preserve">
     <value>群聊</value>
   </data>
+  <data name="TextInputFilterKeywords" xml:space="preserve">
+    <value>请输入筛选关键词</value>
+  </data>
 </root>
