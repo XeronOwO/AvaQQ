@@ -1,10 +1,10 @@
-﻿using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using AvaQQ.Plugins;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.ViewModels;
 using AvaQQ.Views.Connecting;
-using AvaQQ.Views.MainPanels;
 using System;
 
 namespace AvaQQ;
@@ -47,7 +47,7 @@ public partial class App : AppBase
 
 	public override IAdapter? Adapter { get; set; }
 
-	public ConnectWindow? ConnectWindow { get; set; }
+	public override Window? ConnectWindow { get; set; }
 
-	public MainPanelWindow? MainPanelWindow { get; set; }
+	public override Window? MainPanelWindow { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using AvaQQ.SDK.Adapters;
 using System;
 
@@ -23,4 +24,14 @@ public abstract class AppBase : Application
 	/// 获取应用程序的适配器。
 	/// </summary>
 	public abstract IAdapter? Adapter { get; set; }
+
+	/// <summary>
+	/// 连接窗口
+	/// </summary>
+	public abstract Window? ConnectWindow { get; set; }
+
+	/// <summary>
+	/// 主面板窗口
+	/// </summary>
+	public abstract Window? MainPanelWindow { get; set; }
 }

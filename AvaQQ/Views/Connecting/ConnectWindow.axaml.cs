@@ -30,6 +30,7 @@ public partial class ConnectWindow : Window, IConnectWindow
 		{
 			app.Lifetime.Stop();
 		}
+		app.ConnectWindow = null;
 	}
 
 	public void BeginConnect()
