@@ -66,7 +66,7 @@ public class Configuration<T>
 
 	static Configuration()
 	{
-		_baseDirectory = Path.Combine(Constants.StorageDirectory, "config");
+		_baseDirectory = Path.Combine(Constants.RootDirectory, "config");
 
 		if (!Directory.Exists(_baseDirectory))
 		{

@@ -16,7 +16,7 @@ namespace AvaQQ.Plugins;
 
 internal class PluginManager
 {
-	private static readonly string _rootDirectory = Path.GetDirectoryName(typeof(PluginManager).Assembly.Location)!;
+	private static readonly string _rootDirectory = Constants.RootDirectory;
 
 	private static readonly string _pluginsDirectory = Path.Combine(_rootDirectory, "plugins");
 
@@ -215,7 +215,7 @@ internal class PluginManager
 
 	private static void LoadSearchingDirectories()
 	{
-		List<string> searchDirectories = [_rootDirectory];
+		List<string> searchDirectories = [Path.GetDirectoryName(typeof(PluginManager).Assembly.Location)];
 		List<string> cache = []; // 检测循环引用
 
 		LoadSearchingDirectories(searchDirectories, cache);

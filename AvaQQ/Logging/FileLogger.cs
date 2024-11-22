@@ -14,7 +14,7 @@ internal class FileLogger(
 	Func<FileLoggerConfiguration> getCurrentConfig) : ILogger
 {
 	private static readonly string _logDirectory = Path.Combine(
-		Constants.StorageDirectory,
+		Constants.RootDirectory,
 		"logs"
 	);
 

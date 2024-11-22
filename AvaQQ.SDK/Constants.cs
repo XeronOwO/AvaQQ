@@ -1,5 +1,7 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using System;
+using System.IO;
 using System.Text.Json;
 
 namespace AvaQQ.SDK;
@@ -10,9 +12,14 @@ namespace AvaQQ.SDK;
 public static class Constants
 {
 	/// <summary>
-	/// 存储目录
+	/// 根目录
 	/// </summary>
-	public static string StorageDirectory { get; } = Design.IsDesignMode ? ".design" : ".";
+	public static string RootDirectory { get; } =
+		Design.IsDesignMode
+		// Avalonia Designer 使用输出目录作为根目录
+		? Path.GetDirectoryName(typeof(Application).Assembly.Location)!
+		// 使用工作目录作为根目录，方便定制化部署
+		: Environment.CurrentDirectory;
 
 	/// <summary>
 	/// 链接超时时间
