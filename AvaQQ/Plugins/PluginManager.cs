@@ -1,4 +1,5 @@
-﻿using AvaQQ.Resources;
+﻿using Avalonia;
+using AvaQQ.Resources;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,6 +45,12 @@ internal class PluginManager
 			InvokePluginPreLoad(hostBuilder);
 
 			SavePluginInfos();
+
+			if (Application.Current is AppBase app)
+			{
+				app.ServiceProvider.GetRequiredService<ILifetimeController>().Stopping +=
+					(sender, e) => UnloadPlugins(app.ServiceProvider);
+			}
 		}
 		catch (Exception e)
 		{

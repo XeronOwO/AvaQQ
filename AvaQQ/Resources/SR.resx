@@ -192,4 +192,10 @@
   <data name="TextInputFilterKeywords" xml:space="preserve">
     <value>Please enter filter keywords</value>
   </data>
+  <data name="AppName" xml:space="preserve">
+    <value>AvaQQ</value>
+  </data>
+  <data name="MenuTextExit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
 </root>

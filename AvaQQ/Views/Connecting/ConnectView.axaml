@@ -17,7 +17,7 @@
 							 HorizontalAlignment="Stretch"
 							 VerticalAlignment="Stretch"/>
 		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-			<TextBlock Text="AvaQQ"
+			<TextBlock Text="{Binding AppName}"
 								 HorizontalAlignment="Center"
 								 VerticalAlignment="Center"
 								 Foreground="{DynamicResource PrimaryBrush}"

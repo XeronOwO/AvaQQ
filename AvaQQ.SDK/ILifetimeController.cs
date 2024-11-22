@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace AvaQQ.SDK;
 
@@ -17,4 +18,9 @@ public interface ILifetimeController
 	/// 停止应用
 	/// </summary>
 	void Stop();
+
+	/// <summary>
+	/// 停止应用时触发
+	/// </summary>
+	event EventHandler? Stopping;
 }

@@ -6,6 +6,8 @@ namespace AvaQQ.ViewModels;
 
 public class ConnectViewModel : ViewModelBase
 {
+	public string AppName => SR.AppName;
+
 	public string TextConnect => SR.TextConnect;
 
 	public string TextInputUrl => SR.TextInputUrl;

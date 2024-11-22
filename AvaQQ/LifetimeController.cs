@@ -1,5 +1,4 @@
-﻿using AvaQQ.Plugins;
-using AvaQQ.SDK;
+﻿using AvaQQ.SDK;
 using System;
 using System.Threading;
 
@@ -9,10 +8,11 @@ internal class LifetimeController(IServiceProvider serviceProvider) : ILifetimeC
 {
 	public CancellationTokenSource CancellationTokenSource { get; } = new();
 
+	public event EventHandler? Stopping;
+
 	public void Stop()
 	{
-		PluginManager.UnloadPlugins(serviceProvider);
-
+		Stopping?.Invoke(this, EventArgs.Empty);
 		CancellationTokenSource.Cancel();
 	}
 }

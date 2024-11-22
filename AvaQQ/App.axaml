@@ -1,7 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
 						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:vm="using:AvaQQ.ViewModels"
 						 x:Class="AvaQQ.App"
+						 x:DataType="vm:AppViewModel"
 						 RequestedThemeVariant="Default">
+	
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -9,8 +12,24 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Application.Resources>
+	
 	<Application.Styles>
 		<FluentTheme />
 		<StyleInclude Source="avares://AvaQQ/Assets/Theme.Styles.axaml"/>
 	</Application.Styles>
+
+	<TrayIcon.Icons>
+		<TrayIcons>
+			<TrayIcon Icon="avares://AvaQQ/Assets/logo.ico"
+								ToolTipText="{Binding AppName}"
+								Clicked="TrayIcon_Clicked">
+				<TrayIcon.Menu>
+					<NativeMenu>
+						<NativeMenuItem Header="{Binding TextExit}" Click="NativeMenuItemExit_Click"/>
+					</NativeMenu>
+				</TrayIcon.Menu>
+			</TrayIcon>
+		</TrayIcons>
+	</TrayIcon.Icons>
+	
 </Application>

@@ -61,6 +61,15 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
+        ///   查找类似 AvaQQ 的本地化字符串。
+        /// </summary>
+        internal static string AppName {
+            get {
+                return ResourceManager.GetString("AppName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Error while preloading plugins. 的本地化字符串。
         /// </summary>
         internal static string ErrorErrorWhilePreloadingPlugins {
@@ -174,6 +183,15 @@ namespace AvaQQ.Resources {
         internal static string ExceptionPluginDependencyNotFound {
             get {
                 return ResourceManager.GetString("ExceptionPluginDependencyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Exit 的本地化字符串。
+        /// </summary>
+        internal static string MenuTextExit {
+            get {
+                return ResourceManager.GetString("MenuTextExit", resourceCulture);
             }
         }
         
