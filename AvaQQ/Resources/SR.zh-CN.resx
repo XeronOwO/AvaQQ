@@ -180,9 +180,6 @@
   <data name="ErrorFailedToLoadPluginAssembly" xml:space="preserve">
     <value>加载插件程序集 "{0}" 失败。</value>
   </data>
-  <data name="ErrorErrorWhileInvokingPluginMethod" xml:space="preserve">
-    <value>在插件 "{1}" 中调用函数 "{0}" 时出错。</value>
-  </data>
   <data name="TextRecent" xml:space="preserve">
     <value>最近</value>
   </data>

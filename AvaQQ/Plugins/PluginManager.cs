@@ -176,7 +176,7 @@ internal class PluginManager
 				catch (Exception e)
 				{
 					Debug.WriteLine(string.Format(
-						SR.ErrorErrorWhileInvokingPluginMethod,
+						"Error while invoking plugin method `{0}` in `{1}`.",
 						nameof(Plugin.OnPreload),
 						instance.GetType().FullName
 						));
@@ -289,10 +289,11 @@ internal class PluginManager
 				}
 				catch (Exception e)
 				{
-					logger.LogError(e, string.Format(
-						SR.ErrorErrorWhileInvokingPluginMethod,
+					logger.LogError(e,
+						"Error while invoking plugin method `{Method}` in `{Plugin}`.",
 						nameof(Plugin.OnLoad),
-						instance.GetType().FullName));
+						instance.GetType().FullName
+					);
 				}
 			}
 		}
@@ -316,10 +317,11 @@ internal class PluginManager
 				}
 				catch (Exception e)
 				{
-					logger.LogError(e, string.Format(
-						SR.ErrorErrorWhileInvokingPluginMethod,
+					logger.LogError(e,
+						"Error while invoking plugin method `{Method}` in `{Plugin}`.",
 						nameof(Plugin.OnUnload),
-						instance.GetType().FullName));
+						instance.GetType().FullName
+					);
 				}
 			}
 		}

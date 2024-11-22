@@ -61,15 +61,6 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Error while invoking method &quot;{0}&quot; in plugin &quot;{1}&quot;. 的本地化字符串。
-        /// </summary>
-        internal static string ErrorErrorWhileInvokingPluginMethod {
-            get {
-                return ResourceManager.GetString("ErrorErrorWhileInvokingPluginMethod", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Error while preloading plugins. 的本地化字符串。
         /// </summary>
         internal static string ErrorErrorWhilePreloadingPlugins {

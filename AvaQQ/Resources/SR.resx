@@ -180,9 +180,6 @@
   <data name="ErrorFailedToLoadPluginAssembly" xml:space="preserve">
     <value>Failed to load plugin assembly "{0}".</value>
   </data>
-  <data name="ErrorErrorWhileInvokingPluginMethod" xml:space="preserve">
-    <value>Error while invoking method "{0}" in plugin "{1}".</value>
-  </data>
   <data name="TextRecent" xml:space="preserve">
     <value>Recent</value>
   </data>
