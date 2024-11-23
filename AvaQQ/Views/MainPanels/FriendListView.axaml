@@ -17,8 +17,7 @@
 						 Watermark="{Binding FilterWatermark}"/>
 		
 		<!-- 列表 -->
-		<ScrollViewer Grid.Row="1"
-									VerticalScrollBarVisibility="Hidden">
+		<ScrollViewer Grid.Row="1">
 			<StackPanel x:Name="stackPanelFriends">
 			</StackPanel>
 		</ScrollViewer>

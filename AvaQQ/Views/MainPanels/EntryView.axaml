@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+						 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+						 xmlns:vm="using:AvaQQ.ViewModels.MainPanels"
+						 xmlns:mp="clr-namespace:AvaQQ.Views.MainPanels"
+						 mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="70"
+						 x:Class="AvaQQ.Views.MainPanels.EntryView"
+						 x:DataType="vm:EntryViewModel">
+	<Design.DataContext>
+		<vm:EntryViewModel/>
+	</Design.DataContext>
+	
+	<Button Classes="transparent"
+					Margin="5"
+					Padding="5"
+					CornerRadius="10"
+					HorizontalAlignment="Stretch">
+		<Grid ColumnDefinitions="auto,*">
+			
+			<!-- 头像 -->
+			<Image Grid.Column="0"
+						 Source="{Binding Icon^}"
+						 Width="40"
+						 Height="40"
+						 Margin="2.5">
+				<Image.Clip>
+					<EllipseGeometry Center="20,20"
+													 RadiusX="20"
+													 RadiusY="20"/>
+				</Image.Clip>
+			</Image>
+			
+			<Grid Grid.Column="1"
+						RowDefinitions="auto,auto">
+				<Grid Grid.Row="0"
+							ColumnDefinitions="*,auto">
+					<TextBlock Grid.Column="0"
+										 Text="{Binding Title}"
+										 Margin="2.5"/>
+					<TextBlock Grid.Column="1"
+										 Text="{Binding Time}"
+										 Foreground="Gray"
+										 FontSize="12"
+										 HorizontalAlignment="Center"
+										 VerticalAlignment="Center"/>
+				</Grid>
+				<Grid Grid.Row="1"
+							ColumnDefinitions="auto,auto,*,auto">
+					<Image Grid.Column="0"
+								 Source="{Binding ContentIcon^}"
+								 Margin="2.5"
+								 IsVisible="{Binding IsContentIconVisible}"/>
+					<TextBlock Grid.Column="1"
+										 Text="{Binding ContentEmphasis}"
+										 Margin="2.5"
+										 Foreground="{DynamicResource AccentTextBrush}"
+										 FontSize="12"
+										 IsVisible="{Binding IsContentEmphasisVisible}"/>
+					<TextBlock Grid.Column="2"
+										 Text="{Binding Content}"
+										 Margin="2.5"
+										 Foreground="Gray"
+										 FontSize="12"/>
+					<Border Grid.Column="3"
+									Background="#F74C30"
+									CornerRadius="15"
+									Padding="5,0,5,0"
+									Margin="1"
+									IsVisible="{Binding IsUnreadCountVisible}">
+						<TextBlock Text="{Binding UnreadCountText}"
+											 Foreground="White"
+											 VerticalAlignment="Center"
+											 HorizontalAlignment="Center"
+											 FontSize="12"
+											 FontWeight="Bold"/>
+					</Border>
+				</Grid>
+			</Grid>
+		</Grid>
+	</Button>
+</UserControl>

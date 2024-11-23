@@ -21,6 +21,17 @@ public partial class CategoryButton : Button
 		add => AddHandler(SelectedEvent, value);
 		remove => RemoveHandler(SelectedEvent, value);
 	}
+	
+	public static readonly RoutedEvent<RoutedEventArgs> DeselectedEvent =
+		RoutedEvent.Register<CategoryButton, RoutedEventArgs>(
+			nameof(Deselected),
+			RoutingStrategies.Bubble);
+
+	public event EventHandler<RoutedEventArgs>? Deselected
+	{
+		add => AddHandler(DeselectedEvent, value);
+		remove => RemoveHandler(DeselectedEvent, value);
+	}
 
 	public CategoryButton() : base()
 	{
@@ -53,6 +64,7 @@ public partial class CategoryButton : Button
 			if (_isSelected == false)
 			{
 				PseudoClasses.Remove(":selected");
+				RaiseEvent(new(DeselectedEvent));
 				return;
 			}
 

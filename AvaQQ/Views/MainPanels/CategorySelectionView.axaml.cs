@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using AvaQQ.SDK.MainPanels;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -21,11 +22,11 @@ public partial class CategorySelectionView : UserControl
 		remove => RemoveHandler(SelectionChangedEvent, value);
 	}
 
-	public ObservableCollection<object> Items { get; } = [];
+	public ObservableCollection<ICategorySelection> Items { get; } = [];
 
-	private object? _selectedItem;
+	private ICategorySelection? _selectedItem;
 
-	public object? SelectedItem
+	public ICategorySelection? SelectedItem
 	{
 		get => _selectedItem;
 		set
@@ -102,9 +103,20 @@ public partial class CategorySelectionView : UserControl
 		}
 	}
 
+	private CategoryButton CreateCategoryButton(ICategorySelection selection)
+	{
+		var button = new CategoryButton()
+		{
+			Content = selection,
+		};
+		button.Selected += CategoryButton_Selected;
+		return button;
+	}
+
 	private void AddItem(NotifyCollectionChangedEventArgs e)
 	{
-		if (e.NewItems is null)
+		if (e.NewItems is null
+			|| e.NewStartingIndex < 0)
 		{
 			return;
 		}
@@ -112,26 +124,26 @@ public partial class CategorySelectionView : UserControl
 		var index = e.NewStartingIndex;
 		foreach (var item in e.NewItems)
 		{
-			var button = new CategoryButton()
-			{
-				Content = item,
-			};
-			button.Selected += CategoryButton_Selected; ;
+			var button = CreateCategoryButton((ICategorySelection)item);
 			stackPanelCategory.Children.Insert(index++, button);
 		}
 	}
 
 	private void CategoryButton_Selected(object? sender, RoutedEventArgs e)
 	{
-		if (sender is CategoryButton button)
+		if (sender is CategoryButton button
+			&& button.Content is ICategorySelection selection)
 		{
-			SelectedItem = button.Content;
+			SelectedItem?.OnDeselected();
+			SelectedItem = selection;
+			SelectedItem.OnSelected();
 		}
 	}
 
 	private void RemoveItem(NotifyCollectionChangedEventArgs e)
 	{
-		if (e.OldItems is null)
+		if (e.OldItems is null
+			|| e.OldStartingIndex < 0)
 		{
 			return;
 		}
@@ -144,8 +156,19 @@ public partial class CategorySelectionView : UserControl
 
 	private void ReplaceItem(NotifyCollectionChangedEventArgs e)
 	{
-		RemoveItem(e);
-		AddItem(e);
+		if (e.OldItems is null
+			|| e.OldStartingIndex < 0
+			|| e.NewItems is null
+			|| e.NewStartingIndex < 0)
+		{
+			return;
+		}
+
+		for (int i = 0; i < e.OldItems.Count; i++)
+		{
+			stackPanelCategory.Children[e.OldStartingIndex + i] =
+				CreateCategoryButton((ICategorySelection)e.NewItems[i]!);
+		}
 	}
 
 	private void MoveItem(NotifyCollectionChangedEventArgs e)

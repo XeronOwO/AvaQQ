@@ -21,6 +21,8 @@
 			<SolidColorBrush x:Key="ControlTextBrush">White</SolidColorBrush>
 			
 			<SolidColorBrush x:Key="WindowBackgroundBrush">White</SolidColorBrush>
+
+			<SolidColorBrush x:Key="AccentTextBrush">Orange</SolidColorBrush>
 		</ResourceDictionary>
 	</ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

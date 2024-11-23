@@ -8,6 +8,16 @@ internal class GroupCategorySelection : ICategorySelection
 {
 	public UserControl? UserControl => null;
 
+	public void OnDeselected()
+	{
+		
+	}
+
+	public void OnSelected()
+	{
+		
+	}
+
 	public override string ToString()
 	{
 		return SR.TextGroup;

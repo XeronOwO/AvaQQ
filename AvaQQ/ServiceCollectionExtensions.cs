@@ -1,4 +1,5 @@
 ﻿using AvaQQ.Adapters;
+using AvaQQ.Caches;
 using AvaQQ.Logging;
 using AvaQQ.MainPanels;
 using AvaQQ.SDK;
@@ -16,5 +17,6 @@ public static class ServiceCollectionExtensions
 		.AddSingleton<ILifetimeController, LifetimeController>()
 		.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
 		.AddSingleton<ILogWindowProvider, LogWindowProvider>()
-		.AddSingleton<ICategorySelectionProvider, CategorySelectionProvider>();
+		.AddSingleton<ICategorySelectionProvider, CategorySelectionProvider>()
+		.AddSingleton<IAvatarManager, AvatarManager>();
 }

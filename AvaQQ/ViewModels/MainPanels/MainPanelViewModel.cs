@@ -1,6 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Media;
 using AvaQQ.SDK;
-using AvaQQ.Utils;
 using ReactiveUI;
 using System.Threading.Tasks;
 using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
@@ -40,16 +39,12 @@ internal class MainPanelViewModel : ViewModelBase
 	public long HeaderUin
 	{
 		get => _headerUin;
-		set
-		{
-			this.RaiseAndSetIfChanged(ref _headerUin, value);
-			HeaderAvatar = value.GetAvatarImageAsync(100);
-		}
+		set => this.RaiseAndSetIfChanged(ref _headerUin, value);
 	}
 
-	private Task<Bitmap?> _headerAvatar = ((long)10000).GetAvatarImageAsync(40);
+	private Task<IImage?> _headerAvatar = Task.FromResult<IImage?>(null);
 
-	public Task<Bitmap?> HeaderAvatar
+	public Task<IImage?> HeaderAvatar
 	{
 		get => _headerAvatar;
 		set => this.RaiseAndSetIfChanged(ref _headerAvatar, value);

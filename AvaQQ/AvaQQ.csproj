@@ -66,6 +66,9 @@
     <Compile Update="Views\MainPanels\CategorizedListView.axaml.cs">
       <DependentUpon>CategorizedListView.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\MainPanels\EntryView.axaml.cs">
+      <DependentUpon>EntryView.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\MainPanels\MainPanelView.axaml.cs">
       <DependentUpon>MainPanelView.axaml</DependentUpon>
     </Compile>

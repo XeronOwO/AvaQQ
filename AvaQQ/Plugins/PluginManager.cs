@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using AvaQQ.Resources;
+﻿using AvaQQ.Resources;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AvaQQ.SDK;
 using AvaQQ.ViewModels.MainPanels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
@@ -28,6 +30,8 @@ public partial class MainPanelWindow : Window
 		}
 
 		model.HeaderUin = adapter.Uin;
+		model.HeaderAvatar = app.ServiceProvider.GetRequiredService<IAvatarManager>()
+			.GetUserAvatarAsync(adapter.Uin, 40);
 		model.HeaderName = await adapter.GetNicknameAsync();
 	}
 

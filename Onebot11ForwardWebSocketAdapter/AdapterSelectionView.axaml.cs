@@ -36,7 +36,7 @@ public partial class AdapterSelectionView : UserControl
 		model.IsConnecting = true;
 		model.TextBlockErrorText = string.Empty;
 
-		var adapter = new Adapter(model.Url, model.AccessToken);
+		var adapter = new Adapter(app.ServiceProvider, model.Url, model.AccessToken);
 		var (success, log) = await adapter.TryConnectAsync(Constants.ConnectionSpan);
 
 		if (!success)

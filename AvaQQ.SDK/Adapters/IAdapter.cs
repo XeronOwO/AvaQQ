@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AvaQQ.SDK.Adapters;
@@ -16,6 +17,10 @@ public interface IAdapter : IDisposable
 	/// <summary>
 	/// 获取用户昵称
 	/// </summary>
-	/// <returns>昵称</returns>
 	Task<string> GetNicknameAsync();
+
+	/// <summary>
+	/// 获取好友列表
+	/// </summary>
+	Task<IEnumerable<BriefFriendInfo>> GetFriendListAsync();
 }
