@@ -25,7 +25,7 @@ public partial class CategorizedListView : UserControl
 
 		categorySelectionView.Items.Clear();
 		var selections = app.ServiceProvider.GetRequiredService<ICategorySelectionProvider>();
-		foreach (var selection in selections)
+		foreach (var selection in selections.CreateSelections())
 		{
 			categorySelectionView.Items.Add(selection);
 		}

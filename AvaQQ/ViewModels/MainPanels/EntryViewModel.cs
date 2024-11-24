@@ -7,6 +7,8 @@ namespace AvaQQ.ViewModels.MainPanels;
 
 internal class EntryViewModel : ViewModelBase
 {
+	public object? Id { get; set; }
+
 	private Task<IImage?> _icon = Task.FromResult<IImage?>(null);
 
 	public Task<IImage?> Icon

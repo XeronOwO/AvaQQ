@@ -21,7 +21,7 @@ public partial class CategoryButton : Button
 		add => AddHandler(SelectedEvent, value);
 		remove => RemoveHandler(SelectedEvent, value);
 	}
-	
+
 	public static readonly RoutedEvent<RoutedEventArgs> DeselectedEvent =
 		RoutedEvent.Register<CategoryButton, RoutedEventArgs>(
 			nameof(Deselected),

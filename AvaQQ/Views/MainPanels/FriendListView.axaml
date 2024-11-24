@@ -17,8 +17,11 @@
 						 Watermark="{Binding FilterWatermark}"/>
 		
 		<!-- 列表 -->
-		<ScrollViewer Grid.Row="1">
-			<StackPanel x:Name="stackPanelFriends">
+		<ScrollViewer x:Name="scrollViewer"
+									Grid.Row="1">
+			<StackPanel x:Name="stackPanel">
+				<Grid x:Name="grid">
+				</Grid>
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>

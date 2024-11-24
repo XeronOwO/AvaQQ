@@ -10,12 +10,12 @@ internal class GroupCategorySelection : ICategorySelection
 
 	public void OnDeselected()
 	{
-		
+
 	}
 
 	public void OnSelected()
 	{
-		
+
 	}
 
 	public override string ToString()
