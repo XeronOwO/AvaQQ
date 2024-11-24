@@ -16,6 +16,15 @@
 					Padding="5"
 					CornerRadius="10"
 					HorizontalAlignment="Stretch">
+		<Button.Styles>
+			<Style Selector="Button:pointerover TextBlock">
+				<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+			</Style>
+			<Style Selector="Button:pressed TextBlock">
+				<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+			</Style>
+		</Button.Styles>
+		
 		<Grid ColumnDefinitions="auto,*">
 			
 			<!-- 头像 -->
