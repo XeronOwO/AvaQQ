@@ -22,8 +22,6 @@ public partial class FriendListView : UserControl
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
 	}
 
-	private bool _displayedEntriesInitialized;
-
 	private async void FriendListView_Loaded(object? sender, RoutedEventArgs e)
 	{
 		CalculateEntryViewHeight();
@@ -33,7 +31,6 @@ public partial class FriendListView : UserControl
 		UpdateDisplayedEntryList();
 		UpdateGrid();
 		UpdateEntryContent();
-		_displayedEntriesInitialized = true;
 	}
 
 	private readonly List<EntryView> _displayedEntries = [];
@@ -79,6 +76,11 @@ public partial class FriendListView : UserControl
 
 	private void UpdateDisplayedEntryList()
 	{
+		if (_entryViewHeight == 0)
+		{
+			return;
+		}
+
 		_displayedEntryCount = Math.Min(
 			(int)Math.Ceiling(_scrollViewerHeight / _entryViewHeight) + 1,
 			_filteredFriends.Count
@@ -225,8 +227,7 @@ public partial class FriendListView : UserControl
 		{
 			UpdateEntryContent();
 		}
-		else if (e.Property == BoundsProperty
-			&& _displayedEntriesInitialized)
+		else if (e.Property == BoundsProperty)
 		{
 			CalculateScrollViewerHeight();
 			UpdateFilteredFriendList();
