@@ -13,7 +13,8 @@
 	
 	<Grid RowDefinitions="auto *">
 		<!-- 搜索 -->
-		<TextBox Grid.Row="0"
+		<TextBox x:Name="textBoxFilter"
+						 Grid.Row="0"
 						 Watermark="{Binding FilterWatermark}"/>
 		
 		<!-- 列表 -->

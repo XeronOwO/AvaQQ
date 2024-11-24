@@ -19,6 +19,7 @@ public partial class FriendListView : UserControl
 
 		Loaded += FriendListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
+		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
 	}
 
 	private bool _displayedEntriesInitialized;
@@ -27,8 +28,9 @@ public partial class FriendListView : UserControl
 	{
 		CalculateEntryViewHeight();
 		CalculateScrollViewerHeight();
-		UpdateDisplayedEntryList();
 		await UpdateFriendInfoListAsync();
+		UpdateFilteredFriendList();
+		UpdateDisplayedEntryList();
 		UpdateGrid();
 		UpdateEntryContent();
 		_displayedEntriesInitialized = true;
@@ -42,20 +44,16 @@ public partial class FriendListView : UserControl
 			DataContext = new EntryViewModel()
 		};
 
+	private static readonly EntryView _testEntryView = CreateEntryView();
+
 	private double _entryViewHeight;
 
 	private void CalculateEntryViewHeight()
 	{
-		if (_displayedEntries.Count == 0)
-		{
-			_displayedEntries.Add(CreateEntryView());
-		}
-
-		var view = _displayedEntries[0];
-		stackPanel.Children.Add(view);
-		view.Measure(Size.Infinity);
-		var desiredSize = view.DesiredSize;
-		stackPanel.Children.Remove(view);
+		stackPanel.Children.Add(_testEntryView);
+		_testEntryView.Measure(Size.Infinity);
+		var desiredSize = _testEntryView.DesiredSize;
+		stackPanel.Children.Remove(_testEntryView);
 
 		_entryViewHeight = desiredSize.Height;
 	}
@@ -67,25 +65,41 @@ public partial class FriendListView : UserControl
 		_scrollViewerHeight = scrollViewer.Bounds.Height;
 	}
 
+	/// <summary>
+	/// 原始的好友列表
+	/// </summary>
+	private readonly List<BriefFriendInfo> _friends = [];
+
+	/// <summary>
+	/// 经过筛选后的好友列表
+	/// </summary>
+	private readonly List<BriefFriendInfo> _filteredFriends = [];
+
 	private int _displayedEntryCount;
 
 	private void UpdateDisplayedEntryList()
 	{
-		_displayedEntryCount = (int)Math.Ceiling(_scrollViewerHeight / _entryViewHeight) + 1;
+		_displayedEntryCount = Math.Min(
+			(int)Math.Ceiling(_scrollViewerHeight / _entryViewHeight) + 1,
+			_filteredFriends.Count
+		);
+
 		while (_displayedEntries.Count != _displayedEntryCount)
 		{
 			if (_displayedEntries.Count < _displayedEntryCount)
 			{
-				_displayedEntries.Add(CreateEntryView());
+				var view = CreateEntryView();
+				grid.Children.Add(view);
+				_displayedEntries.Add(view);
 			}
 			else
 			{
-				_displayedEntries.RemoveAt(_displayedEntries.Count - 1);
+				var entry = _displayedEntries[^1];
+				grid.Children.Remove(entry);
+				_displayedEntries.Remove(entry);
 			}
 		}
 	}
-
-	private readonly List<BriefFriendInfo> _friends = [];
 
 	private async Task UpdateFriendInfoListAsync()
 	{
@@ -97,23 +111,43 @@ public partial class FriendListView : UserControl
 
 		var friends = await adapter.GetFriendListAsync();
 		//for (int i = 0; i < 1000; i++) // 压力测试
-		//{
 		_friends.AddRange(friends);
-		//}
+	}
+
+	private void UpdateFilteredFriendList()
+	{
+		_filteredFriends.Clear();
+
+		var filter = textBoxFilter.Text;
+		if (string.IsNullOrEmpty(filter))
+		{
+			_filteredFriends.AddRange(_friends);
+			return;
+		}
+
+		foreach (var friend in _friends)
+		{
+			if (friend.Uin.ToString().Contains(filter)
+				|| friend.Nickname.Contains(filter)
+				|| friend.Remark.Contains(filter))
+			{
+				_filteredFriends.Add(friend);
+			}
+		}
 	}
 
 	private void UpdateGrid()
 	{
 		var height = new GridLength(_entryViewHeight);
 
-		for (int i = 0; i < Math.Min(_friends.Count, grid.RowDefinitions.Count); i++)
+		for (int i = 0; i < Math.Min(_filteredFriends.Count, grid.RowDefinitions.Count); i++)
 		{
 			grid.RowDefinitions[i].Height = height;
 		}
 
-		while (grid.RowDefinitions.Count != _friends.Count)
+		while (grid.RowDefinitions.Count != _filteredFriends.Count)
 		{
-			if (grid.RowDefinitions.Count < _friends.Count)
+			if (grid.RowDefinitions.Count < _filteredFriends.Count)
 			{
 				grid.RowDefinitions.Add(new(height));
 			}
@@ -158,13 +192,13 @@ public partial class FriendListView : UserControl
 			{
 				var entry = _displayedEntries[i];
 				var friendIndex = newIndex + i;
-				if (friendIndex >= _friends.Count
+				if (friendIndex >= _filteredFriends.Count
 					|| entry.DataContext is not EntryViewModel model)
 				{
 					continue;
 				}
 
-				var friend = _friends[friendIndex];
+				var friend = _filteredFriends[friendIndex];
 				if (model.Id is int id && id == friend.Uin)
 				{
 					continue;
@@ -178,10 +212,6 @@ public partial class FriendListView : UserControl
 					model.Title += $" ({friend.Remark})";
 				}
 
-				if (entry.Parent is null)
-				{
-					grid.Children.Add(entry);
-				}
 				Grid.SetRow(entry, friendIndex);
 			}
 		}
@@ -199,9 +229,18 @@ public partial class FriendListView : UserControl
 			&& _displayedEntriesInitialized)
 		{
 			CalculateScrollViewerHeight();
+			UpdateFilteredFriendList();
 			UpdateDisplayedEntryList();
 			UpdateGrid();
 			UpdateEntryContent();
 		}
+	}
+
+	private void TextBoxFilter_TextChanged(object? sender, TextChangedEventArgs e)
+	{
+		UpdateFilteredFriendList();
+		UpdateDisplayedEntryList();
+		UpdateGrid();
+		UpdateEntryContent();
 	}
 }
