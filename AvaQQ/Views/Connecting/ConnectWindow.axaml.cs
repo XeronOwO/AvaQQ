@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.ViewModels;
@@ -10,7 +9,7 @@ using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfig
 
 namespace AvaQQ.Views.Connecting;
 
-public partial class ConnectWindow : Window, IConnectWindow
+public partial class ConnectWindow : ConnectWindowBase
 {
 	public ConnectWindow()
 	{
@@ -31,7 +30,7 @@ public partial class ConnectWindow : Window, IConnectWindow
 		app.ConnectWindow = null;
 	}
 
-	public void BeginConnect()
+	public override void BeginConnect()
 	{
 		if (DataContext is not ConnectViewModel model)
 		{
@@ -41,7 +40,7 @@ public partial class ConnectWindow : Window, IConnectWindow
 		model.IsConnecting = true;
 	}
 
-	public void EndConnect(IAdapter? adapter)
+	public override void EndConnect(IAdapter? adapter)
 	{
 		if (DataContext is not ConnectViewModel model)
 		{

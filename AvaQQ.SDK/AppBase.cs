@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Resources;
+using AvaQQ.SDK.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -59,7 +60,7 @@ public abstract class AppBase : Application
 	/// <summary>
 	/// 连接窗口
 	/// </summary>
-	public abstract Window? ConnectWindow { get; set; }
+	public abstract ConnectWindowBase? ConnectWindow { get; set; }
 
 	/// <summary>
 	/// 主面板窗口

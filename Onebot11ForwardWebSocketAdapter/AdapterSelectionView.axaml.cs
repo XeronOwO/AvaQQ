@@ -25,7 +25,7 @@ public partial class AdapterSelectionView : UserControl
 	{
 		if (DataContext is not AdapterSelectionViewModel model
 			|| VisualRoot is not Window window
-			|| VisualRoot is not IConnectWindow connect)
+			|| VisualRoot is not ConnectWindowBase connect)
 		{
 			return;
 		}
