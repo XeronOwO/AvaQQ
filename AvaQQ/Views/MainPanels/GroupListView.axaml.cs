@@ -1,33 +1,33 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK;
 using AvaQQ.ViewModels.MainPanels;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AvaQQ.Views.MainPanels;
 
-public partial class FriendListView : UserControl
+public partial class GroupListView : UserControl
 {
-	public FriendListView()
+	public GroupListView()
 	{
 		InitializeComponent();
 
-		Loaded += FriendListView_Loaded;
+		Loaded += GroupListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
 	}
 
-	private async void FriendListView_Loaded(object? sender, RoutedEventArgs e)
+	private async void GroupListView_Loaded(object? sender, RoutedEventArgs e)
 	{
 		CalculateEntryViewHeight();
 		CalculateScrollViewerHeight();
-		await UpdateFriendInfoListAsync();
-		UpdateFilteredFriendList();
+		await UpdateGroupInfoListAsync();
+		UpdateFilteredGroupList();
 		UpdateDisplayedEntryList();
 		UpdateGrid();
 		UpdateEntryContent();
@@ -65,12 +65,12 @@ public partial class FriendListView : UserControl
 	/// <summary>
 	/// 原始的好友列表
 	/// </summary>
-	private readonly List<BriefFriendInfo> _friends = [];
+	private readonly List<BriefGroupInfo> _groups = [];
 
 	/// <summary>
 	/// 经过筛选后的好友列表
 	/// </summary>
-	private readonly List<BriefFriendInfo> _filteredFriends = [];
+	private readonly List<BriefGroupInfo> _filteredGroups = [];
 
 	private int _displayedEntryCount;
 
@@ -83,7 +83,7 @@ public partial class FriendListView : UserControl
 
 		_displayedEntryCount = Math.Min(
 			(int)Math.Ceiling(_scrollViewerHeight / _entryViewHeight) + 1,
-			_filteredFriends.Count
+			_filteredGroups.Count
 		);
 
 		while (_displayedEntries.Count != _displayedEntryCount)
@@ -103,7 +103,7 @@ public partial class FriendListView : UserControl
 		}
 	}
 
-	private async Task UpdateFriendInfoListAsync()
+	private async Task UpdateGroupInfoListAsync()
 	{
 		var app = AppBase.Current;
 		if (app.Adapter is not { } adapter)
@@ -111,29 +111,29 @@ public partial class FriendListView : UserControl
 			return;
 		}
 
-		var friends = await adapter.GetFriendListAsync();
+		var groups = await adapter.GetGroupListAsync();
 		//for (int i = 0; i < 1000; i++) // 压力测试
-		_friends.AddRange(friends);
+		_groups.AddRange(groups);
 	}
 
-	private void UpdateFilteredFriendList()
+	private void UpdateFilteredGroupList()
 	{
-		_filteredFriends.Clear();
+		_filteredGroups.Clear();
 
 		var filter = textBoxFilter.Text;
 		if (string.IsNullOrEmpty(filter))
 		{
-			_filteredFriends.AddRange(_friends);
+			_filteredGroups.AddRange(_groups);
 			return;
 		}
 
-		foreach (var friend in _friends)
+		foreach (var group in _groups)
 		{
-			if (friend.Uin.ToString().Contains(filter)
-				|| friend.Nickname.Contains(filter)
-				|| friend.Remark.Contains(filter))
+			if (group.Uin.ToString().Contains(filter)
+				|| group.Name.Contains(filter)
+				|| group.Remark.Contains(filter))
 			{
-				_filteredFriends.Add(friend);
+				_filteredGroups.Add(group);
 			}
 		}
 	}
@@ -142,14 +142,14 @@ public partial class FriendListView : UserControl
 	{
 		var height = new GridLength(_entryViewHeight);
 
-		for (int i = 0; i < Math.Min(_filteredFriends.Count, grid.RowDefinitions.Count); i++)
+		for (int i = 0; i < Math.Min(_filteredGroups.Count, grid.RowDefinitions.Count); i++)
 		{
 			grid.RowDefinitions[i].Height = height;
 		}
 
-		while (grid.RowDefinitions.Count != _filteredFriends.Count)
+		while (grid.RowDefinitions.Count != _filteredGroups.Count)
 		{
-			if (grid.RowDefinitions.Count < _filteredFriends.Count)
+			if (grid.RowDefinitions.Count < _filteredGroups.Count)
 			{
 				grid.RowDefinitions.Add(new(height));
 			}
@@ -191,26 +191,26 @@ public partial class FriendListView : UserControl
 		for (int i = 0; i < _displayedEntries.Count; i++)
 		{
 			var entry = _displayedEntries[i];
-			var friendIndex = newIndex + i;
-			if (friendIndex >= _filteredFriends.Count
+			var groupIndex = newIndex + i;
+			if (groupIndex >= _filteredGroups.Count
 				|| entry.DataContext is not EntryViewModel model)
 			{
 				continue;
 			}
 
-			var friend = _filteredFriends[friendIndex];
-			if (model.Id is int id && id == friend.Uin)
+			var group = _filteredGroups[groupIndex];
+			if (model.Id is int id && id == group.Uin)
 			{
 				continue;
 			}
 
-			model.Id = friend.Uin;
-			model.Icon = avatarManager.GetUserAvatarAsync(friend.Uin, 40);
-			model.Title = string.IsNullOrEmpty(friend.Remark)
-				? friend.Nickname
-				: $"{friend.Remark} ({friend.Nickname})";
+			model.Id = group.Uin;
+			model.Icon = avatarManager.GetGroupAvatarAsync(group.Uin, 40);
+			model.Title = string.IsNullOrEmpty(group.Remark)
+				? group.Name
+				: $"{group.Remark} ({group.Name})";
 
-			Grid.SetRow(entry, friendIndex);
+			Grid.SetRow(entry, groupIndex);
 		}
 
 		_oldOffset = newOffset;
@@ -225,7 +225,7 @@ public partial class FriendListView : UserControl
 		else if (e.Property == BoundsProperty)
 		{
 			CalculateScrollViewerHeight();
-			UpdateFilteredFriendList();
+			UpdateFilteredGroupList();
 			UpdateDisplayedEntryList();
 			UpdateGrid();
 			UpdateEntryContent();
@@ -234,7 +234,7 @@ public partial class FriendListView : UserControl
 
 	private void TextBoxFilter_TextChanged(object? sender, TextChangedEventArgs e)
 	{
-		UpdateFilteredFriendList();
+		UpdateFilteredGroupList();
 		UpdateDisplayedEntryList();
 		UpdateGrid();
 		UpdateEntryContent();

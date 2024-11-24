@@ -14,6 +14,7 @@ public partial class CategorizedListView : UserControl
 
 		Loaded += CategorizedListView_Loaded;
 		categorySelectionView.SelectionChanged += CategorySelectionView_SelectionChanged;
+		Unloaded += CategorizedListView_Unloaded;
 	}
 
 	private void CategorizedListView_Loaded(object? sender, RoutedEventArgs e)
@@ -44,6 +45,14 @@ public partial class CategorizedListView : UserControl
 		if (selection.UserControl is { } control)
 		{
 			gridContent.Children.Add(control);
+		}
+	}
+
+	private void CategorizedListView_Unloaded(object? sender, RoutedEventArgs e)
+	{
+		foreach (var selection in categorySelectionView.Items)
+		{
+			selection.Dispose();
 		}
 	}
 }

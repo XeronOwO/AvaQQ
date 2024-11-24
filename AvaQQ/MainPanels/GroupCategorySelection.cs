@@ -1,25 +1,88 @@
 ﻿using Avalonia.Controls;
 using AvaQQ.Resources;
 using AvaQQ.SDK.MainPanels;
+using AvaQQ.Utils;
+using AvaQQ.ViewModels.MainPanels;
+using AvaQQ.Views.MainPanels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
 namespace AvaQQ.MainPanels;
 
 internal class GroupCategorySelection : ICategorySelection
 {
-	public UserControl? UserControl => null;
+	private readonly object _lock = new();
 
-	public void OnDeselected()
+	private readonly ILogger<GroupCategorySelection> _logger;
+
+	private GroupListView? _view;
+
+	private readonly Watchdog _watchdog;
+
+	public GroupCategorySelection(IServiceProvider serviceProvider)
 	{
-
+		_logger = serviceProvider.GetRequiredService<ILogger<GroupCategorySelection>>();
+		_watchdog = new(DestroyView);
 	}
 
-	public void OnSelected()
+	public UserControl? UserControl
 	{
+		get
+		{
+			lock (_lock)
+			{
+				if (_view is null)
+				{
+					_view = new GroupListView()
+					{
+						DataContext = new GroupListViewModel(),
+					};
+					_logger.LogInformation("GroupListView has been created.");
+				}
 
+				return _view;
+			}
+		}
+	}
+
+	private void DestroyView(object? state)
+	{
+		lock (_lock)
+		{
+			_view = null;
+			_watchdog.Stop();
+			_logger.LogInformation("GroupListView has been destroyed.");
+		}
 	}
 
 	public override string ToString()
 	{
 		return SR.TextGroup;
+	}
+
+	public void OnSelected()
+	{
+		_watchdog.Stop();
+		_logger.LogInformation("GroupListView has been stopped from destruction.");
+	}
+
+	public void OnDeselected()
+	{
+		_watchdog.Start(MainPanelConfig.Instance.UnusedViewDestructionTime);
+		_logger.LogInformation(
+			"GroupListView has been scheduled for destruction after {Delay}.",
+			MainPanelConfig.Instance.UnusedViewDestructionTime
+		);
+	}
+
+	public void Dispose()
+	{
+		if (_view is not null)
+		{
+			DestroyView(null);
+		}
+		_watchdog.Dispose();
 	}
 }

@@ -23,4 +23,9 @@ public interface IAdapter : IDisposable
 	/// 获取好友列表
 	/// </summary>
 	Task<IEnumerable<BriefFriendInfo>> GetFriendListAsync();
+
+	/// <summary>
+	/// 获取群列表
+	/// </summary>
+	Task<IEnumerable<BriefGroupInfo>> GetGroupListAsync();
 }

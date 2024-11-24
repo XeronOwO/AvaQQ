@@ -8,6 +8,8 @@ namespace AvaQQ.SDK;
 /// </summary>
 public interface IAvatarManager
 {
+	Task<IImage?> GetGroupAvatarAsync(long uin, int size = 0, bool noCache = false);
+
 	/// <summary>
 	/// 获取用户头像
 	/// </summary>

@@ -22,4 +22,9 @@ internal class RecentCategorySelection : ICategorySelection
 	{
 		return SR.TextRecent;
 	}
+
+	public void Dispose()
+	{
+		
+	}
 }

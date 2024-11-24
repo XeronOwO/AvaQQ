@@ -1,12 +1,12 @@
 ﻿using Avalonia.Controls;
 using AvaQQ.Resources;
 using AvaQQ.SDK.MainPanels;
+using AvaQQ.Utils;
 using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Threading;
 using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
 namespace AvaQQ.MainPanels;
@@ -19,12 +19,12 @@ internal class FriendCategorySelection : ICategorySelection
 
 	private FriendListView? _view;
 
-	private readonly Timer _timer;
+	private readonly Watchdog _watchdog;
 
 	public FriendCategorySelection(IServiceProvider serviceProvider)
 	{
 		_logger = serviceProvider.GetRequiredService<ILogger<FriendCategorySelection>>();
-		_timer = new(DestroyView);
+		_watchdog = new(DestroyView);
 	}
 
 	public UserControl? UserControl
@@ -52,7 +52,7 @@ internal class FriendCategorySelection : ICategorySelection
 		lock (_lock)
 		{
 			_view = null;
-			_timer.Change(Timeout.Infinite, Timeout.Infinite);
+			_watchdog.Stop();
 			_logger.LogInformation("FriendListView has been destroyed.");
 		}
 	}
@@ -64,18 +64,25 @@ internal class FriendCategorySelection : ICategorySelection
 
 	public void OnSelected()
 	{
-		_logger.LogInformation("FriendListView has been selected.");
-		_timer.Change(Timeout.Infinite, Timeout.Infinite);
+		_watchdog.Stop();
 		_logger.LogInformation("FriendListView has been stopped from destruction.");
 	}
 
 	public void OnDeselected()
 	{
-		_logger.LogInformation("FriendListView has been deselected.");
-		_timer.Change(MainPanelConfig.Instance.UnusedViewDestructionTime, Timeout.InfiniteTimeSpan);
+		_watchdog.Start(MainPanelConfig.Instance.UnusedViewDestructionTime);
 		_logger.LogInformation(
 			"FriendListView has been scheduled for destruction after {Delay}.",
 			MainPanelConfig.Instance.UnusedViewDestructionTime
 		);
+	}
+
+	public void Dispose()
+	{
+		if (_view is not null)
+		{
+			DestroyView(null);
+		}
+		_watchdog.Dispose();
 	}
 }

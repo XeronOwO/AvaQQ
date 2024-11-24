@@ -13,8 +13,6 @@ namespace Onebot11ForwardWebSocketAdapter;
 
 internal class Adapter : IAdapter
 {
-	private readonly IServiceProvider _serviceProvider;
-
 	private readonly MakabakaApp _makabaka;
 
 	private readonly ILogger<Adapter> _logger;
@@ -55,8 +53,6 @@ internal class Adapter : IAdapter
 
 	public Adapter(IServiceProvider serviceProvider, string url, string accessToken)
 	{
-		_serviceProvider = serviceProvider;
-
 		var json = new
 		{
 			Bot = new
@@ -135,6 +131,25 @@ internal class Adapter : IAdapter
 		catch (Exception e)
 		{
 			_logger.LogError(e, "Failed to get friend list.");
+			return [];
+		}
+	}
+
+	public async Task<IEnumerable<BriefGroupInfo>> GetGroupListAsync()
+	{
+		try
+		{
+			var groups = (await _makabaka.BotContext.GetGroupListAsync()).Result;
+			return groups.Select(f => new BriefGroupInfo()
+			{
+				Uin = f.GroupId,
+				Name = f.GroupName,
+				Remark = string.Empty,
+			});
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get group list.");
 			return [];
 		}
 	}
