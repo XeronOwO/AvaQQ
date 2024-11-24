@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaQQ.SDK;
@@ -26,11 +25,12 @@ public partial class AdapterSelectionView : UserControl
 	{
 		if (DataContext is not AdapterSelectionViewModel model
 			|| VisualRoot is not Window window
-			|| VisualRoot is not IConnectWindow connect
-			|| Application.Current is not AppBase app)
+			|| VisualRoot is not IConnectWindow connect)
 		{
 			return;
 		}
+
+		var app = AppBase.Current;
 
 		connect.BeginConnect();
 		model.IsConnecting = true;

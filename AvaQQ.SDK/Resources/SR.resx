@@ -117,10 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ExceptionCurrentApplicationIsNull" xml:space="preserve">
+    <value>Current application is null.</value>
+  </data>
   <data name="ExceptionFailedToLoadConfiguration" xml:space="preserve">
     <value>Failed to load configuration: "{0}".</value>
   </data>
   <data name="ExceptionFailedToLoadPlugins" xml:space="preserve">
     <value>Failed to load plugins.</value>
+  </data>
+  <data name="ExceptionUnsupportedApplicationType" xml:space="preserve">
+    <value>Unsupported application type.</value>
   </data>
 </root>

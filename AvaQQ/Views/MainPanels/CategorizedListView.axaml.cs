@@ -1,6 +1,6 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AvaQQ.SDK;
 using AvaQQ.SDK.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,10 +18,7 @@ public partial class CategorizedListView : UserControl
 
 	private void CategorizedListView_Loaded(object? sender, RoutedEventArgs e)
 	{
-		if (Application.Current is not App app)
-		{
-			return;
-		}
+		var app = AppBase.Current;
 
 		categorySelectionView.Items.Clear();
 		var selections = app.ServiceProvider.GetRequiredService<ICategorySelectionProvider>();

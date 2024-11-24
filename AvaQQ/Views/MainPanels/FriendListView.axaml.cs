@@ -105,8 +105,8 @@ public partial class FriendListView : UserControl
 
 	private async Task UpdateFriendInfoListAsync()
 	{
-		if (Application.Current is not AppBase app
-			|| app.Adapter is not { } adapter)
+		var app = AppBase.Current;
+		if (app.Adapter is not { } adapter)
 		{
 			return;
 		}
@@ -186,36 +186,33 @@ public partial class FriendListView : UserControl
 			}
 		}
 
-		if (Application.Current is AppBase app)
+		var app = AppBase.Current;
+		var avatarManager = app.ServiceProvider.GetRequiredService<IAvatarManager>();
+		for (int i = 0; i < _displayedEntries.Count; i++)
 		{
-			var avatarManager = app.ServiceProvider.GetRequiredService<IAvatarManager>();
-
-			for (int i = 0; i < _displayedEntries.Count; i++)
+			var entry = _displayedEntries[i];
+			var friendIndex = newIndex + i;
+			if (friendIndex >= _filteredFriends.Count
+				|| entry.DataContext is not EntryViewModel model)
 			{
-				var entry = _displayedEntries[i];
-				var friendIndex = newIndex + i;
-				if (friendIndex >= _filteredFriends.Count
-					|| entry.DataContext is not EntryViewModel model)
-				{
-					continue;
-				}
-
-				var friend = _filteredFriends[friendIndex];
-				if (model.Id is int id && id == friend.Uin)
-				{
-					continue;
-				}
-
-				model.Id = friend.Uin;
-				model.Icon = avatarManager.GetUserAvatarAsync(friend.Uin, 40);
-				model.Title = friend.Nickname;
-				if (!string.IsNullOrEmpty(friend.Remark))
-				{
-					model.Title += $" ({friend.Remark})";
-				}
-
-				Grid.SetRow(entry, friendIndex);
+				continue;
 			}
+
+			var friend = _filteredFriends[friendIndex];
+			if (model.Id is int id && id == friend.Uin)
+			{
+				continue;
+			}
+
+			model.Id = friend.Uin;
+			model.Icon = avatarManager.GetUserAvatarAsync(friend.Uin, 40);
+			model.Title = friend.Nickname;
+			if (!string.IsNullOrEmpty(friend.Remark))
+			{
+				model.Title += $" ({friend.Remark})";
+			}
+
+			Grid.SetRow(entry, friendIndex);
 		}
 
 		_oldOffset = newOffset;

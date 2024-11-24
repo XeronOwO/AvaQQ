@@ -61,6 +61,15 @@ namespace AvaQQ.SDK.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Current application is null. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionCurrentApplicationIsNull {
+            get {
+                return ResourceManager.GetString("ExceptionCurrentApplicationIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Failed to load configuration: &quot;{0}&quot;. 的本地化字符串。
         /// </summary>
         internal static string ExceptionFailedToLoadConfiguration {
@@ -75,6 +84,15 @@ namespace AvaQQ.SDK.Resources {
         internal static string ExceptionFailedToLoadPlugins {
             get {
                 return ResourceManager.GetString("ExceptionFailedToLoadPlugins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unsupported application type. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionUnsupportedApplicationType {
+            get {
+                return ResourceManager.GetString("ExceptionUnsupportedApplicationType", resourceCulture);
             }
         }
     }

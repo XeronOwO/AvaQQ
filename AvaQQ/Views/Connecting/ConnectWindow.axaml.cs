@@ -1,5 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
+using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.ViewModels;
 using AvaQQ.ViewModels;
@@ -21,10 +21,7 @@ public partial class ConnectWindow : Window, IConnectWindow
 
 	private void ConnectWindow_Closed(object? sender, EventArgs e)
 	{
-		if (Application.Current is not App app)
-		{
-			return;
-		}
+		var app = AppBase.Current;
 
 		ConnectConfig.Save();
 		if (app.Adapter is null)
@@ -53,8 +50,8 @@ public partial class ConnectWindow : Window, IConnectWindow
 
 		model.IsConnecting = false;
 
-		if (Application.Current is not App app
-			|| adapter is null)
+		var app = AppBase.Current;
+		if (adapter is null)
 		{
 			return;
 		}
