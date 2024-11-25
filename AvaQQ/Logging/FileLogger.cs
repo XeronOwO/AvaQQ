@@ -6,6 +6,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.LogConfiguration>;
 
 namespace AvaQQ.Logging;
 
@@ -33,6 +35,7 @@ internal class FileLogger(
 			}
 
 			CompressLatestLog();
+			DeleteOldLogs();
 		}
 		catch (Exception e)
 		{
@@ -62,6 +65,27 @@ internal class FileLogger(
 		}
 
 		File.Delete(_logFilePath);
+	}
+
+	private static void DeleteOldLogs()
+	{
+		if (!Directory.Exists(_logDirectory))
+		{
+			return;
+		}
+
+		var files = Directory.GetFiles(_logDirectory, "*.log.gz").ToList();
+		files.Sort((a, b) =>
+		{
+			var aTime = File.GetCreationTime(a);
+			var bTime = File.GetCreationTime(b);
+			return -aTime.CompareTo(bTime);
+		});
+
+		for (int i = Config.Instance.MaxFileCount; i < files.Count; i++)
+		{
+			File.Delete(files[i]);
+		}
 	}
 
 	public IDisposable? BeginScope<TState>(TState state) where TState : notnull
