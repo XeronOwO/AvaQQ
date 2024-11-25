@@ -13,6 +13,10 @@ namespace AvaQQ.Views.MainPanels;
 
 public partial class FriendListView : UserControl
 {
+	private readonly IAvatarManager _avatarManager;
+
+	private readonly IUserManager _friendManager;
+
 	public FriendListView()
 	{
 		InitializeComponent();
@@ -20,6 +24,8 @@ public partial class FriendListView : UserControl
 		Loaded += FriendListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
+		_avatarManager = AppBase.Current.ServiceProvider.GetRequiredService<IAvatarManager>();
+		_friendManager = AppBase.Current.ServiceProvider.GetRequiredService<IUserManager>();
 	}
 
 	private async void FriendListView_Loaded(object? sender, RoutedEventArgs e)
@@ -105,13 +111,7 @@ public partial class FriendListView : UserControl
 
 	private async Task UpdateFriendInfoListAsync()
 	{
-		var app = AppBase.Current;
-		if (app.Adapter is not { } adapter)
-		{
-			return;
-		}
-
-		var friends = await adapter.GetFriendListAsync();
+		var friends = await _friendManager.GetAllFriendInfosAsync();
 		//for (int i = 0; i < 1000; i++) // Ñ¹Á¦²âÊÔ
 		_friends.AddRange(friends);
 	}
@@ -186,8 +186,6 @@ public partial class FriendListView : UserControl
 			}
 		}
 
-		var app = AppBase.Current;
-		var avatarManager = app.ServiceProvider.GetRequiredService<IAvatarManager>();
 		for (int i = 0; i < _displayedEntries.Count; i++)
 		{
 			var entry = _displayedEntries[i];
@@ -205,7 +203,7 @@ public partial class FriendListView : UserControl
 			}
 
 			model.Id = friend.Uin;
-			model.Icon = avatarManager.GetUserAvatarAsync(friend.Uin, 40);
+			model.Icon = _avatarManager.GetUserAvatarAsync(friend.Uin, 40);
 			model.Title = string.IsNullOrEmpty(friend.Remark)
 				? friend.Nickname
 				: $"{friend.Remark} ({friend.Nickname})";

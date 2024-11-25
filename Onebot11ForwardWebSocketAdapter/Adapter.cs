@@ -1,4 +1,6 @@
-﻿using AvaQQ.SDK.Adapters;
+﻿using Avalonia.Threading;
+using AvaQQ.SDK;
+using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Logging;
 using Makabaka;
 using Makabaka.Events;
@@ -8,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using AGroupMessageEventArgs = AvaQQ.SDK.Adapters.GroupMessageEventArgs;
+using MGroupMessageEventArgs = Makabaka.Events.GroupMessageEventArgs;
 
 namespace Onebot11ForwardWebSocketAdapter;
 
@@ -51,6 +55,8 @@ internal class Adapter : IAdapter
 
 	private readonly LogRecorder _logRecorder = new();
 
+	private readonly IUserManager _friendManager;
+
 	public Adapter(IServiceProvider serviceProvider, string url, string accessToken)
 	{
 		var json = new
@@ -73,6 +79,7 @@ internal class Adapter : IAdapter
 		builder.Configuration.AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json))));
 		_makabaka = builder.Build();
 		_logger = serviceProvider.GetRequiredService<ILogger<Adapter>>();
+		_friendManager = serviceProvider.GetRequiredService<IUserManager>();
 	}
 
 	public long Uin => _makabaka.BotContext.SelfId;
@@ -103,6 +110,8 @@ internal class Adapter : IAdapter
 			return (false, _logRecorder);
 		}
 
+		RegisterEvents();
+
 		return (true, _logRecorder);
 	}
 
@@ -114,6 +123,11 @@ internal class Adapter : IAdapter
 		}
 
 		return Task.CompletedTask;
+	}
+
+	private void RegisterEvents()
+	{
+		_makabaka.BotContext.OnGroupMessage += BotContext_OnGroupMessage;
 	}
 
 	public async Task<IEnumerable<BriefFriendInfo>> GetFriendListAsync()
@@ -152,5 +166,48 @@ internal class Adapter : IAdapter
 			_logger.LogError(e, "Failed to get group list.");
 			return [];
 		}
+	}
+
+	public event EventHandler<AGroupMessageEventArgs>? OnGroupMessage;
+
+	private async Task BotContext_OnGroupMessage(object sender, MGroupMessageEventArgs e)
+	{
+		if (OnGroupMessage is null)
+		{
+			return;
+		}
+
+		var isAnonymous = e.Anonymous != null;
+
+		string senderRemark;
+		if (isAnonymous)
+		{
+			senderRemark = string.Empty;
+		}
+		else
+		{
+			var info = await _friendManager.GetFriendInfoAsync(e.UserId);
+			senderRemark = info is null ? string.Empty : info.Remark;
+		}
+
+		var eventArgs = new AGroupMessageEventArgs()
+		{
+			Type = e.SubType.ToAvaQQ(),
+			MessageId = e.MessageId,
+			Time = e.Time,
+			GroupUin = e.GroupId,
+			IsAnonymous = isAnonymous,
+			SenderUin = isAnonymous ? e.Anonymous!.Id : e.UserId,
+			AnonymousFlag = isAnonymous ? e.Anonymous!.Flag : string.Empty,
+			//Message = throw new NotImplementedException(),
+			SenderNickname = isAnonymous ? e.Anonymous!.Name : e.Sender!.Nickname,
+			SenderGroupNickname = isAnonymous ? string.Empty : e.Sender!.Card,
+			SenderRemark = senderRemark,
+			SenderLevel = isAnonymous ? 0 : int.Parse(e.Sender!.Level),
+			SenderRole = isAnonymous ? GroupRoleType.Member : e.Sender!.Role.ToAvaQQ(),
+			SpecificTitle = isAnonymous ? string.Empty : e.Sender!.Title,
+		};
+
+		OnGroupMessage.Invoke(this, eventArgs);
 	}
 }

@@ -21,5 +21,6 @@ public static class ServiceCollectionExtensions
 		.AddSingleton<IAvatarManager, AvatarManager>()
 		.AddTransient<RecentCategorySelection>()
 		.AddTransient<FriendCategorySelection>()
-		.AddTransient<GroupCategorySelection>();
+		.AddTransient<GroupCategorySelection>()
+		.AddSingleton<IUserManager, UserManager>();
 }

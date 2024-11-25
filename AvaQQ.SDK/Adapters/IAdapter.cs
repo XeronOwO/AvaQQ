@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Threading;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -28,4 +29,10 @@ public interface IAdapter : IDisposable
 	/// 获取群列表
 	/// </summary>
 	Task<IEnumerable<BriefGroupInfo>> GetGroupListAsync();
+
+	/// <summary>
+	/// 当收到群消息时触发<br/>
+	/// 如果当前线程不是 UI 线程，请使用 <see cref="Dispatcher.UIThread"/> 进行 Invoke
+	/// </summary>
+	event EventHandler<GroupMessageEventArgs>? OnGroupMessage;
 }
