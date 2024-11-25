@@ -1,13 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK;
+using AvaQQ.SDK.Adapters;
 using AvaQQ.ViewModels.MainPanels;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AvaQQ.Views.MainPanels;
 

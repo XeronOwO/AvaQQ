@@ -77,12 +77,33 @@ internal class GroupCategorySelection : ICategorySelection
 		);
 	}
 
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+			}
+
+			_watchdog.Dispose();
+			disposedValue = true;
+		}
+	}
+
+	~GroupCategorySelection()
+	{
+		Dispose(disposing: false);
+	}
+
 	public void Dispose()
 	{
-		if (_view is not null)
-		{
-			DestroyView(null);
-		}
-		_watchdog.Dispose();
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
+
+	#endregion
 }

@@ -25,8 +25,33 @@ internal class Watchdog(TimerCallback callback) : IDisposable
 		_timer.Change(Timeout.Infinite, Timeout.Infinite);
 	}
 
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+			}
+
+			_timer.Dispose();
+			disposedValue = true;
+		}
+	}
+
+	~Watchdog()
+	{
+		Dispose(disposing: false);
+	}
+
 	public void Dispose()
 	{
-		_timer.Dispose();
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
+
+	#endregion
 }
