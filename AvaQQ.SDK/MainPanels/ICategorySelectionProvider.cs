@@ -9,11 +9,14 @@ namespace AvaQQ.SDK.MainPanels;
 /// </summary>
 public interface ICategorySelectionProvider
 {
-	List<ICategorySelection> CreateSelections();
+	/// <summary>
+	/// 创建分类选项
+	/// </summary>
+	List<ICategorySelection> CreateSelections(IServiceProvider scopedServiceProvider);
 
 	/// <summary>
 	/// 注册分类选项<br/>
-	/// 请自行完成 <see cref="IServiceCollection"/> 的注册，后续会通过依赖注入获取该服务。
+	/// 请自行完成 <see cref="IServiceCollection"/> 的注册，推荐注册为 Scoped，后续会通过依赖注入获取该服务。
 	/// </summary>
 	/// <typeparam name="T">选项类型</typeparam>
 	void Register<T>()
@@ -21,7 +24,7 @@ public interface ICategorySelectionProvider
 
 	/// <summary>
 	/// 注册分类选项<br/>
-	/// 请自行完成 <see cref="IServiceCollection"/> 的注册，后续会通过依赖注入获取该服务。
+	/// 请自行完成 <see cref="IServiceCollection"/> 的注册，推荐注册为 Scoped，后续会通过依赖注入获取该服务。
 	/// </summary>
 	/// <param name="type">选项类型</param>
 	void Register(Type type);

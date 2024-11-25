@@ -8,6 +8,21 @@ internal class SelectAdapterSelection : IAdapterSelection
 {
 	public UserControl? UserControl => null;
 
+	public void OnSelected()
+	{
+
+	}
+
+	public void OnDeselected()
+	{
+
+	}
+
+	public void Dispose()
+	{
+
+	}
+
 	public override string ToString()
 	{
 		return SR.TextSelectAdapter;

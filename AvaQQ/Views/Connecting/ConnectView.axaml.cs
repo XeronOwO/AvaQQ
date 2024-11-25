@@ -10,13 +10,16 @@ namespace AvaQQ.Views.Connecting;
 
 public partial class ConnectView : UserControl
 {
+	private readonly IServiceScope _serviceScope;
+
 	public ConnectView()
 	{
 		InitializeComponent();
 
 		var app = AppBase.Current;
-		var selections = app.ServiceProvider.GetRequiredService<IAdapterSelectionProvider>();
-		foreach (var selection in selections)
+		_serviceScope = app.ServiceProvider.CreateScope();
+		var selectionProvider = _serviceScope.ServiceProvider.GetRequiredService<IAdapterSelectionProvider>();
+		foreach (var selection in selectionProvider.CreateSelections(_serviceScope.ServiceProvider))
 		{
 			adapterSelector.Items.Add(selection);
 		}
@@ -26,6 +29,7 @@ public partial class ConnectView : UserControl
 		).FirstOrDefault();
 
 		Loaded += ConnectView_Loaded;
+		Unloaded += ConnectView_Unloaded;
 	}
 
 	private void UpdateSelection()
@@ -37,14 +41,16 @@ public partial class ConnectView : UserControl
 			ConnectConfig.Instance.AdapterIndex = index;
 		}
 
-		if (adapterSelector.SelectedItem is IAdapterSelection selection)
+		if (adapterSelector.SelectedItem is not IAdapterSelection selection)
 		{
-			gridAdapterOptions.Children.Clear();
-			var control = selection.UserControl;
-			if (control is not null)
-			{
-				gridAdapterOptions.Children.Add(control);
-			}
+			return;
+		}
+
+		gridAdapterOptions.Children.Clear();
+		var control = selection.UserControl;
+		if (control is not null)
+		{
+			gridAdapterOptions.Children.Add(control);
 		}
 	}
 
@@ -53,8 +59,35 @@ public partial class ConnectView : UserControl
 		UpdateSelection();
 	}
 
+	private void ConnectView_Unloaded(object? sender, RoutedEventArgs e)
+	{
+		_serviceScope.Dispose();
+	}
+
 	private void OnSelectAdapter(object? sender, SelectionChangedEventArgs e)
 	{
+		if (e.RemovedItems is not null)
+		{
+			foreach (var item in e.RemovedItems)
+			{
+				if (item is IAdapterSelection selection)
+				{
+					selection.OnDeselected();
+				}
+			}
+		}
+
 		UpdateSelection();
+
+		if (e.AddedItems is not null)
+		{
+			foreach (var item in e.AddedItems)
+			{
+				if (item is IAdapterSelection selection)
+				{
+					selection.OnSelected();
+				}
+			}
+		}
 	}
 }

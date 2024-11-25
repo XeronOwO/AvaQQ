@@ -19,8 +19,9 @@ public static class ServiceCollectionExtensions
 		.AddSingleton<ILogWindowProvider, LogWindowProvider>()
 		.AddSingleton<ICategorySelectionProvider, CategorySelectionProvider>()
 		.AddSingleton<IAvatarManager, AvatarManager>()
-		.AddTransient<RecentCategorySelection>()
-		.AddTransient<FriendCategorySelection>()
-		.AddTransient<GroupCategorySelection>()
-		.AddSingleton<IUserManager, UserManager>();
+		.AddScoped<RecentCategorySelection>()
+		.AddScoped<FriendCategorySelection>()
+		.AddScoped<GroupCategorySelection>()
+		.AddSingleton<IUserManager, UserManager>()
+		.AddScoped<SelectAdapterSelection>();
 }

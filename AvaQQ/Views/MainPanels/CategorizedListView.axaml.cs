@@ -8,9 +8,14 @@ namespace AvaQQ.Views.MainPanels;
 
 public partial class CategorizedListView : UserControl
 {
+	private readonly IServiceScope _serviceScope;
+
 	public CategorizedListView()
 	{
 		InitializeComponent();
+
+		var app = AppBase.Current;
+		_serviceScope = app.ServiceProvider.CreateScope();
 
 		Loaded += CategorizedListView_Loaded;
 		categorySelectionView.SelectionChanged += CategorySelectionView_SelectionChanged;
@@ -19,11 +24,9 @@ public partial class CategorizedListView : UserControl
 
 	private void CategorizedListView_Loaded(object? sender, RoutedEventArgs e)
 	{
-		var app = AppBase.Current;
-
 		categorySelectionView.Items.Clear();
-		var selections = app.ServiceProvider.GetRequiredService<ICategorySelectionProvider>();
-		foreach (var selection in selections.CreateSelections())
+		var selections = _serviceScope.ServiceProvider.GetRequiredService<ICategorySelectionProvider>();
+		foreach (var selection in selections.CreateSelections(_serviceScope.ServiceProvider))
 		{
 			categorySelectionView.Items.Add(selection);
 		}
@@ -50,9 +53,6 @@ public partial class CategorizedListView : UserControl
 
 	private void CategorizedListView_Unloaded(object? sender, RoutedEventArgs e)
 	{
-		foreach (var selection in categorySelectionView.Items)
-		{
-			selection.Dispose();
-		}
+		_serviceScope.Dispose();
 	}
 }

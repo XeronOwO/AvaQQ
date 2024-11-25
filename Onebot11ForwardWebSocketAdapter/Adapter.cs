@@ -1,5 +1,4 @@
-﻿using Avalonia.Threading;
-using AvaQQ.SDK;
+﻿using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Logging;
 using Makabaka;

@@ -11,7 +11,7 @@ public class GroupMessageEventArgs : GroupMessageEntry
 	/// 发送者的昵称
 	/// </summary>
 	public string SenderNickname { get; set; } = string.Empty;
-	
+
 	/// <summary>
 	/// 发送者的群内昵称
 	/// </summary>

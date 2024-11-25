@@ -10,13 +10,10 @@ internal class CategorySelectionProvider : ICategorySelectionProvider
 {
 	private readonly List<Type> _categories = [];
 
-	private readonly IServiceProvider _serviceProvider;
-
 	private readonly ILogger<CategorySelectionProvider> _logger;
 
 	public CategorySelectionProvider(IServiceProvider serviceProvider)
 	{
-		_serviceProvider = serviceProvider;
 		_logger = serviceProvider.GetRequiredService<ILogger<CategorySelectionProvider>>();
 
 		Register<RecentCategorySelection>();
@@ -46,12 +43,12 @@ internal class CategorySelectionProvider : ICategorySelectionProvider
 		}
 	}
 
-	public List<ICategorySelection> CreateSelections()
+	public List<ICategorySelection> CreateSelections(IServiceProvider scopedServiceProvider)
 	{
 		var selections = new List<ICategorySelection>();
 		foreach (var type in _categories)
 		{
-			if (_serviceProvider.GetService(type) is ICategorySelection selection)
+			if (scopedServiceProvider.GetService(type) is ICategorySelection selection)
 			{
 				selections.Add(selection);
 			}
