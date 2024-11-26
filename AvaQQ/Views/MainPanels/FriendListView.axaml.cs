@@ -111,6 +111,7 @@ public partial class FriendListView : UserControl
 
 	private async Task UpdateFriendInfoListAsync()
 	{
+		_friends.Clear();
 		var friends = await _friendManager.GetAllFriendInfosAsync();
 		//for (int i = 0; i < 1000; i++) // Ñ¹Á¦²âÊÔ
 		_friends.AddRange(friends);

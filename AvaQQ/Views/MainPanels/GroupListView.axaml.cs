@@ -111,6 +111,7 @@ public partial class GroupListView : UserControl
 			return;
 		}
 
+		_groups.Clear();
 		var groups = await adapter.GetGroupListAsync();
 		//for (int i = 0; i < 1000; i++) // Ñ¹Á¦²âÊÔ
 		_groups.AddRange(groups);
