@@ -4,7 +4,9 @@ using System.Collections.Concurrent;
 
 namespace AvaQQ.SDK.Logging;
 
-internal class RecordLoggerProvider(LogRecorder recorder) : ILoggerProvider
+internal class RecordLoggerProvider(
+	LogRecorder recorder,
+	ILoggerProvider? linkedLoggerProvider = null) : ILoggerProvider
 {
 	private readonly ConcurrentDictionary<string, RecordLogger> _loggers =
 		new(StringComparer.OrdinalIgnoreCase);
@@ -15,6 +17,7 @@ internal class RecordLoggerProvider(LogRecorder recorder) : ILoggerProvider
 			categoryName,
 			name => new RecordLogger(
 				recorder,
+				linkedLoggerProvider,
 				name
 			)
 		);
@@ -22,6 +25,5 @@ internal class RecordLoggerProvider(LogRecorder recorder) : ILoggerProvider
 
 	public void Dispose()
 	{
-		_loggers.Clear();
 	}
 }

@@ -13,12 +13,16 @@ public static class LoggingBuilderExtensions
 	/// </summary>
 	/// <param name="services">服务</param>
 	/// <param name="recorder">日志记录器</param>
-	public static IServiceCollection ConfigureRecordLogger(this IServiceCollection services, LogRecorder recorder)
+	/// <param name="linkedLoggerProvider">关联的日志提供器</param>
+	public static IServiceCollection ConfigureRecordLogger(
+		this IServiceCollection services,
+		LogRecorder recorder,
+		ILoggerProvider? linkedLoggerProvider = null)
 	{
 		return services.AddLogging(builder =>
 		{
 			builder.ClearProviders();
-			builder.AddProvider(new RecordLoggerProvider(recorder));
+			builder.AddProvider(new RecordLoggerProvider(recorder, linkedLoggerProvider));
 		});
 	}
 }

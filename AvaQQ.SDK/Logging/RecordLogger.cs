@@ -3,7 +3,10 @@ using System;
 
 namespace AvaQQ.SDK.Logging;
 
-internal class RecordLogger(LogRecorder recorder, string name) : ILogger
+internal class RecordLogger(
+	LogRecorder recorder,
+	ILoggerProvider? linkedLoggerProvider,
+	string name) : ILogger
 {
 	public IDisposable? BeginScope<TState>(TState state) where TState : notnull
 	{
@@ -27,6 +30,7 @@ internal class RecordLogger(LogRecorder recorder, string name) : ILogger
 			return;
 		}
 
-		recorder.Record(name, DateTime.Now, logLevel, eventId, state, exception, formatter);
+		recorder.OnLog(name, DateTime.Now, logLevel, eventId, state, exception, formatter);
+		linkedLoggerProvider?.CreateLogger(name).Log(logLevel, eventId, state, exception, formatter);
 	}
 }

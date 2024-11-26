@@ -32,6 +32,7 @@ internal class Adapter : IAdapter
 			{
 			}
 
+			_makabaka.StopAsync().Wait();
 			_makabaka.Dispose();
 			disposedValue = true;
 		}
@@ -74,7 +75,7 @@ internal class Adapter : IAdapter
 		};
 
 		var builder = new MakabakaAppBuilder();
-		builder.Services.ConfigureRecordLogger(_logRecorder);
+		builder.Services.ConfigureRecordLogger(_logRecorder, serviceProvider.GetRequiredService<ILoggerProvider>());
 		builder.Configuration.AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json))));
 		_makabaka = builder.Build();
 		_logger = serviceProvider.GetRequiredService<ILogger<Adapter>>();
@@ -98,10 +99,12 @@ internal class Adapter : IAdapter
 
 	public async Task<(bool, LogRecorder)> TryConnectAsync(TimeSpan timeout)
 	{
+		_logRecorder.Start();
 		_makabaka.BotContext.OnLifecycle += FirstOnLifecycle;
 		_ = _makabaka.RunAsync();
 		await Task.WhenAny(_connectCompletionSource.Task, Task.Delay(timeout));
 		_makabaka.BotContext.OnLifecycle -= FirstOnLifecycle;
+		_logRecorder.Stop();
 
 		if (!_connectCompletionSource.Task.IsCompletedSuccessfully)
 		{

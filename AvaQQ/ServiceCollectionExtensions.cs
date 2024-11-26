@@ -1,9 +1,11 @@
 ﻿using AvaQQ.Adapters;
 using AvaQQ.Caches;
+using AvaQQ.Databases;
 using AvaQQ.Logging;
 using AvaQQ.MainPanels;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK.Databases;
 using AvaQQ.SDK.MainPanels;
 using AvaQQ.SDK.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,5 +25,6 @@ public static class ServiceCollectionExtensions
 		.AddScoped<FriendCategorySelection>()
 		.AddScoped<GroupCategorySelection>()
 		.AddSingleton<IUserManager, UserManager>()
-		.AddScoped<SelectAdapterSelection>();
+		.AddScoped<SelectAdapterSelection>()
+		.AddSingleton<GroupMessageDatabase, GroupMessageLiteDB>();
 }

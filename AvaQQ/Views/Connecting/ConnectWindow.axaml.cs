@@ -1,9 +1,11 @@
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK.Databases;
 using AvaQQ.SDK.ViewModels;
 using AvaQQ.ViewModels;
 using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
 
@@ -49,12 +51,12 @@ public partial class ConnectWindow : ConnectWindowBase
 
 		model.IsConnecting = false;
 
-		var app = AppBase.Current;
 		if (adapter is null)
 		{
 			return;
 		}
 
+		var app = AppBase.Current;
 		app.Adapter = adapter;
 		Close();
 
@@ -63,5 +65,8 @@ public partial class ConnectWindow : ConnectWindowBase
 			DataContext = new MainPanelViewModel(),
 		};
 		app.MainPanelWindow.Show();
+
+		AppBase.Current.ServiceProvider.GetRequiredService<GroupMessageDatabase>()
+			.Initialize();
 	}
 }

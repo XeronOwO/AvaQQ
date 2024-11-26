@@ -31,8 +31,7 @@ public interface IAdapter : IDisposable
 	Task<IEnumerable<BriefGroupInfo>> GetGroupListAsync();
 
 	/// <summary>
-	/// 当收到群消息时触发<br/>
-	/// 如果当前线程不是 UI 线程，请使用 <see cref="Dispatcher.UIThread"/> 进行 Invoke
+	/// 当收到群消息时触发
 	/// </summary>
 	event EventHandler<GroupMessageEventArgs>? OnGroupMessage;
 }

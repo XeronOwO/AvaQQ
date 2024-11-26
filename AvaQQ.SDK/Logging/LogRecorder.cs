@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Threading;
 
 namespace AvaQQ.SDK.Logging;
 
@@ -41,7 +42,25 @@ public class LogRecorder
 	/// <summary>
 	/// 记录
 	/// </summary>
-	public ConcurrentQueue<RecordInfo> Records { get; } = [];
+	public ConcurrentQueue<RecordInfo> Recordings { get; } = [];
+
+	private int _isRecording;
+
+	/// <summary>
+	/// 启动记录
+	/// </summary>
+	public void Start()
+	{
+		Interlocked.Exchange(ref _isRecording, 1);
+	}
+
+	/// <summary>
+	/// 停止记录
+	/// </summary>
+	public void Stop()
+	{
+		Interlocked.Exchange(ref _isRecording, 0);
+	}
 
 	/// <summary>
 	/// 记录一条日志
@@ -54,7 +73,7 @@ public class LogRecorder
 	/// <param name="state">状态</param>
 	/// <param name="exception">异常</param>
 	/// <param name="formatter">格式化器</param>
-	public void Record<TState>(
+	public void OnLog<TState>(
 		string name,
 		DateTime time,
 		LogLevel logLevel,
@@ -63,7 +82,12 @@ public class LogRecorder
 		Exception? exception,
 		Func<TState, Exception?, string> formatter)
 	{
-		Records.Enqueue(
+		if (Interlocked.CompareExchange(ref _isRecording, 0, 0) == 0)
+		{
+			return;
+		}
+
+		Recordings.Enqueue(
 			new RecordInfo(
 				name,
 				time,
@@ -83,7 +107,7 @@ public class LogRecorder
 	public override string ToString()
 	{
 		var sb = new StringBuilder();
-		foreach (var record in Records)
+		foreach (var record in Recordings)
 		{
 			sb.Append(record.ToString());
 		}
