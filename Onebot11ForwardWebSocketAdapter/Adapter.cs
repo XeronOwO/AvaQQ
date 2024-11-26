@@ -201,7 +201,7 @@ internal class Adapter : IAdapter
 			IsAnonymous = isAnonymous,
 			SenderUin = isAnonymous ? e.Anonymous!.Id : e.UserId,
 			AnonymousFlag = isAnonymous ? e.Anonymous!.Flag : string.Empty,
-			//Message = throw new NotImplementedException(),
+			Message = e.Message.ToAvaQQ(_logger),
 			SenderNickname = isAnonymous ? e.Anonymous!.Name : e.Sender!.Nickname,
 			SenderGroupNickname = isAnonymous ? string.Empty : e.Sender!.Card,
 			SenderRemark = senderRemark,

@@ -1,26 +1,53 @@
-﻿namespace Onebot11ForwardWebSocketAdapter;
+﻿using Microsoft.Extensions.Logging;
+using AGroupMessageType = AvaQQ.SDK.Databases.GroupMessageType;
+using AGroupRoleType = AvaQQ.SDK.Adapters.GroupRoleType;
+using MGroupMessageEventType = Makabaka.Events.GroupMessageEventType;
+using MGroupRoleType = Makabaka.Models.GroupRoleType;
+
+namespace Onebot11ForwardWebSocketAdapter;
 
 internal static class ConvertExtensions
 {
-	public static AvaQQ.SDK.Databases.GroupMessageType ToAvaQQ(this Makabaka.Events.GroupMessageEventType type)
+	public static AGroupMessageType ToAvaQQ(this MGroupMessageEventType type)
 	{
 		return type switch
 		{
-			Makabaka.Events.GroupMessageEventType.Normal => AvaQQ.SDK.Databases.GroupMessageType.Normal,
-			Makabaka.Events.GroupMessageEventType.Anonymous => AvaQQ.SDK.Databases.GroupMessageType.Anonymous,
-			Makabaka.Events.GroupMessageEventType.Notice => AvaQQ.SDK.Databases.GroupMessageType.Notice,
+			MGroupMessageEventType.Normal => AGroupMessageType.Normal,
+			MGroupMessageEventType.Anonymous => AGroupMessageType.Anonymous,
+			MGroupMessageEventType.Notice => AGroupMessageType.Notice,
 			_ => throw new ArgumentOutOfRangeException(nameof(type)),
 		};
 	}
 
-	public static AvaQQ.SDK.Adapters.GroupRoleType ToAvaQQ(this Makabaka.Models.GroupRoleType type)
+	public static AGroupRoleType ToAvaQQ(this MGroupRoleType type)
 	{
 		return type switch
 		{
-			Makabaka.Models.GroupRoleType.Owner => AvaQQ.SDK.Adapters.GroupRoleType.Owner,
-			Makabaka.Models.GroupRoleType.Admin => AvaQQ.SDK.Adapters.GroupRoleType.Admin,
-			Makabaka.Models.GroupRoleType.Member => AvaQQ.SDK.Adapters.GroupRoleType.Member,
+			MGroupRoleType.Owner => AGroupRoleType.Owner,
+			MGroupRoleType.Admin => AGroupRoleType.Admin,
+			MGroupRoleType.Member => AGroupRoleType.Member,
 			_ => throw new ArgumentOutOfRangeException(nameof(type)),
 		};
+	}
+
+	public static AvaQQ.SDK.Messages.Message ToAvaQQ(this Makabaka.Messages.Message message, ILogger logger)
+	{
+		var result = new AvaQQ.SDK.Messages.Message();
+		foreach (var segment in message)
+		{
+			switch (segment)
+			{
+				case Makabaka.Messages.TextSegment text:
+					result.Add(new AvaQQ.SDK.Messages.TextSegment()
+					{
+						Text = text.Data.Text,
+					});
+					break;
+				default:
+					logger.LogWarning("Unsupported segment type: {Type}", segment.GetType());
+					break;
+			}
+		}
+		return result;
 	}
 }
