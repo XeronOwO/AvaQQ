@@ -3,7 +3,7 @@ using AvaQQ.SDK.Adapters;
 
 namespace Onebot11ForwardWebSocketAdapter;
 
-internal class AdapterSelection : IAdapterSelection, IDisposable
+internal class AdapterSelection : IAdapterSelection
 {
 	public UserControl? UserControl
 		=> new AdapterSelectionView()
