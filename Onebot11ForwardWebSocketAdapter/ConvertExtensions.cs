@@ -37,6 +37,25 @@ internal static class ConvertExtensions
 		{
 			switch (segment)
 			{
+				case Makabaka.Messages.AtSegment at:
+					result.Add(new AvaQQ.SDK.Messages.AtSegment()
+					{
+						Uin = at.Data.QQ == "all" ? 0 : ulong.Parse(at.Data.QQ),
+					});
+					break;
+				case Makabaka.Messages.FaceSegment face:
+					result.Add(new AvaQQ.SDK.Messages.FaceSegment()
+					{
+						Id = ulong.Parse(face.Data.Id),
+						IsLarge = face.Data.IsLarge,
+					});
+					break;
+				case Makabaka.Messages.ForwardSegment forward:
+					result.Add(new AvaQQ.SDK.Messages.ForwardSegment()
+					{
+						ResId = forward.Data.Id,
+					});
+					break;
 				case Makabaka.Messages.TextSegment text:
 					result.Add(new AvaQQ.SDK.Messages.TextSegment()
 					{

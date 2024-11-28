@@ -11,7 +11,7 @@ public class GroupMessageEntry
 	/// <summary>
 	/// 主键
 	/// </summary>
-	public ulong Id { get; set; }
+	public long Id { get; set; }
 
 	/// <summary>
 	/// 类型

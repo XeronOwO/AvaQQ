@@ -195,7 +195,7 @@ internal class Adapter : IAdapter
 		var eventArgs = new AGroupMessageEventArgs()
 		{
 			Type = e.SubType.ToAvaQQ(),
-			MessageId = e.MessageId,
+			MessageId = (ulong)e.MessageId,
 			Time = e.Time,
 			GroupUin = e.GroupId,
 			SenderUin = isAnonymous ? e.Anonymous!.Id : e.UserId,
