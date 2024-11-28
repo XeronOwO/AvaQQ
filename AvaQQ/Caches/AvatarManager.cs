@@ -33,7 +33,7 @@ internal class AvatarManager : IAvatarManager
 
 	#region 用户
 
-	public Task<IImage?> GetUserAvatarAsync(long uin, int size = 0, bool noCache = false)
+	public Task<IImage?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false)
 	{
 		if (!Directory.Exists(_usersDirectory))
 		{
@@ -50,7 +50,7 @@ internal class AvatarManager : IAvatarManager
 		}
 	}
 
-	private async Task<IImage?> GetUserAvatarNoCacheAsync(long uin, int size)
+	private async Task<IImage?> GetUserAvatarNoCacheAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -82,7 +82,7 @@ internal class AvatarManager : IAvatarManager
 		}
 	}
 
-	private async Task<IImage?> GetUserAvatarFromCacheAsync(long uin, int size)
+	private async Task<IImage?> GetUserAvatarFromCacheAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -113,7 +113,7 @@ internal class AvatarManager : IAvatarManager
 
 	#region 群聊
 
-	public Task<IImage?> GetGroupAvatarAsync(long uin, int size = 0, bool noCache = false)
+	public Task<IImage?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false)
 	{
 		if (!Directory.Exists(_groupsDirectory))
 		{
@@ -129,7 +129,7 @@ internal class AvatarManager : IAvatarManager
 		}
 	}
 
-	private async Task<IImage?> GetGroupAvatarNoCacheAsync(long uin, int size)
+	private async Task<IImage?> GetGroupAvatarNoCacheAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -158,7 +158,7 @@ internal class AvatarManager : IAvatarManager
 		}
 	}
 
-	private async Task<IImage?> GetGroupAvatarFromCacheAsync(long uin, int size)
+	private async Task<IImage?> GetGroupAvatarFromCacheAsync(ulong uin, int size)
 	{
 		try
 		{

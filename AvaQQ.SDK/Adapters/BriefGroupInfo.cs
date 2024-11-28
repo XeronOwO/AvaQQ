@@ -8,7 +8,7 @@ public class BriefGroupInfo
 	/// <summary>
 	/// 群号
 	/// </summary>
-	public long Uin { get; set; }
+	public ulong Uin { get; set; }
 
 	/// <summary>
 	/// 群名

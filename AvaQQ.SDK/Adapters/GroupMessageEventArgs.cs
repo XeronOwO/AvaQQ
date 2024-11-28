@@ -17,28 +17,23 @@ public class GroupMessageEventArgs
 	/// <summary>
 	/// 消息 ID
 	/// </summary>
-	public long MessageId { get; set; }
+	public ulong MessageId { get; set; }
 
 	/// <summary>
 	/// 时间
 	/// </summary>
-	public DateTime Time { get; set; }
+	public DateTimeOffset Time { get; set; }
 
 	/// <summary>
 	/// 群号
 	/// </summary>
-	public long GroupUin { get; set; }
-
-	/// <summary>
-	/// 是否为匿名消息
-	/// </summary>
-	public bool IsAnonymous { get; set; }
+	public ulong GroupUin { get; set; }
 
 	/// <summary>
 	/// 发送者 QQ 号<br/>
 	/// 如果为匿名消息，则为匿名用户 ID
 	/// </summary>
-	public long SenderUin { get; set; }
+	public ulong SenderUin { get; set; }
 
 	/// <summary>
 	/// 匿名标识，在调用禁言 API 时需要传入
@@ -90,8 +85,6 @@ public class GroupMessageEventArgs
 			Type = e.Type,
 			MessageId = e.MessageId,
 			Time = e.Time,
-			GroupUin = e.GroupUin,
-			IsAnonymous = e.IsAnonymous,
 			SenderUin = e.SenderUin,
 			AnonymousFlag = e.AnonymousFlag,
 			Message = e.Message,

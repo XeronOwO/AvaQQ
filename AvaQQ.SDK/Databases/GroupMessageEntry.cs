@@ -11,7 +11,7 @@ public class GroupMessageEntry
 	/// <summary>
 	/// 主键
 	/// </summary>
-	public long Id { get; set; }
+	public ulong Id { get; set; }
 
 	/// <summary>
 	/// 类型
@@ -21,28 +21,18 @@ public class GroupMessageEntry
 	/// <summary>
 	/// 消息 ID
 	/// </summary>
-	public long MessageId { get; set; }
+	public ulong MessageId { get; set; }
 
 	/// <summary>
 	/// 时间
 	/// </summary>
-	public DateTime Time { get; set; }
-
-	/// <summary>
-	/// 群号
-	/// </summary>
-	public long GroupUin { get; set; }
-
-	/// <summary>
-	/// 是否为匿名消息
-	/// </summary>
-	public bool IsAnonymous { get; set; }
+	public DateTimeOffset Time { get; set; }
 
 	/// <summary>
 	/// 发送者 QQ 号<br/>
 	/// 如果为匿名消息，则为匿名用户 ID
 	/// </summary>
-	public long SenderUin { get; set; }
+	public ulong SenderUin { get; set; }
 
 	/// <summary>
 	/// 匿名标识，在调用禁言 API 时需要传入

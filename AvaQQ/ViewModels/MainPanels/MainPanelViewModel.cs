@@ -34,9 +34,9 @@ internal class MainPanelViewModel : ViewModelBase
 
 	#region Header
 
-	private long _headerUin = 10000;
+	private ulong _headerUin = 10000;
 
-	public long HeaderUin
+	public ulong HeaderUin
 	{
 		get => _headerUin;
 		set => this.RaiseAndSetIfChanged(ref _headerUin, value);

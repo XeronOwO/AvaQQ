@@ -82,7 +82,7 @@ internal class Adapter : IAdapter
 		_friendManager = serviceProvider.GetRequiredService<IUserManager>();
 	}
 
-	public long Uin => _makabaka.BotContext.SelfId;
+	public ulong Uin => (ulong)_makabaka.BotContext.SelfId;
 
 	public async Task<string> GetNicknameAsync()
 	{
@@ -139,7 +139,7 @@ internal class Adapter : IAdapter
 			var friends = (await _makabaka.BotContext.GetFriendListAsync()).Result;
 			return friends.Select(f => new BriefFriendInfo()
 			{
-				Uin = f.UserId,
+				Uin = (ulong)f.UserId,
 				Nickname = f.Nickname,
 				Remark = f.Remark,
 			});
@@ -158,7 +158,7 @@ internal class Adapter : IAdapter
 			var groups = (await _makabaka.BotContext.GetGroupListAsync()).Result;
 			return groups.Select(f => new BriefGroupInfo()
 			{
-				Uin = f.GroupId,
+				Uin = (ulong)f.GroupId,
 				Name = f.GroupName,
 				Remark = string.Empty,
 			});
@@ -179,7 +179,7 @@ internal class Adapter : IAdapter
 			return;
 		}
 
-		var isAnonymous = e.Anonymous != null;
+		var isAnonymous = e.SubType == GroupMessageEventType.Anonymous;
 
 		string senderRemark;
 		if (isAnonymous)
@@ -188,18 +188,17 @@ internal class Adapter : IAdapter
 		}
 		else
 		{
-			var info = await _friendManager.GetFriendInfoAsync(e.UserId);
+			var info = await _friendManager.GetFriendInfoAsync((ulong)e.UserId);
 			senderRemark = info is null ? string.Empty : info.Remark;
 		}
 
 		var eventArgs = new AGroupMessageEventArgs()
 		{
 			Type = e.SubType.ToAvaQQ(),
-			MessageId = e.MessageId,
+			MessageId = (ulong)e.MessageId,
 			Time = e.Time,
-			GroupUin = e.GroupId,
-			IsAnonymous = isAnonymous,
-			SenderUin = isAnonymous ? e.Anonymous!.Id : e.UserId,
+			GroupUin = (ulong)e.GroupId,
+			SenderUin = isAnonymous ? (ulong)e.Anonymous!.Id : (ulong)e.UserId,
 			AnonymousFlag = isAnonymous ? e.Anonymous!.Flag : string.Empty,
 			Message = e.Message.ToAvaQQ(_logger),
 			SenderNickname = isAnonymous ? e.Anonymous!.Name : e.Sender!.Nickname,

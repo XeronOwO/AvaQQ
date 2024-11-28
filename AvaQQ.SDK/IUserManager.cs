@@ -17,5 +17,5 @@ public interface IUserManager
 	/// 获取好友的简略信息
 	/// </summary>
 	/// <param name="uin">好友 QQ 号</param>
-	Task<BriefFriendInfo?> GetFriendInfoAsync(long uin);
+	Task<BriefFriendInfo?> GetFriendInfoAsync(ulong uin);
 }

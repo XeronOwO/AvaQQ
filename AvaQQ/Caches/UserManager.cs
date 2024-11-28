@@ -13,7 +13,7 @@ internal class UserManager : IUserManager
 {
 	private readonly ReaderWriterLockSlim _lock = new();
 
-	private readonly Dictionary<long, BriefFriendInfo> _briefFriendInfos = [];
+	private readonly Dictionary<ulong, BriefFriendInfo> _briefFriendInfos = [];
 
 	private DateTime _lastUpdateTime = DateTime.MinValue;
 
@@ -32,14 +32,14 @@ internal class UserManager : IUserManager
 		_briefFriendInfos.Clear();
 		foreach (var friend in friendList)
 		{
-			_briefFriendInfos[friend.Uin] = friend;
+			_briefFriendInfos[(ulong)friend.Uin] = friend;
 		}
 		_lock.ExitWriteLock();
 
 		_lastUpdateTime = DateTime.Now;
 	}
 
-	public async Task<BriefFriendInfo?> GetFriendInfoAsync(long uin)
+	public async Task<BriefFriendInfo?> GetFriendInfoAsync(ulong uin)
 	{
 		if (RequiresUpdate)
 		{

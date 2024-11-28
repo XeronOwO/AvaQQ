@@ -200,7 +200,7 @@ public partial class GroupListView : UserControl
 			}
 
 			var group = _filteredGroups[groupIndex];
-			if (model.Id is int id && id == group.Uin)
+			if (model.Id is ulong id && id == group.Uin)
 			{
 				continue;
 			}

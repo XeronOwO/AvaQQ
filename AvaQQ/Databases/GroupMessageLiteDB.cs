@@ -8,17 +8,17 @@ namespace AvaQQ.Databases;
 
 internal class GroupMessageLiteDB : GroupMessageDatabase
 {
-	private readonly ConcurrentDictionary<long, LiteDatabase> _databases = [];
+	private readonly ConcurrentDictionary<ulong, LiteDatabase> _databases = [];
 
-	private LiteDatabase CreateDatabase(long groupUin)
+	private LiteDatabase CreateDatabase(ulong groupUin)
 		=> new(Path.Combine(BaseDirectory, $"group-{groupUin}.db"));
 
-	private LiteDatabase GetOrCreateDatabase(long groupUin)
+	private LiteDatabase GetOrCreateDatabase(ulong groupUin)
 		=> _databases.GetOrAdd(groupUin, CreateDatabase);
 
-	public override void Insert(GroupMessageEntry entry)
+	public override void Insert(ulong groupUin, GroupMessageEntry entry)
 	{
-		GetOrCreateDatabase(entry.GroupUin)
+		GetOrCreateDatabase(groupUin)
 			.GetCollection<GroupMessageEntry>("messages").Insert(entry);
 	}
 

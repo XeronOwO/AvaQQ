@@ -22,11 +22,12 @@ public abstract class GroupMessageDatabase : Database
 	/// <summary>
 	/// 插入群消息到数据库
 	/// </summary>
+	/// <param name="groupUin">群号</param>
 	/// <param name="entry">条目</param>
-	public abstract void Insert(GroupMessageEntry entry);
+	public abstract void Insert(ulong groupUin, GroupMessageEntry entry);
 
 	private void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
 	{
-		Insert(e);
+		Insert(e.GroupUin, e);
 	}
 }
