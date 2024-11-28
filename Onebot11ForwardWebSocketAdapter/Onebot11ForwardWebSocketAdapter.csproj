@@ -9,13 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Makabaka" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AvaQQ.SDK\AvaQQ.SDK.csproj">
       <Private>False</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
-		<PackageReference Include="Makabaka" Version="2.0.0">
-			<Private>False</Private>
-		</PackageReference>
   </ItemGroup>
 
   <ItemGroup>
