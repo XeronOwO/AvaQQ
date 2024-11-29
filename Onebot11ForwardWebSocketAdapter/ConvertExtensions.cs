@@ -56,6 +56,27 @@ internal static class ConvertExtensions
 						ResId = forward.Data.Id,
 					});
 					break;
+				case Makabaka.Messages.ImageSegment image:
+					result.Add(new AvaQQ.SDK.Messages.ImageSegment()
+					{
+						Filename = image.Data.Filename!,
+						Url = image.Data.Url!,
+					});
+					break;
+				case Makabaka.Messages.NodeSegment node:
+					result.Add(new AvaQQ.SDK.Messages.NodeSegment()
+					{
+						Uin = ulong.Parse(node.Data.Id!),
+						DisplayName = node.Data.Nickname!,
+						Content = node.Data.Content!.ToAvaQQ(logger),
+					});
+					break;
+				case Makabaka.Messages.ReplySegment reply:
+					result.Add(new AvaQQ.SDK.Messages.ReplySegment()
+					{
+						MessageId = ulong.Parse(reply.Data.Id),
+					});
+					break;
 				case Makabaka.Messages.TextSegment text:
 					result.Add(new AvaQQ.SDK.Messages.TextSegment()
 					{
