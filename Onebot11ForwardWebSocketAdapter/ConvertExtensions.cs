@@ -88,7 +88,7 @@ internal static class ConvertExtensions
 				case Makabaka.Messages.ReplySegment reply:
 					result.Add(new AvaQQ.SDK.Messages.ReplySegment()
 					{
-						MessageId = ulong.Parse(reply.Data.Id),
+						MessageId = (ulong)long.Parse(reply.Data.Id),
 					});
 					break;
 				case Makabaka.Messages.TextSegment text:
