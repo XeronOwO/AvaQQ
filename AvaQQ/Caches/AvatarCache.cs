@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using AvaQQ.SDK;
+using AvaQQ.SDK.Adapters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AvaQQ.Caches;
 
-internal class AvatarManager : IAvatarManager
+internal class AvatarCache : IAvatarCache
 {
 	private readonly IServiceProvider _serviceProvider;
 
@@ -20,15 +21,15 @@ internal class AvatarManager : IAvatarManager
 
 	private readonly string _groupsDirectory;
 
-	private readonly ILogger<AvatarManager> _logger;
+	private readonly ILogger<AvatarCache> _logger;
 
-	public AvatarManager(IServiceProvider serviceProvider)
+	public AvatarCache(IServiceProvider serviceProvider)
 	{
 		_serviceProvider = serviceProvider;
 		_baseDirectory = Path.Combine(Constants.RootDirectory, "cache", "avatars");
 		_usersDirectory = Path.Combine(_baseDirectory, "users");
 		_groupsDirectory = Path.Combine(_baseDirectory, "groups");
-		_logger = _serviceProvider.GetRequiredService<ILogger<AvatarManager>>();
+		_logger = _serviceProvider.GetRequiredService<ILogger<AvatarCache>>();
 	}
 
 	#region 用户

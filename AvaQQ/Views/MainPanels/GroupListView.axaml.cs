@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK.Databases;
 using AvaQQ.ViewModels.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,6 +15,8 @@ namespace AvaQQ.Views.MainPanels;
 
 public partial class GroupListView : UserControl
 {
+	private readonly IGroupCache _groupCache;
+
 	public GroupListView()
 	{
 		InitializeComponent();
@@ -20,6 +24,12 @@ public partial class GroupListView : UserControl
 		Loaded += GroupListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
+
+		_groupCache = AppBase.Current.ServiceProvider.GetRequiredService<IGroupCache>();
+		if (AppBase.Current.Adapter is { } adapter)
+		{
+			adapter.OnGroupMessage += Adapter_OnGroupMessage;
+		}
 	}
 
 	private async void GroupListView_Loaded(object? sender, RoutedEventArgs e)
@@ -62,15 +72,9 @@ public partial class GroupListView : UserControl
 		_scrollViewerHeight = scrollViewer.Bounds.Height;
 	}
 
-	/// <summary>
-	/// 原始的好友列表
-	/// </summary>
-	private readonly List<BriefGroupInfo> _groups = [];
+	private GroupInfo[] _groups = [];
 
-	/// <summary>
-	/// 经过筛选后的好友列表
-	/// </summary>
-	private readonly List<BriefGroupInfo> _filteredGroups = [];
+	private readonly List<GroupInfo> _filteredGroups = [];
 
 	private int _displayedEntryCount;
 
@@ -105,16 +109,7 @@ public partial class GroupListView : UserControl
 
 	private async Task UpdateGroupInfoListAsync()
 	{
-		var app = AppBase.Current;
-		if (app.Adapter is not { } adapter)
-		{
-			return;
-		}
-
-		_groups.Clear();
-		var groups = await adapter.GetGroupListAsync();
-		//for (int i = 0; i < 1000; i++) // 压力测试
-		_groups.AddRange(groups);
+		_groups = await _groupCache.GetAllGroupInfosAsync();
 	}
 
 	private void UpdateFilteredGroupList()
@@ -188,7 +183,9 @@ public partial class GroupListView : UserControl
 		}
 
 		var app = AppBase.Current;
-		var avatarManager = app.ServiceProvider.GetRequiredService<IAvatarManager>();
+		var avatarCache = app.ServiceProvider.GetRequiredService<IAvatarCache>();
+		var groupMessageDatabase = app.ServiceProvider.GetRequiredService<GroupMessageDatabase>();
+		var groupCache = app.ServiceProvider.GetRequiredService<IGroupCache>();
 		for (int i = 0; i < _displayedEntries.Count; i++)
 		{
 			var entry = _displayedEntries[i];
@@ -200,16 +197,16 @@ public partial class GroupListView : UserControl
 			}
 
 			var group = _filteredGroups[groupIndex];
-			if (model.Id is ulong id && id == group.Uin)
-			{
-				continue;
-			}
 
 			model.Id = group.Uin;
-			model.Icon = avatarManager.GetGroupAvatarAsync(group.Uin, 40);
+			model.Icon = avatarCache.GetGroupAvatarAsync(group.Uin, 40);
 			model.Title = string.IsNullOrEmpty(group.Remark)
 				? group.Name
 				: $"{group.Remark} ({group.Name})";
+			var lastMessage = groupMessageDatabase.Last(group.Uin);
+			model.Content = lastMessage is null
+				? Task.FromResult(string.Empty)
+				: groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
 
 			Grid.SetRow(entry, groupIndex);
 		}
@@ -239,5 +236,10 @@ public partial class GroupListView : UserControl
 		UpdateDisplayedEntryList();
 		UpdateGrid();
 		UpdateEntryContent();
+	}
+
+	private void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
+	{
+		Dispatcher.UIThread.Invoke(UpdateEntryContent);
 	}
 }

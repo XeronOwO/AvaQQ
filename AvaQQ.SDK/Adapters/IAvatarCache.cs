@@ -1,12 +1,12 @@
 ﻿using Avalonia.Media;
 using System.Threading.Tasks;
 
-namespace AvaQQ.SDK;
+namespace AvaQQ.SDK.Adapters;
 
 /// <summary>
-/// 头像管理器
+/// 头像缓存
 /// </summary>
-public interface IAvatarManager
+public interface IAvatarCache
 {
 	/// <summary>
 	/// 获取群头像

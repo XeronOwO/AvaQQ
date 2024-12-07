@@ -20,11 +20,13 @@ public static class ServiceCollectionExtensions
 		.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
 		.AddSingleton<ILogWindowProvider, LogWindowProvider>()
 		.AddSingleton<ICategorySelectionProvider, CategorySelectionProvider>()
-		.AddSingleton<IAvatarManager, AvatarManager>()
 		.AddScoped<RecentCategorySelection>()
 		.AddScoped<FriendCategorySelection>()
 		.AddScoped<GroupCategorySelection>()
-		.AddSingleton<IUserManager, UserManager>()
+		.AddSingleton<IAvatarCache, AvatarCache>()
+		.AddSingleton<IFriendCache, FriendCache>()
+		.AddSingleton<IUserCache, UserCache>()
+		.AddSingleton<IGroupCache, GroupCache>()
 		.AddScoped<SelectAdapterSelection>()
 		.AddSingleton<GroupMessageDatabase, GroupMessageLiteDB>();
 }

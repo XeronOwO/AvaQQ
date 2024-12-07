@@ -1,5 +1,4 @@
-﻿using Avalonia.Threading;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -23,12 +22,24 @@ public interface IAdapter : IDisposable
 	/// <summary>
 	/// 获取好友列表
 	/// </summary>
-	Task<IEnumerable<BriefFriendInfo>> GetFriendListAsync();
+	Task<IEnumerable<FriendInfo>> GetFriendListAsync();
 
 	/// <summary>
 	/// 获取群列表
 	/// </summary>
-	Task<IEnumerable<BriefGroupInfo>> GetGroupListAsync();
+	Task<IEnumerable<GroupInfo>> GetGroupListAsync();
+
+	/// <summary>
+	/// 获取用户信息
+	/// </summary>
+	/// <param name="uin">QQ 号</param>
+	Task<UserInfo?> GetUserInfoAsync(ulong uin);
+
+	/// <summary>
+	/// 获取群成员列表
+	/// </summary>
+	/// <param name="groupUin">群号</param>
+	Task<IEnumerable<GroupMemberInfo>> GetGroupMemberListAsync(ulong groupUin);
 
 	/// <summary>
 	/// 当收到群消息时触发

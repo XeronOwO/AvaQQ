@@ -67,7 +67,7 @@
 										 FontSize="12"
 										 IsVisible="{Binding IsContentEmphasisVisible}"/>
 					<TextBlock Grid.Column="2"
-										 Text="{Binding Content}"
+										 Text="{Binding Content^}"
 										 Margin="2.5"
 										 Foreground="Gray"
 										 FontSize="12"/>

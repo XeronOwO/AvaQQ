@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using AGroupMessageType = AvaQQ.SDK.Databases.GroupMessageType;
 using AGroupRoleType = AvaQQ.SDK.Adapters.GroupRoleType;
+using ASexType = AvaQQ.SDK.Adapters.SexType;
 using MGroupMessageEventType = Makabaka.Events.GroupMessageEventType;
 using MGroupRoleType = Makabaka.Models.GroupRoleType;
+using MSexType = Makabaka.Models.SexType;
 
 namespace Onebot11ForwardWebSocketAdapter;
 
@@ -26,6 +28,17 @@ internal static class ConvertExtensions
 			MGroupRoleType.Owner => AGroupRoleType.Owner,
 			MGroupRoleType.Admin => AGroupRoleType.Admin,
 			MGroupRoleType.Member => AGroupRoleType.Member,
+			_ => throw new ArgumentOutOfRangeException(nameof(type)),
+		};
+	}
+
+	public static ASexType ToAvaQQ(this MSexType type)
+	{
+		return type switch
+		{
+			MSexType.Male => ASexType.Male,
+			MSexType.Female => ASexType.Female,
+			MSexType.Unknown => ASexType.Unknown,
 			_ => throw new ArgumentOutOfRangeException(nameof(type)),
 		};
 	}
@@ -61,6 +74,7 @@ internal static class ConvertExtensions
 					{
 						Filename = image.Data.Filename!,
 						Url = image.Data.Url!,
+						SubType = image.Data.SubType,
 					});
 					break;
 				case Makabaka.Messages.NodeSegment node:

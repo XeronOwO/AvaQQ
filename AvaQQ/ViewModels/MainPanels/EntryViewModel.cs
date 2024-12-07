@@ -33,9 +33,9 @@ internal class EntryViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref _time, value);
 	}
 
-	private string _content = string.Empty;
+	private Task<string> _content = Task.FromResult(string.Empty);
 
-	public string Content
+	public Task<string> Content
 	{
 		get => _content;
 		set => this.RaiseAndSetIfChanged(ref _content, value);

@@ -26,6 +26,12 @@ public abstract class GroupMessageDatabase : Database
 	/// <param name="entry">条目</param>
 	public abstract void Insert(ulong groupUin, GroupMessageEntry entry);
 
+	/// <summary>
+	/// 获取最后一条群消息
+	/// </summary>
+	/// <param name="groupUin">群号</param>
+	public abstract GroupMessageEntry? Last(ulong groupUin);
+
 	private void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
 	{
 		Insert(e.GroupUin, e);

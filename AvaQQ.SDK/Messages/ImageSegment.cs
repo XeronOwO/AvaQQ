@@ -14,4 +14,9 @@ public class ImageSegment : Segment
 	/// 图片 URL
 	/// </summary>
 	public string Url { get; set; } = string.Empty;
+
+	/// <summary>
+	/// 子类型
+	/// </summary>
+	public int SubType { get; set; }
 }

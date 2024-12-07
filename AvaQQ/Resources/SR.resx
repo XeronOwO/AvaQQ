@@ -198,4 +198,16 @@
   <data name="MenuTextExit" xml:space="preserve">
     <value>Exit</value>
   </data>
+  <data name="FaceSegmentPreview" xml:space="preserve">
+    <value>[Face]</value>
+  </data>
+  <data name="ForwardSegmentPreview" xml:space="preserve">
+    <value>[Forward]</value>
+  </data>
+  <data name="ImageSegmentPreview0" xml:space="preserve">
+    <value>[Image]</value>
+  </data>
+  <data name="ImageSegmentPreview1" xml:space="preserve">
+    <value>[Animation]</value>
+  </data>
 </root>

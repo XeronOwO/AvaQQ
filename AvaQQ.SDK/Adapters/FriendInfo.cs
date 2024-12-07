@@ -1,19 +1,19 @@
 ﻿namespace AvaQQ.SDK.Adapters;
 
 /// <summary>
-/// 群聊简略信息
+/// 好友信息
 /// </summary>
-public class BriefGroupInfo
+public class FriendInfo
 {
 	/// <summary>
-	/// 群号
+	/// QQ 号
 	/// </summary>
 	public ulong Uin { get; set; }
 
 	/// <summary>
-	/// 群名
+	/// 昵称
 	/// </summary>
-	public string Name { get; set; } = string.Empty;
+	public string Nickname { get; set; } = string.Empty;
 
 	/// <summary>
 	/// 备注

@@ -1,5 +1,4 @@
-﻿using AvaQQ.SDK;
-using AvaQQ.SDK.Adapters;
+﻿using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Logging;
 using Makabaka;
 using Makabaka.Events;
@@ -55,7 +54,7 @@ internal class Adapter : IAdapter
 
 	private readonly LogRecorder _logRecorder = new();
 
-	private readonly IUserManager _friendManager;
+	private readonly IFriendCache _friendManager;
 
 	public Adapter(IServiceProvider serviceProvider, string url, string accessToken)
 	{
@@ -79,7 +78,7 @@ internal class Adapter : IAdapter
 		builder.Configuration.AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json))));
 		_makabaka = builder.Build();
 		_logger = serviceProvider.GetRequiredService<ILogger<Adapter>>();
-		_friendManager = serviceProvider.GetRequiredService<IUserManager>();
+		_friendManager = serviceProvider.GetRequiredService<IFriendCache>();
 	}
 
 	public ulong Uin => _makabaka.BotContext.SelfId;
@@ -132,12 +131,12 @@ internal class Adapter : IAdapter
 		_makabaka.BotContext.OnGroupMessage += BotContext_OnGroupMessage;
 	}
 
-	public async Task<IEnumerable<BriefFriendInfo>> GetFriendListAsync()
+	public async Task<IEnumerable<FriendInfo>> GetFriendListAsync()
 	{
 		try
 		{
 			var friends = (await _makabaka.BotContext.GetFriendListAsync()).Result;
-			return friends.Select(f => new BriefFriendInfo()
+			return friends.Select(f => new FriendInfo()
 			{
 				Uin = f.UserId,
 				Nickname = f.Nickname,
@@ -151,12 +150,12 @@ internal class Adapter : IAdapter
 		}
 	}
 
-	public async Task<IEnumerable<BriefGroupInfo>> GetGroupListAsync()
+	public async Task<IEnumerable<GroupInfo>> GetGroupListAsync()
 	{
 		try
 		{
 			var groups = (await _makabaka.BotContext.GetGroupListAsync()).Result;
-			return groups.Select(f => new BriefGroupInfo()
+			return groups.Select(f => new GroupInfo()
 			{
 				Uin = f.GroupId,
 				Name = f.GroupName,
@@ -166,6 +165,50 @@ internal class Adapter : IAdapter
 		catch (Exception e)
 		{
 			_logger.LogError(e, "Failed to get group list.");
+			return [];
+		}
+	}
+
+	public async Task<UserInfo?> GetUserInfoAsync(ulong uin)
+	{
+		try
+		{
+			var info = (await _makabaka.BotContext.GetStrangerInfoAsync(uin)).Result;
+			return new UserInfo()
+			{
+				Uin = info.UserId,
+				Nickname = info.Nickname,
+				Sex = info.Sex.ToAvaQQ(),
+				Age = info.Age,
+			};
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get user info of {Uin}.", uin);
+			return null;
+		}
+	}
+
+	public async Task<IEnumerable<GroupMemberInfo>> GetGroupMemberListAsync(ulong groupUin)
+	{
+		try
+		{
+			var members = (await _makabaka.BotContext.GetGroupMemberListAsync(groupUin)).Result;
+			return members.Select(m => new GroupMemberInfo()
+			{
+				Uin = m.UserId,
+				GroupUin = groupUin,
+				Card = m.Card!,
+				JoinTime = m.JoinTime,
+				LastSpeakTime = m.LastSentTime,
+				Level = uint.Parse(m.Level),
+				Role = m.Role.ToAvaQQ(),
+				Title = m.Title,
+			});
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get group member infos of {GroupUin}.", groupUin);
 			return [];
 		}
 	}

@@ -13,9 +13,9 @@ namespace AvaQQ.Views.MainPanels;
 
 public partial class FriendListView : UserControl
 {
-	private readonly IAvatarManager _avatarManager;
+	private readonly IAvatarCache _avatarManager;
 
-	private readonly IUserManager _friendManager;
+	private readonly IFriendCache _friendManager;
 
 	public FriendListView()
 	{
@@ -24,8 +24,8 @@ public partial class FriendListView : UserControl
 		Loaded += FriendListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-		_avatarManager = AppBase.Current.ServiceProvider.GetRequiredService<IAvatarManager>();
-		_friendManager = AppBase.Current.ServiceProvider.GetRequiredService<IUserManager>();
+		_avatarManager = AppBase.Current.ServiceProvider.GetRequiredService<IAvatarCache>();
+		_friendManager = AppBase.Current.ServiceProvider.GetRequiredService<IFriendCache>();
 	}
 
 	private async void FriendListView_Loaded(object? sender, RoutedEventArgs e)
@@ -71,12 +71,12 @@ public partial class FriendListView : UserControl
 	/// <summary>
 	/// 原始的好友列表
 	/// </summary>
-	private readonly List<BriefFriendInfo> _friends = [];
+	private readonly List<FriendInfo> _friends = [];
 
 	/// <summary>
 	/// 经过筛选后的好友列表
 	/// </summary>
-	private readonly List<BriefFriendInfo> _filteredFriends = [];
+	private readonly List<FriendInfo> _filteredFriends = [];
 
 	private int _displayedEntryCount;
 
