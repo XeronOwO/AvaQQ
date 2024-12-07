@@ -198,7 +198,7 @@ public partial class FriendListView : UserControl
 			}
 
 			var friend = _filteredFriends[friendIndex];
-			if (model.Id is ulong id && id == friend.Uin)
+			if (model.Id == friend.Uin)
 			{
 				continue;
 			}

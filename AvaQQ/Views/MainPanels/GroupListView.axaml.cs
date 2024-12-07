@@ -198,17 +198,26 @@ public partial class GroupListView : UserControl
 
 			var group = _filteredGroups[groupIndex];
 
-			model.Id = group.Uin;
-			model.Icon = avatarCache.GetGroupAvatarAsync(group.Uin, 40);
-			model.Title = string.IsNullOrEmpty(group.Remark)
-				? group.Name
-				: $"{group.Remark} ({group.Name})";
-			var lastMessage = groupMessageDatabase.Last(group.Uin);
-			model.Content = lastMessage is null
-				? Task.FromResult(string.Empty)
-				: groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
+			if (model.Id != group.Uin)
+			{
+				model.Id = group.Uin;
+				model.Icon = avatarCache.GetGroupAvatarAsync(group.Uin, 40);
+				model.Title = string.IsNullOrEmpty(group.Remark)
+					? group.Name
+					: $"{group.Remark} ({group.Name})";
 
-			Grid.SetRow(entry, groupIndex);
+				Grid.SetRow(entry, groupIndex);
+			}
+
+			var lastMessage = groupMessageDatabase.Last(group.Uin);
+			if (lastMessage is not null
+				&& model.ContentId != lastMessage.MessageId)
+			{
+				model.ContentId = lastMessage.MessageId;
+				model.Content = lastMessage is null
+					? Task.FromResult(string.Empty)
+					: groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
+			}
 		}
 
 		_oldOffset = newOffset;

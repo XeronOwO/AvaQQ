@@ -7,7 +7,7 @@ namespace AvaQQ.ViewModels.MainPanels;
 
 internal class EntryViewModel : ViewModelBase
 {
-	public object? Id { get; set; }
+	public ulong Id { get; set; }
 
 	private Task<IImage?> _icon = Task.FromResult<IImage?>(null);
 
@@ -32,6 +32,8 @@ internal class EntryViewModel : ViewModelBase
 		get => _time;
 		set => this.RaiseAndSetIfChanged(ref _time, value);
 	}
+
+	public ulong ContentId { get; set; }
 
 	private Task<string> _content = Task.FromResult(string.Empty);
 

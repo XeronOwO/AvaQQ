@@ -43,63 +43,65 @@ internal static class ConvertExtensions
 		};
 	}
 
+	public static AvaQQ.SDK.Messages.Segment? ToAvaQQ(this Makabaka.Messages.Segment segment, ILogger logger)
+	{
+		switch (segment)
+		{
+			case Makabaka.Messages.AtSegment at:
+				return new AvaQQ.SDK.Messages.AtSegment()
+				{
+					Uin = at.Data.QQ == "all" ? 0 : ulong.Parse(at.Data.QQ),
+				};
+			case Makabaka.Messages.FaceSegment face:
+				return new AvaQQ.SDK.Messages.FaceSegment()
+				{
+					Id = ulong.Parse(face.Data.Id),
+					IsLarge = face.Data.IsLarge,
+				};
+			case Makabaka.Messages.ForwardSegment forward:
+				return new AvaQQ.SDK.Messages.ForwardSegment()
+				{
+					ResId = forward.Data.Id,
+				};
+			case Makabaka.Messages.ImageSegment image:
+				return new AvaQQ.SDK.Messages.ImageSegment()
+				{
+					Filename = image.Data.Filename!,
+					Url = image.Data.Url!,
+					SubType = image.Data.SubType,
+				};
+			case Makabaka.Messages.NodeSegment node:
+				return new AvaQQ.SDK.Messages.NodeSegment()
+				{
+					Uin = ulong.Parse(node.Data.Id!),
+					DisplayName = node.Data.Nickname!,
+					Content = node.Data.Content!.ToAvaQQ(logger),
+				};
+			case Makabaka.Messages.ReplySegment reply:
+				return new AvaQQ.SDK.Messages.ReplySegment()
+				{
+					MessageId = (ulong)long.Parse(reply.Data.Id),
+				};
+			case Makabaka.Messages.TextSegment text:
+				return new AvaQQ.SDK.Messages.TextSegment()
+				{
+					Text = text.Data.Text,
+				};
+			default:
+				logger.LogWarning("Unsupported segment type: {Type}", segment.GetType());
+				return null;
+		}
+	}
+
 	public static AvaQQ.SDK.Messages.Message ToAvaQQ(this Makabaka.Messages.Message message, ILogger logger)
 	{
 		var result = new AvaQQ.SDK.Messages.Message();
 		foreach (var segment in message)
 		{
-			switch (segment)
+			var segment1 = segment.ToAvaQQ(logger);
+			if (segment1 is not null)
 			{
-				case Makabaka.Messages.AtSegment at:
-					result.Add(new AvaQQ.SDK.Messages.AtSegment()
-					{
-						Uin = at.Data.QQ == "all" ? 0 : ulong.Parse(at.Data.QQ),
-					});
-					break;
-				case Makabaka.Messages.FaceSegment face:
-					result.Add(new AvaQQ.SDK.Messages.FaceSegment()
-					{
-						Id = ulong.Parse(face.Data.Id),
-						IsLarge = face.Data.IsLarge,
-					});
-					break;
-				case Makabaka.Messages.ForwardSegment forward:
-					result.Add(new AvaQQ.SDK.Messages.ForwardSegment()
-					{
-						ResId = forward.Data.Id,
-					});
-					break;
-				case Makabaka.Messages.ImageSegment image:
-					result.Add(new AvaQQ.SDK.Messages.ImageSegment()
-					{
-						Filename = image.Data.Filename!,
-						Url = image.Data.Url!,
-						SubType = image.Data.SubType,
-					});
-					break;
-				case Makabaka.Messages.NodeSegment node:
-					result.Add(new AvaQQ.SDK.Messages.NodeSegment()
-					{
-						Uin = ulong.Parse(node.Data.Id!),
-						DisplayName = node.Data.Nickname!,
-						Content = node.Data.Content!.ToAvaQQ(logger),
-					});
-					break;
-				case Makabaka.Messages.ReplySegment reply:
-					result.Add(new AvaQQ.SDK.Messages.ReplySegment()
-					{
-						MessageId = (ulong)long.Parse(reply.Data.Id),
-					});
-					break;
-				case Makabaka.Messages.TextSegment text:
-					result.Add(new AvaQQ.SDK.Messages.TextSegment()
-					{
-						Text = text.Data.Text,
-					});
-					break;
-				default:
-					logger.LogWarning("Unsupported segment type: {Type}", segment.GetType());
-					break;
+				result.Add(segment1);
 			}
 		}
 		return result;
