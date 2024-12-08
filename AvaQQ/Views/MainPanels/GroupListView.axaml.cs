@@ -16,6 +16,10 @@ namespace AvaQQ.Views.MainPanels;
 public partial class GroupListView : UserControl
 {
 	private readonly IGroupCache _groupCache;
+	
+	private readonly IAvatarCache _avatarCache;
+	
+	private readonly GroupMessageDatabase _groupMessageDatabase;
 
 	public GroupListView()
 	{
@@ -25,7 +29,10 @@ public partial class GroupListView : UserControl
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
 
-		_groupCache = AppBase.Current.ServiceProvider.GetRequiredService<IGroupCache>();
+		var app = AppBase.Current;
+		_groupCache = app.ServiceProvider.GetRequiredService<IGroupCache>();
+		_avatarCache = app.ServiceProvider.GetRequiredService<IAvatarCache>();
+		_groupMessageDatabase = app.ServiceProvider.GetRequiredService<GroupMessageDatabase>();
 		if (AppBase.Current.Adapter is { } adapter)
 		{
 			adapter.OnGroupMessage += Adapter_OnGroupMessage;
@@ -182,10 +189,6 @@ public partial class GroupListView : UserControl
 			}
 		}
 
-		var app = AppBase.Current;
-		var avatarCache = app.ServiceProvider.GetRequiredService<IAvatarCache>();
-		var groupMessageDatabase = app.ServiceProvider.GetRequiredService<GroupMessageDatabase>();
-		var groupCache = app.ServiceProvider.GetRequiredService<IGroupCache>();
 		for (int i = 0; i < _displayedEntries.Count; i++)
 		{
 			var entry = _displayedEntries[i];
@@ -201,7 +204,8 @@ public partial class GroupListView : UserControl
 			if (model.Id != group.Uin)
 			{
 				model.Id = group.Uin;
-				model.Icon = avatarCache.GetGroupAvatarAsync(group.Uin, 40);
+				model.Icon?.Dispose();
+				model.Icon = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
 				model.Title = string.IsNullOrEmpty(group.Remark)
 					? group.Name
 					: $"{group.Remark} ({group.Name})";
@@ -209,14 +213,14 @@ public partial class GroupListView : UserControl
 				Grid.SetRow(entry, groupIndex);
 			}
 
-			var lastMessage = groupMessageDatabase.Last(group.Uin);
+			var lastMessage = _groupMessageDatabase.Last(group.Uin);
 			if (lastMessage is not null
 				&& model.ContentId != lastMessage.MessageId)
 			{
 				model.ContentId = lastMessage.MessageId;
 				model.Content = lastMessage is null
 					? Task.FromResult(string.Empty)
-					: groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
+					: _groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
 			}
 		}
 
