@@ -2,7 +2,9 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
 
@@ -12,12 +14,13 @@ public partial class ConnectView : UserControl
 {
 	private readonly IServiceScope _serviceScope;
 
-	public ConnectView()
+	public ConnectView(IServiceProvider serviceProvider)
 	{
 		InitializeComponent();
 
-		var app = AppBase.Current;
-		_serviceScope = app.ServiceProvider.CreateScope();
+		_serviceScope = serviceProvider.CreateScope();
+
+		DataContext = new ConnectViewModel();
 		var selectionProvider = _serviceScope.ServiceProvider.GetRequiredService<IAdapterSelectionProvider>();
 		foreach (var selection in selectionProvider.CreateSelections(_serviceScope.ServiceProvider))
 		{
@@ -30,6 +33,10 @@ public partial class ConnectView : UserControl
 
 		Loaded += ConnectView_Loaded;
 		Unloaded += ConnectView_Unloaded;
+	}
+
+	public ConnectView() : this(DesignerServiceProviderHelper.Root)
+	{
 	}
 
 	private void UpdateSelection()

@@ -16,12 +16,16 @@ namespace AvaQQ.Views.MainPanels;
 public partial class GroupListView : UserControl
 {
 	private readonly IGroupCache _groupCache;
-	
+
 	private readonly IAvatarCache _avatarCache;
-	
+
 	private readonly GroupMessageDatabase _groupMessageDatabase;
 
-	public GroupListView()
+	public GroupListView(
+		IGroupCache groupCache,
+		IAvatarCache avatarCache,
+		GroupMessageDatabase groupMessageDatabase
+		)
 	{
 		InitializeComponent();
 
@@ -29,14 +33,21 @@ public partial class GroupListView : UserControl
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
 
-		var app = AppBase.Current;
-		_groupCache = app.ServiceProvider.GetRequiredService<IGroupCache>();
-		_avatarCache = app.ServiceProvider.GetRequiredService<IAvatarCache>();
-		_groupMessageDatabase = app.ServiceProvider.GetRequiredService<GroupMessageDatabase>();
+		_groupCache = groupCache;
+		_avatarCache = avatarCache;
+		_groupMessageDatabase = groupMessageDatabase;
 		if (AppBase.Current.Adapter is { } adapter)
 		{
 			adapter.OnGroupMessage += Adapter_OnGroupMessage;
 		}
+	}
+
+	public GroupListView() : this(
+		DesignerServiceProviderHelper.Root.GetRequiredService<IGroupCache>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<GroupMessageDatabase>()
+		)
+	{
 	}
 
 	private async void GroupListView_Loaded(object? sender, RoutedEventArgs e)

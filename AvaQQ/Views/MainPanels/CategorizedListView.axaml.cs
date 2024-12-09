@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using AvaQQ.SDK;
 using AvaQQ.SDK.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace AvaQQ.Views.MainPanels;
 
@@ -10,16 +11,19 @@ public partial class CategorizedListView : UserControl
 {
 	private readonly IServiceScope _serviceScope;
 
-	public CategorizedListView()
+	public CategorizedListView(IServiceProvider serviceProvider)
 	{
 		InitializeComponent();
 
-		var app = AppBase.Current;
-		_serviceScope = app.ServiceProvider.CreateScope();
+		_serviceScope = serviceProvider.CreateScope();
 
 		Loaded += CategorizedListView_Loaded;
 		categorySelectionView.SelectionChanged += CategorySelectionView_SelectionChanged;
 		Unloaded += CategorizedListView_Unloaded;
+	}
+
+	public CategorizedListView() : this(DesignerServiceProviderHelper.Root)
+	{
 	}
 
 	private void CategorizedListView_Loaded(object? sender, RoutedEventArgs e)

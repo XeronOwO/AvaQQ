@@ -17,15 +17,22 @@ public partial class FriendListView : UserControl
 
 	private readonly IFriendCache _friendManager;
 
-	public FriendListView()
+	public FriendListView(IAvatarCache avatarCache, IFriendCache friendCache)
 	{
 		InitializeComponent();
 
 		Loaded += FriendListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-		_avatarManager = AppBase.Current.ServiceProvider.GetRequiredService<IAvatarCache>();
-		_friendManager = AppBase.Current.ServiceProvider.GetRequiredService<IFriendCache>();
+		_avatarManager = avatarCache;
+		_friendManager = friendCache;
+	}
+
+	public FriendListView() : this(
+		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<IFriendCache>()
+		)
+	{
 	}
 
 	private async void FriendListView_Loaded(object? sender, RoutedEventArgs e)

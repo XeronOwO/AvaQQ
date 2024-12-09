@@ -6,38 +6,45 @@ using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.ViewModels;
 using AvaQQ.ViewModels;
 using AvaQQ.ViewModels.MainPanels;
-using AvaQQ.Views.Connecting;
 using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace AvaQQ;
 
 public partial class App : AppBase
 {
-	public App()
+	private readonly IServiceProvider _serviceProvider;
+
+	private readonly IAppLifetimeController _lifetimeController;
+
+	public App(IServiceProvider serviceProvider)
+		: base(serviceProvider.GetRequiredService<ILogger<AppBase>>())
 	{
+		_serviceProvider = serviceProvider;
+		_lifetimeController = serviceProvider.GetRequiredService<IAppLifetimeController>();
+
 		DataContext = new AppViewModel();
 	}
 
-	// 受制于 Avalonia Designer 的工作方式，
-	// 必须手动设置 ServiceProvider 和 Lifetime，
-	// 而且必须要有无参构造函数
-	public override IServiceProvider ServiceProvider { get; set; } = null!;
-
-	public override ILifetimeController Lifetime { get; set; } = null!;
+	public App() : this(DesignerServiceProviderHelper.Root)
+	{
+	}
 
 	public override void Initialize()
 	{
 		AvaloniaXamlLoader.Load(this);
 	}
 
+	private IServiceScope? _connectServiceScope;
+
 	public override void OnFrameworkInitializationCompleted()
 	{
 		base.OnFrameworkInitializationCompleted();
 
-		PluginManager.LoadPlugins(ServiceProvider);
-		PluginManager.PostLoadPlugins(ServiceProvider);
+		PluginManager.LoadPlugins(_serviceProvider);
+		PluginManager.PostLoadPlugins(_serviceProvider);
 
 		//if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		//{
@@ -48,18 +55,16 @@ public partial class App : AppBase
 		//	singleViewPlatform.MainView = window;
 		//}
 
-		ConnectWindow = new ConnectWindow()
-		{
-			DataContext = new ConnectViewModel(),
-		};
+		_connectServiceScope = _serviceProvider.CreateScope();
+		ConnectWindow = _connectServiceScope.ServiceProvider.GetRequiredService<ConnectWindowBase>();
 		ConnectWindow.Show();
 
-		ServiceProvider.GetRequiredService<ILifetimeController>().Stopping += App_Stopping;
+		_lifetimeController.Stopping += App_Stopping;
 	}
 
 	private void App_Stopping(object? sender, EventArgs e)
 	{
-		PluginManager.UnloadPlugins(ServiceProvider);
+		PluginManager.UnloadPlugins(_serviceProvider);
 
 		if (Adapter is not null)
 		{
@@ -88,7 +93,7 @@ public partial class App : AppBase
 
 	public void NativeMenuItemExit_Click(object? sender, EventArgs e)
 	{
-		Lifetime.Stop();
+		_lifetimeController.Stop();
 	}
 
 	public void TrayIcon_Clicked(object? sender, EventArgs e)

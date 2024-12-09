@@ -11,12 +11,21 @@ namespace AvaQQ.Views.MainPanels;
 
 public partial class MainPanelWindow : Window
 {
-	public MainPanelWindow()
+	private readonly IAvatarCache _avatarCache;
+
+	public MainPanelWindow(IAvatarCache avatarCache)
 	{
+		_avatarCache = avatarCache;
+
 		InitializeComponent();
 
 		Loaded += MainPanelWindow_Loaded;
 		Closed += MainPanelWindow_Closed;
+	}
+
+	public MainPanelWindow()
+		: this(DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>())
+	{
 	}
 
 	private async void MainPanelWindow_Loaded(object? sender, RoutedEventArgs e)
@@ -30,8 +39,7 @@ public partial class MainPanelWindow : Window
 		}
 
 		model.HeaderUin = adapter.Uin;
-		model.HeaderAvatar = app.ServiceProvider.GetRequiredService<IAvatarCache>()
-			.GetUserAvatarAsync(adapter.Uin, 40);
+		model.HeaderAvatar = _avatarCache.GetUserAvatarAsync(adapter.Uin, 40);
 		model.HeaderName = await adapter.GetNicknameAsync();
 	}
 

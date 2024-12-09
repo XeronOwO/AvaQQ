@@ -9,11 +9,19 @@ namespace Onebot11ForwardWebSocketAdapter;
 
 public partial class AdapterSelectionView : UserControl
 {
-	public AdapterSelectionView()
+	private readonly IServiceProvider _serviceProvider;
+
+	public AdapterSelectionView(IServiceProvider serviceProvider)
 	{
+		_serviceProvider = serviceProvider;
+
 		InitializeComponent();
 
 		Unloaded += AdapterSelectionView_Unloaded;
+	}
+
+	public AdapterSelectionView() : this(DesignerServiceProviderHelper.Root)
+	{
 	}
 
 	private void AdapterSelectionView_Unloaded(object? sender, RoutedEventArgs e)
@@ -30,13 +38,11 @@ public partial class AdapterSelectionView : UserControl
 			return;
 		}
 
-		var app = AppBase.Current;
-
 		connect.BeginConnect();
 		model.IsConnecting = true;
 		model.TextBlockErrorText = string.Empty;
 
-		var adapter = new Adapter(app.ServiceProvider, model.Url, model.AccessToken);
+		var adapter = new Adapter(_serviceProvider, model.Url, model.AccessToken);
 		var (success, log) = await adapter.TryConnectAsync(Constants.ConnectionSpan);
 
 		if (!success)
@@ -46,7 +52,7 @@ public partial class AdapterSelectionView : UserControl
 			model.TextBlockErrorText = SR.TextConnectFailed;
 			connect.EndConnect(null);
 
-			await app.ServiceProvider.GetRequiredService<ILogWindowProvider>().ShowDialog(
+			await _serviceProvider.GetRequiredService<ILogWindowProvider>().ShowDialog(
 				window,
 				log.ToString()
 			);

@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using Avalonia.Svg.Skia;
 using AvaQQ.Logging;
 using AvaQQ.Plugins;
 using AvaQQ.SDK;
@@ -34,11 +33,6 @@ internal class Program
 	// Avalonia configuration, don't remove; also used by visual designer.
 	public static AppBuilder BuildAvaloniaApp()
 	{
-		// https://github.com/wieslawsoltes/Svg.Skia?tab=readme-ov-file#avalonia-previewer
-		// To make svg controls work with Avalonia Previewer
-		GC.KeepAlive(typeof(SvgImageExtension).Assembly);
-		GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
-
 		return AppBuilder.Configure(() =>
 			{
 				var builder = Host.CreateDefaultBuilder()
@@ -52,14 +46,9 @@ internal class Program
 					)
 					.ConfigurePlugins()
 					.Build();
+				DesignerServiceProviderHelper.Root = builder.Services.GetRequiredService<IServiceProvider>();
 
-				var app = (App)builder.Services.GetRequiredService<AppBase>();
-				// 受制于 Avalonia Designer 的工作方式，
-				// 必须手动设置 ServiceProvider 和 Lifetime，
-				// 而且必须要有无参构造函数
-				app.ServiceProvider = builder.Services;
-				app.Lifetime = builder.Services.GetRequiredService<ILifetimeController>();
-				return app;
+				return (App)builder.Services.GetRequiredService<AppBase>();
 			})
 			.UsePlatformDetect()
 			.WithInterFont()

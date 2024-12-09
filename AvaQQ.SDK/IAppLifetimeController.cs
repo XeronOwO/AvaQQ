@@ -6,7 +6,7 @@ namespace AvaQQ.SDK;
 /// <summary>
 /// 应用生命周期控制器
 /// </summary>
-public interface ILifetimeController
+public interface IAppLifetimeController
 {
 	/// <summary>
 	/// 获取一个 CancellationTokenSource，用于停止应用。<br/>

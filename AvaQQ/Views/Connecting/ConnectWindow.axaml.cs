@@ -5,7 +5,6 @@ using AvaQQ.SDK.ViewModels;
 using AvaQQ.ViewModels;
 using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
 
@@ -13,8 +12,18 @@ namespace AvaQQ.Views.Connecting;
 
 public partial class ConnectWindow : ConnectWindowBase
 {
-	public ConnectWindow()
+	private readonly IAppLifetimeController _lifetime;
+
+	private readonly GroupMessageDatabase _database;
+
+	public ConnectWindow(
+		IAppLifetimeController lifetime,
+		GroupMessageDatabase database
+		)
 	{
+		_lifetime = lifetime;
+		_database = database;
+
 		InitializeComponent();
 
 		Closed += ConnectWindow_Closed;
@@ -27,7 +36,7 @@ public partial class ConnectWindow : ConnectWindowBase
 		ConnectConfig.Save();
 		if (app.Adapter is null)
 		{
-			app.Lifetime.Stop();
+			_lifetime.Stop();
 		}
 		app.ConnectWindow = null;
 	}
@@ -66,7 +75,6 @@ public partial class ConnectWindow : ConnectWindowBase
 		};
 		app.MainPanelWindow.Show();
 
-		AppBase.Current.ServiceProvider.GetRequiredService<GroupMessageDatabase>()
-			.Initialize();
+		_database.Initialize();
 	}
 }

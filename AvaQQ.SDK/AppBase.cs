@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Resources;
 using AvaQQ.SDK.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 
@@ -14,11 +13,15 @@ namespace AvaQQ.SDK;
 /// </summary>
 public abstract class AppBase : Application
 {
+	private readonly ILogger<AppBase> _logger;
+
 	/// <summary>
 	/// 初始化 <see cref="AppBase"/> 类的新实例。
 	/// </summary>
-	public AppBase()
+	public AppBase(ILogger<AppBase> logger)
 	{
+		_logger = logger;
+
 		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 	}
 
@@ -43,16 +46,6 @@ public abstract class AppBase : Application
 	}
 
 	/// <summary>
-	/// 服务提供器
-	/// </summary>
-	public abstract IServiceProvider ServiceProvider { get; set; }
-
-	/// <summary>
-	/// 生命周期控制器
-	/// </summary>
-	public abstract ILifetimeController Lifetime { get; set; }
-
-	/// <summary>
 	/// 获取应用程序的适配器。
 	/// </summary>
 	public abstract IAdapter? Adapter { get; set; }
@@ -71,8 +64,7 @@ public abstract class AppBase : Application
 	{
 		try
 		{
-			ServiceProvider.GetRequiredService<ILogger<AppBase>>()
-				.LogCritical((Exception)e.ExceptionObject, "Unhandled exception.");
+			_logger.LogCritical((Exception)e.ExceptionObject, "Unhandled exception.");
 		}
 		catch
 		{
