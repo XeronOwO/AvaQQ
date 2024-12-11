@@ -1,5 +1,5 @@
 ﻿using Avalonia.Controls;
-using AvaQQ.SDK.ViewModels;
+using AvaQQ.SDK.Views;
 using AvaQQ.ViewModels;
 using AvaQQ.Views;
 using System.Threading.Tasks;

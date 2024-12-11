@@ -3,7 +3,6 @@
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				xmlns:vm="using:AvaQQ.ViewModels"
-				xmlns:connect="clr-namespace:AvaQQ.Views.Connecting"
 				mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
 				x:Class="AvaQQ.Views.Connecting.ConnectWindow"
 				x:DataType="vm:ConnectViewModel"
@@ -15,5 +14,5 @@
 	<Design.DataContext>
 		<vm:ConnectViewModel/>
 	</Design.DataContext>
-	<connect:ConnectView />
+	<Grid x:Name="gridConnectView"/>
 </Window>

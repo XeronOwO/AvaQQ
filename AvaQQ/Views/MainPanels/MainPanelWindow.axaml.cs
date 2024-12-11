@@ -5,7 +5,7 @@ using AvaQQ.SDK.Adapters;
 using AvaQQ.ViewModels.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
 namespace AvaQQ.Views.MainPanels;
 
@@ -45,7 +45,7 @@ public partial class MainPanelWindow : Window
 
 	private void MainPanelWindow_Closed(object? sender, EventArgs e)
 	{
-		MainPanelConfig.Save();
+		Config.Save();
 		AppBase.Current.MainPanelWindow = null;
 	}
 }

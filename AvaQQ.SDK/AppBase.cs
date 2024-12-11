@@ -2,7 +2,6 @@
 using Avalonia.Controls;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Resources;
-using AvaQQ.SDK.ViewModels;
 using Microsoft.Extensions.Logging;
 using System;
 
@@ -16,13 +15,35 @@ public abstract class AppBase : Application
 	private readonly ILogger<AppBase> _logger;
 
 	/// <summary>
+	/// 生命周期控制器
+	/// </summary>
+	protected readonly IAppLifetimeController _lifetime;
+
+	/// <summary>
 	/// 初始化 <see cref="AppBase"/> 类的新实例。
 	/// </summary>
-	public AppBase(ILogger<AppBase> logger)
+	public AppBase(ILogger<AppBase> logger, IAppLifetimeController lifetime)
 	{
 		_logger = logger;
+		_lifetime = lifetime;
 
-		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+#if !DEBUG
+		AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
+		{
+			try
+			{
+				_logger.LogCritical((Exception)e.ExceptionObject, "Unhandled exception.");
+			}
+			catch
+			{
+			}
+
+			if (e.IsTerminating)
+			{
+				_lifetime.Stop();
+			}
+		};
+#endif
 	}
 
 	/// <summary>
@@ -48,35 +69,26 @@ public abstract class AppBase : Application
 	/// <summary>
 	/// 获取应用程序的适配器。
 	/// </summary>
-	public abstract IAdapter? Adapter { get; set; }
+	public IAdapter? Adapter { get; protected set; }
 
 	/// <summary>
-	/// 连接窗口
+	/// 获取或设置主窗口，点击托盘图标时会聚焦该窗口
 	/// </summary>
-	public abstract ConnectWindowBase? ConnectWindow { get; set; }
+	public Window? MainWindow { get; set; }
+
+	/// <summary>
+	/// 当连接时触发<br/>
+	/// 此方法由连接窗口调用，请勿手动调用
+	/// </summary>
+	/// <param name="adapter">
+	/// 适配器<br/>
+	/// 如果连接失败，设置为 null，应用将会退出<br/>
+	/// 如果连接成功，设置为适配器实例，将会打开主面板窗口
+	/// </param>
+	public abstract void OnConnected(IAdapter? adapter);
 
 	/// <summary>
 	/// 主面板窗口
 	/// </summary>
 	public abstract Window? MainPanelWindow { get; set; }
-
-	private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-	{
-		try
-		{
-			_logger.LogCritical((Exception)e.ExceptionObject, "Unhandled exception.");
-		}
-		catch
-		{
-		}
-
-#if DEBUG
-		throw (Exception)e.ExceptionObject;
-#else
-		if (e.IsTerminating)
-		{
-			Lifetime.Stop();
-		}
-#endif
-	}
 }

@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaQQ.SDK;
-using AvaQQ.SDK.ViewModels;
+using AvaQQ.SDK.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Config = AvaQQ.SDK.Configuration<Onebot11ForwardWebSocketAdapter.AdapterConfiguration>;
 
@@ -11,16 +11,31 @@ public partial class AdapterSelectionView : UserControl
 {
 	private readonly IServiceProvider _serviceProvider;
 
-	public AdapterSelectionView(IServiceProvider serviceProvider)
+	private readonly ILogWindowProvider _logWindowProvider;
+
+	private readonly Lazy<ConnectWindowBase> _lazyConnectWindow;
+
+	private ConnectWindowBase ConnectWindow => _lazyConnectWindow.Value;
+
+	public AdapterSelectionView(
+		IServiceProvider serviceProvider,
+		ILogWindowProvider logWindowProvider
+		)
 	{
 		_serviceProvider = serviceProvider;
+		_logWindowProvider = logWindowProvider;
+		_lazyConnectWindow = new(serviceProvider.GetRequiredService<ConnectWindowBase>);
 
+		DataContext = new AdapterSelectionViewModel();
 		InitializeComponent();
 
 		Unloaded += AdapterSelectionView_Unloaded;
 	}
 
-	public AdapterSelectionView() : this(DesignerServiceProviderHelper.Root)
+	public AdapterSelectionView() : this(
+		DesignerServiceProviderHelper.Root,
+		DesignerServiceProviderHelper.Root.GetRequiredService<ILogWindowProvider>()
+		)
 	{
 	}
 
@@ -31,14 +46,12 @@ public partial class AdapterSelectionView : UserControl
 
 	private async void ButtonConnect_Click(object? sender, RoutedEventArgs e)
 	{
-		if (DataContext is not AdapterSelectionViewModel model
-			|| VisualRoot is not Window window
-			|| VisualRoot is not ConnectWindowBase connect)
+		if (DataContext is not AdapterSelectionViewModel model)
 		{
 			return;
 		}
 
-		connect.BeginConnect();
+		ConnectWindow.BeginConnect();
 		model.IsConnecting = true;
 		model.TextBlockErrorText = string.Empty;
 
@@ -50,10 +63,10 @@ public partial class AdapterSelectionView : UserControl
 			adapter.Dispose();
 			model.IsConnecting = false;
 			model.TextBlockErrorText = SR.TextConnectFailed;
-			connect.EndConnect(null);
+			ConnectWindow.EndConnect(null);
 
-			await _serviceProvider.GetRequiredService<ILogWindowProvider>().ShowDialog(
-				window,
+			await _logWindowProvider.ShowDialog(
+				ConnectWindow,
 				log.ToString()
 			);
 
@@ -61,6 +74,6 @@ public partial class AdapterSelectionView : UserControl
 		}
 
 		model.IsConnecting = false;
-		connect.EndConnect(adapter);
+		ConnectWindow.EndConnect(adapter);
 	}
 }

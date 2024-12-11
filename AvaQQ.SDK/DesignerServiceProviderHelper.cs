@@ -10,7 +10,7 @@ namespace AvaQQ.SDK;
 public static class DesignerServiceProviderHelper
 {
 	/// <summary>
-	/// 根服务提供器
+	/// 根服务提供器，仅用于防止设计器崩溃，不推荐在正式代码中使用
 	/// </summary>
 	[NotNull]
 	public static IServiceProvider? Root

@@ -6,7 +6,7 @@ namespace AvaQQ.Adapters;
 
 internal class SelectAdapterSelection : IAdapterSelection
 {
-	public UserControl? UserControl => null;
+	public UserControl? View => null;
 
 	public void OnSelected()
 	{

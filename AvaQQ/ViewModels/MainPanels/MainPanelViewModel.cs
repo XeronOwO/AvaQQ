@@ -2,13 +2,13 @@
 using AvaQQ.SDK;
 using ReactiveUI;
 using System.Threading.Tasks;
-using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
 namespace AvaQQ.ViewModels.MainPanels;
 
 internal class MainPanelViewModel : ViewModelBase
 {
-	private int _width = MainPanelConfig.Instance.Width;
+	private int _width = Config.Instance.Width;
 
 	public int Width
 	{
@@ -16,11 +16,11 @@ internal class MainPanelViewModel : ViewModelBase
 		set
 		{
 			this.RaiseAndSetIfChanged(ref _width, value);
-			MainPanelConfig.Instance.Width = value;
+			Config.Instance.Width = value;
 		}
 	}
 
-	private int _height = MainPanelConfig.Instance.Height;
+	private int _height = Config.Instance.Height;
 
 	public int Height
 	{
@@ -28,7 +28,7 @@ internal class MainPanelViewModel : ViewModelBase
 		set
 		{
 			this.RaiseAndSetIfChanged(ref _height, value);
-			MainPanelConfig.Instance.Height = value;
+			Config.Instance.Height = value;
 		}
 	}
 

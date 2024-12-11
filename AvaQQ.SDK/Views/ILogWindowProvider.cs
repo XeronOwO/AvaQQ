@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
 using System.Threading.Tasks;
 
-namespace AvaQQ.SDK.ViewModels;
+namespace AvaQQ.SDK.Views;
 
 /// <summary>
 /// 日志窗口提供者

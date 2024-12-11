@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 using AvaQQ.Plugins;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
-using AvaQQ.SDK.ViewModels;
+using AvaQQ.SDK.Views;
 using AvaQQ.ViewModels;
 using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
@@ -17,13 +17,13 @@ public partial class App : AppBase
 {
 	private readonly IServiceProvider _serviceProvider;
 
-	private readonly IAppLifetimeController _lifetimeController;
-
 	public App(IServiceProvider serviceProvider)
-		: base(serviceProvider.GetRequiredService<ILogger<AppBase>>())
+		: base(
+			serviceProvider.GetRequiredService<ILogger<AppBase>>(),
+			serviceProvider.GetRequiredService<IAppLifetimeController>()
+			)
 	{
 		_serviceProvider = serviceProvider;
-		_lifetimeController = serviceProvider.GetRequiredService<IAppLifetimeController>();
 
 		DataContext = new AppViewModel();
 	}
@@ -36,8 +36,6 @@ public partial class App : AppBase
 	{
 		AvaloniaXamlLoader.Load(this);
 	}
-
-	private IServiceScope? _connectServiceScope;
 
 	public override void OnFrameworkInitializationCompleted()
 	{
@@ -55,11 +53,9 @@ public partial class App : AppBase
 		//	singleViewPlatform.MainView = window;
 		//}
 
-		_connectServiceScope = _serviceProvider.CreateScope();
-		ConnectWindow = _connectServiceScope.ServiceProvider.GetRequiredService<ConnectWindowBase>();
-		ConnectWindow.Show();
+		_lifetime.Stopping += App_Stopping;
 
-		_lifetimeController.Stopping += App_Stopping;
+		OpenConnectWindow();
 	}
 
 	private void App_Stopping(object? sender, EventArgs e)
@@ -72,11 +68,7 @@ public partial class App : AppBase
 			Adapter = null;
 		}
 
-		if (ConnectWindow is not null)
-		{
-			ConnectWindow.Close();
-			ConnectWindow = null;
-		}
+		_connectScope?.Dispose();
 
 		if (MainPanelWindow is not null)
 		{
@@ -85,15 +77,37 @@ public partial class App : AppBase
 		}
 	}
 
-	public override IAdapter? Adapter { get; set; }
+	private IServiceScope? _connectScope;
 
-	public override ConnectWindowBase? ConnectWindow { get; set; }
+	private void OpenConnectWindow()
+	{
+		_connectScope = _serviceProvider.CreateScope();
+		MainWindow = _connectScope.ServiceProvider.GetRequiredService<ConnectWindowBase>();
+		MainWindow.Show();
+	}
+
+	public override void OnConnected(IAdapter? adapter)
+	{
+		Adapter = adapter;
+
+		_connectScope?.Dispose();
+		_connectScope = null;
+		MainWindow = null;
+
+		if (adapter is null)
+		{
+			_lifetime.Stop();
+			return;
+		}
+
+		throw new NotImplementedException();
+	}
 
 	public override Window? MainPanelWindow { get; set; }
 
 	public void NativeMenuItemExit_Click(object? sender, EventArgs e)
 	{
-		_lifetimeController.Stop();
+		_lifetime.Stop();
 	}
 
 	public void TrayIcon_Clicked(object? sender, EventArgs e)
@@ -110,27 +124,21 @@ public partial class App : AppBase
 
 	private void TryFocusConnectWindow()
 	{
-		if (ConnectWindow is not { } connect)
-		{
-			return;
-		}
-
-		connect.Activate();
+		MainWindow?.Activate();
 	}
 
 	private void TryOpenOrFocusMainPanelWindow()
 	{
-		if (MainPanelWindow is null)
+		if (MainWindow is not null)
 		{
-			MainPanelWindow = new MainPanelWindow()
-			{
-				DataContext = new MainPanelViewModel(),
-			};
-			MainPanelWindow.Show();
+			MainWindow.Activate();
+			return;
 		}
-		else
+
+		MainWindow = new MainPanelWindow()
 		{
-			MainPanelWindow.Activate();
-		}
+			DataContext = new MainPanelViewModel(),
+		};
+		MainWindow.Show();
 	}
 }

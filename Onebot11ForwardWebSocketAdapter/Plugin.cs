@@ -14,7 +14,8 @@ public class Plugin : AvaQQ.SDK.Plugin
 
 		hostBuilder.ConfigureServices(services =>
 		{
-			services.AddScoped<AdapterSelection>();
+			services.AddScoped<AdapterSelection>()
+				.AddScoped<AdapterSelectionView>();
 		});
 	}
 
@@ -31,7 +32,6 @@ public class Plugin : AvaQQ.SDK.Plugin
 
 	public override void OnPostLoad(IServiceProvider services)
 	{
-		_logger = services.GetRequiredService<ILogger<Plugin>>();
 		_logger.LogInformation(nameof(OnPostLoad));
 	}
 

@@ -7,7 +7,7 @@ using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using MainPanelConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.MainPanelConfiguration>;
 
 namespace AvaQQ.MainPanels;
 
@@ -70,10 +70,10 @@ internal class GroupCategorySelection : ICategorySelection
 
 	public void OnDeselected()
 	{
-		_watchdog.Start(MainPanelConfig.Instance.UnusedViewDestructionTime);
+		_watchdog.Start(Config.Instance.UnusedViewDestructionTime);
 		_logger.LogInformation(
 			"GroupListView has been scheduled for destruction after {Delay}.",
-			MainPanelConfig.Instance.UnusedViewDestructionTime
+			Config.Instance.UnusedViewDestructionTime
 		);
 	}
 

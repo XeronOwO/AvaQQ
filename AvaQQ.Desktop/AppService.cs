@@ -27,7 +27,7 @@ internal class AppService(
 
 	protected override Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		DesignerServiceProviderHelper.Root = serviceProvider;
+		//DesignerServiceProviderHelper.Root = serviceProvider;
 
 		return Task.Run(() =>
 		{

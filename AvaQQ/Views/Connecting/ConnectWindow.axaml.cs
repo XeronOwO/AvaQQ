@@ -1,44 +1,30 @@
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
-using AvaQQ.SDK.Databases;
-using AvaQQ.SDK.ViewModels;
+using AvaQQ.SDK.Views;
 using AvaQQ.ViewModels;
-using AvaQQ.ViewModels.MainPanels;
-using AvaQQ.Views.MainPanels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
 
 namespace AvaQQ.Views.Connecting;
 
 public partial class ConnectWindow : ConnectWindowBase
 {
-	private readonly IAppLifetimeController _lifetime;
-
-	private readonly GroupMessageDatabase _database;
-
 	public ConnectWindow(
-		IAppLifetimeController lifetime,
-		GroupMessageDatabase database
+		ConnectView connectView
 		)
 	{
-		_lifetime = lifetime;
-		_database = database;
-
+		DataContext = new ConnectViewModel();
 		InitializeComponent();
+		gridConnectView.Children.Add(connectView);
 
 		Closed += ConnectWindow_Closed;
 	}
 
-	private void ConnectWindow_Closed(object? sender, EventArgs e)
+	public ConnectWindow() : this(
+		DesignerServiceProviderHelper.Root.GetRequiredService<ConnectView>()
+		)
 	{
-		var app = AppBase.Current;
-
-		ConnectConfig.Save();
-		if (app.Adapter is null)
-		{
-			_lifetime.Stop();
-		}
-		app.ConnectWindow = null;
 	}
 
 	public override void BeginConnect()
@@ -50,6 +36,8 @@ public partial class ConnectWindow : ConnectWindowBase
 
 		model.IsConnecting = true;
 	}
+
+	private IAdapter? _adapter;
 
 	public override void EndConnect(IAdapter? adapter)
 	{
@@ -65,16 +53,15 @@ public partial class ConnectWindow : ConnectWindowBase
 			return;
 		}
 
-		var app = AppBase.Current;
-		app.Adapter = adapter;
+		_adapter = adapter;
+
 		Close();
+	}
 
-		app.MainPanelWindow = new MainPanelWindow()
-		{
-			DataContext = new MainPanelViewModel(),
-		};
-		app.MainPanelWindow.Show();
+	private void ConnectWindow_Closed(object? sender, EventArgs e)
+	{
+		Config.Save();
 
-		_database.Initialize();
+		AppBase.Current.OnConnected(_adapter);
 	}
 }

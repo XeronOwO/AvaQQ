@@ -1,51 +1,54 @@
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
-using AvaQQ.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
-using ConnectConfig = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.ConnectConfiguration>;
 
 namespace AvaQQ.Views.Connecting;
 
 public partial class ConnectView : UserControl
 {
-	private readonly IServiceScope _serviceScope;
+	private readonly IServiceProvider _serviceProvider;
 
-	public ConnectView(IServiceProvider serviceProvider)
+	private readonly IAdapterSelectionProvider _adapterSelectionProvider;
+
+	public ConnectView(
+		IServiceProvider serviceProvider,
+		IAdapterSelectionProvider adapterSelectionProvider
+		)
 	{
+		_serviceProvider = serviceProvider;
+		_adapterSelectionProvider = adapterSelectionProvider;
+
 		InitializeComponent();
 
-		_serviceScope = serviceProvider.CreateScope();
-
-		DataContext = new ConnectViewModel();
-		var selectionProvider = _serviceScope.ServiceProvider.GetRequiredService<IAdapterSelectionProvider>();
-		foreach (var selection in selectionProvider.CreateSelections(_serviceScope.ServiceProvider))
+		var selections = _adapterSelectionProvider.CreateSelections(_serviceProvider);
+		foreach (var selection in selections)
 		{
 			adapterSelector.Items.Add(selection);
 		}
-
 		adapterSelector.SelectedItem = adapterSelector.Items.Where(
-			x => x is not null && x.ToString() == ConnectConfig.Instance.AdapterIndex
+			x => x is not null && x.ToString() == Config.Instance.AdapterIndex
 		).FirstOrDefault();
-
-		Loaded += ConnectView_Loaded;
-		Unloaded += ConnectView_Unloaded;
+		UpdateSelection();
 	}
 
-	public ConnectView() : this(DesignerServiceProviderHelper.Root)
+	public ConnectView() : this(
+		DesignerServiceProviderHelper.Root,
+		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterSelectionProvider>()
+		)
 	{
 	}
 
 	private void UpdateSelection()
 	{
-		ConnectConfig.Instance.AdapterIndex = string.Empty;
+		Config.Instance.AdapterIndex = string.Empty;
 		if (adapterSelector.SelectedItem is not null
 			&& adapterSelector.SelectedItem.ToString() is { } index)
 		{
-			ConnectConfig.Instance.AdapterIndex = index;
+			Config.Instance.AdapterIndex = index;
 		}
 
 		if (adapterSelector.SelectedItem is not IAdapterSelection selection)
@@ -54,21 +57,11 @@ public partial class ConnectView : UserControl
 		}
 
 		gridAdapterOptions.Children.Clear();
-		var control = selection.UserControl;
+		var control = selection.View;
 		if (control is not null)
 		{
 			gridAdapterOptions.Children.Add(control);
 		}
-	}
-
-	private void ConnectView_Loaded(object? sender, RoutedEventArgs e)
-	{
-		UpdateSelection();
-	}
-
-	private void ConnectView_Unloaded(object? sender, RoutedEventArgs e)
-	{
-		_serviceScope.Dispose();
 	}
 
 	private void OnSelectAdapter(object? sender, SelectionChangedEventArgs e)

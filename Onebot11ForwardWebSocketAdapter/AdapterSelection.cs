@@ -3,13 +3,9 @@ using AvaQQ.SDK.Adapters;
 
 namespace Onebot11ForwardWebSocketAdapter;
 
-internal class AdapterSelection : IAdapterSelection
+internal class AdapterSelection(AdapterSelectionView view) : IAdapterSelection
 {
-	public UserControl? UserControl
-		=> new AdapterSelectionView()
-		{
-			DataContext = new AdapterSelectionViewModel(),
-		};
+	public UserControl? View => view;
 
 	public void OnSelected()
 	{

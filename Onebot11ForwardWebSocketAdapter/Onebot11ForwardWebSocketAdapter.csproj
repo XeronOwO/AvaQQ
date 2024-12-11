@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY /Y $(OutputPath)** ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\" />
+    <Exec Command="XCOPY /Y $(OutputPath)** ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\&#xD;&#xA;echo $(OutputPath)** ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\" />
   </Target>
 
 </Project>
