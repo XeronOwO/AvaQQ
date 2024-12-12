@@ -12,7 +12,7 @@ public interface ICategorySelection : IDisposable
 	/// <summary>
 	/// 获取选中该分类后展示的界面，也就是说需要自己DIY，可以参考已实现的分类界面的有关代码。
 	/// </summary>
-	UserControl? UserControl { get; }
+	UserControl? View { get; }
 
 	/// <summary>
 	/// 选中该分类时触发

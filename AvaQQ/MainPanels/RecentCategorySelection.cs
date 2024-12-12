@@ -7,7 +7,7 @@ namespace AvaQQ.MainPanels;
 
 internal class RecentCategorySelection : ICategorySelection
 {
-	public UserControl? UserControl => null;
+	public UserControl? View => null;
 
 	public void OnDeselected()
 	{

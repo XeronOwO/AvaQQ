@@ -27,6 +27,7 @@ public partial class GroupListView : UserControl
 		GroupMessageDatabase groupMessageDatabase
 		)
 	{
+		DataContext = new GroupListViewModel();
 		InitializeComponent();
 
 		Loaded += GroupListView_Loaded;

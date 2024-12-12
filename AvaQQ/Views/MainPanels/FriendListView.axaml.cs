@@ -19,6 +19,7 @@ public partial class FriendListView : UserControl
 
 	public FriendListView(IAvatarCache avatarCache, IFriendCache friendCache)
 	{
+		DataContext = new FriendListViewModel();
 		InitializeComponent();
 
 		Loaded += FriendListView_Loaded;

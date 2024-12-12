@@ -1,11 +1,9 @@
-﻿using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Markup.Xaml;
 using AvaQQ.Plugins;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using AvaQQ.SDK.Views;
 using AvaQQ.ViewModels;
-using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -70,11 +68,7 @@ public partial class App : AppBase
 
 		_connectScope?.Dispose();
 
-		if (MainPanelWindow is not null)
-		{
-			MainPanelWindow.Close();
-			MainPanelWindow = null;
-		}
+		_mainPanelScope?.Dispose();
 	}
 
 	private IServiceScope? _connectScope;
@@ -100,10 +94,17 @@ public partial class App : AppBase
 			return;
 		}
 
-		throw new NotImplementedException();
+		OpenMainPanelWindow();
 	}
 
-	public override Window? MainPanelWindow { get; set; }
+	private IServiceScope? _mainPanelScope;
+
+	private void OpenMainPanelWindow()
+	{
+		_mainPanelScope = _serviceProvider.CreateScope();
+		MainWindow = _mainPanelScope.ServiceProvider.GetRequiredService<MainPanelWindow>();
+		MainWindow.Show();
+	}
 
 	public void NativeMenuItemExit_Click(object? sender, EventArgs e)
 	{
@@ -135,10 +136,6 @@ public partial class App : AppBase
 			return;
 		}
 
-		MainWindow = new MainPanelWindow()
-		{
-			DataContext = new MainPanelViewModel(),
-		};
-		MainWindow.Show();
+		OpenMainPanelWindow();
 	}
 }

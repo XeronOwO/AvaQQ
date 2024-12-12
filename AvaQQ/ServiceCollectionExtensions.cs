@@ -9,6 +9,7 @@ using AvaQQ.SDK.Databases;
 using AvaQQ.SDK.MainPanels;
 using AvaQQ.SDK.Views;
 using AvaQQ.Views.Connecting;
+using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AvaQQ;
@@ -19,6 +20,12 @@ public static class ServiceCollectionExtensions
 		=> services.AddSingleton<AppBase, App>()
 		.AddTransient<ConnectView>()
 		.AddScoped<ConnectWindowBase, ConnectWindow>()
+		.AddTransient<HeaderView>()
+		.AddTransient<CategorizedListView>()
+		.AddTransient<MainPanelView>()
+		.AddTransient<FriendListView>()
+		.AddTransient<GroupListView>()
+		.AddScoped<MainPanelWindow>()
 		.AddSingleton<IAppLifetimeController, LifetimeController>()
 		.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
 		.AddSingleton<ILogWindowProvider, LogWindowProvider>()

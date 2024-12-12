@@ -86,9 +86,4 @@ public abstract class AppBase : Application
 	/// 如果连接成功，设置为适配器实例，将会打开主面板窗口
 	/// </param>
 	public abstract void OnConnected(IAdapter? adapter);
-
-	/// <summary>
-	/// 主面板窗口
-	/// </summary>
-	public abstract Window? MainPanelWindow { get; set; }
 }

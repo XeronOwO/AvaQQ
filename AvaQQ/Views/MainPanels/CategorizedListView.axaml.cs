@@ -29,8 +29,9 @@ public partial class CategorizedListView : UserControl
 	private void CategorizedListView_Loaded(object? sender, RoutedEventArgs e)
 	{
 		categorySelectionView.Items.Clear();
-		var selections = _serviceScope.ServiceProvider.GetRequiredService<ICategorySelectionProvider>();
-		foreach (var selection in selections.CreateSelections(_serviceScope.ServiceProvider))
+
+		var selectionProvider = _serviceScope.ServiceProvider.GetRequiredService<ICategorySelectionProvider>();
+		foreach (var selection in selectionProvider.CreateSelections(_serviceScope.ServiceProvider))
 		{
 			categorySelectionView.Items.Add(selection);
 		}
@@ -49,9 +50,9 @@ public partial class CategorizedListView : UserControl
 		}
 
 		gridContent.Children.Clear();
-		if (selection.UserControl is { } control)
+		if (selection.View is { } view)
 		{
-			gridContent.Children.Add(control);
+			gridContent.Children.Add(view);
 		}
 	}
 

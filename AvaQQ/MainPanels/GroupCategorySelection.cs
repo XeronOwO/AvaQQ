@@ -2,7 +2,6 @@
 using AvaQQ.Resources;
 using AvaQQ.SDK.MainPanels;
 using AvaQQ.Utils;
-using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,19 +14,25 @@ internal class GroupCategorySelection : ICategorySelection
 {
 	private readonly object _lock = new();
 
+	private readonly IServiceProvider _serviceProvider;
+
 	private readonly ILogger<GroupCategorySelection> _logger;
 
 	private GroupListView? _view;
 
 	private readonly Watchdog _watchdog;
 
-	public GroupCategorySelection(IServiceProvider serviceProvider)
+	public GroupCategorySelection(
+		IServiceProvider serviceProvider,
+		ILogger<GroupCategorySelection> logger
+		)
 	{
-		_logger = serviceProvider.GetRequiredService<ILogger<GroupCategorySelection>>();
+		_serviceProvider = serviceProvider;
+		_logger = logger;
 		_watchdog = new(DestroyView);
 	}
 
-	public UserControl? UserControl
+	public UserControl? View
 	{
 		get
 		{
@@ -35,10 +40,7 @@ internal class GroupCategorySelection : ICategorySelection
 			{
 				if (_view is null)
 				{
-					_view = new GroupListView()
-					{
-						DataContext = new GroupListViewModel(),
-					};
+					_view = _serviceProvider.GetRequiredService<GroupListView>();
 					_logger.LogInformation("GroupListView has been created.");
 				}
 

@@ -50,9 +50,9 @@ internal class MainPanelViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref _headerAvatar, value);
 	}
 
-	private string _headerName = "User";
+	private Task<string> _headerName = Task.FromResult("User");
 
-	public string HeaderName
+	public Task<string> HeaderName
 	{
 		get => _headerName;
 		set => this.RaiseAndSetIfChanged(ref _headerName, value);

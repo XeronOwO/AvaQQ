@@ -15,5 +15,5 @@
 	<Design.DataContext>
 		<vm:MainPanelViewModel/>
 	</Design.DataContext>
-	<mp:MainPanelView/>
+	<Grid x:Name="gridMainPanelView"/>
 </Window>

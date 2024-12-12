@@ -2,7 +2,6 @@
 using AvaQQ.Resources;
 using AvaQQ.SDK.MainPanels;
 using AvaQQ.Utils;
-using AvaQQ.ViewModels.MainPanels;
 using AvaQQ.Views.MainPanels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,19 +14,25 @@ internal class FriendCategorySelection : ICategorySelection
 {
 	private readonly object _lock = new();
 
+	private readonly IServiceProvider _serviceProvider;
+
 	private readonly ILogger<FriendCategorySelection> _logger;
 
 	private FriendListView? _view;
 
 	private readonly Watchdog _watchdog;
 
-	public FriendCategorySelection(IServiceProvider serviceProvider)
+	public FriendCategorySelection(
+		IServiceProvider serviceProvider,
+		ILogger<FriendCategorySelection> logger
+		)
 	{
-		_logger = serviceProvider.GetRequiredService<ILogger<FriendCategorySelection>>();
+		_serviceProvider = serviceProvider;
+		_logger = logger;
 		_watchdog = new(DestroyView);
 	}
 
-	public UserControl? UserControl
+	public UserControl? View
 	{
 		get
 		{
@@ -35,10 +40,7 @@ internal class FriendCategorySelection : ICategorySelection
 			{
 				if (_view is null)
 				{
-					_view = new FriendListView()
-					{
-						DataContext = new FriendListViewModel(),
-					};
+					_view = _serviceProvider.GetRequiredService<FriendListView>();
 					_logger.LogInformation("FriendListView has been created.");
 				}
 
