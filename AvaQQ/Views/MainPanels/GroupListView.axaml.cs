@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Views.MainPanels;
 
@@ -27,16 +29,17 @@ public partial class GroupListView : UserControl
 		GroupMessageDatabase groupMessageDatabase
 		)
 	{
+		_groupCache = groupCache;
+		_avatarCache = avatarCache;
+		_groupMessageDatabase = groupMessageDatabase;
+
 		DataContext = new GroupListViewModel();
 		InitializeComponent();
 
 		Loaded += GroupListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-
-		_groupCache = groupCache;
-		_avatarCache = avatarCache;
-		_groupMessageDatabase = groupMessageDatabase;
+		Unloaded += GroupListView_Unloaded;
 		if (AppBase.Current.Adapter is { } adapter)
 		{
 			adapter.OnGroupMessage += Adapter_OnGroupMessage;
@@ -59,7 +62,7 @@ public partial class GroupListView : UserControl
 		UpdateFilteredGroupList();
 		UpdateDisplayedEntryList();
 		UpdateGrid();
-		UpdateEntryContent();
+		UpdateDisplayedEntries();
 	}
 
 	private readonly List<EntryView> _displayedEntries = [];
@@ -175,14 +178,37 @@ public partial class GroupListView : UserControl
 		}
 	}
 
+	private void GroupListView_Unloaded(object? sender, RoutedEventArgs e)
+	{
+		foreach (var (_, cache) in _caches)
+		{
+			cache.Image.Dispose();
+		}
+		_caches.Clear();
+	}
+
 	private double _oldOffset;
 
-	private void UpdateEntryContent()
+	private void UpdateDisplayedEntries()
 	{
+		if (_entryViewHeight <= 0)
+		{
+			return;
+		}
+
 		var newOffset = scrollViewer.Offset.Y;
 
 		var oldIndex = (int)Math.Floor(_oldOffset / _entryViewHeight);
 		var newIndex = (int)Math.Floor(newOffset / _entryViewHeight);
+
+		EnsureEnoughDisplayedEntries(oldIndex, newIndex);
+		UpdateDisplayedEntryContents(newIndex);
+
+		_oldOffset = newOffset;
+	}
+
+	private void EnsureEnoughDisplayedEntries(int oldIndex, int newIndex)
+	{
 		while (oldIndex != newIndex)
 		{
 			if (oldIndex < newIndex)
@@ -200,7 +226,25 @@ public partial class GroupListView : UserControl
 				--oldIndex;
 			}
 		}
+	}
 
+	private class Cache
+	{
+		public DateTime InfoLastUpdateTime { get; set; }
+
+		public Task<IImage?> Image { get; set; } = null!;
+
+		public string Title { get; set; } = null!;
+
+		public GroupMessageEntry? LastMessage { get; set; }
+
+		public Task<string> Content { get; set; } = Task.FromResult(string.Empty);
+	}
+
+	private readonly Dictionary<ulong, Cache> _caches = [];
+
+	private void UpdateDisplayedEntryContents(int newIndex)
+	{
 		for (int i = 0; i < _displayedEntries.Count; i++)
 		{
 			var entry = _displayedEntries[i];
@@ -212,38 +256,42 @@ public partial class GroupListView : UserControl
 			}
 
 			var group = _filteredGroups[groupIndex];
-
-			if (model.Id != group.Uin)
+			if (!_caches.TryGetValue(group.Uin, out var cache))
 			{
-				model.Id = group.Uin;
-				model.Icon?.Dispose();
-				model.Icon = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
-				model.Title = string.IsNullOrEmpty(group.Remark)
+				_caches[group.Uin] = cache = new();
+			}
+
+			var now = DateTime.Now;
+			if (now > cache.InfoLastUpdateTime + Config.Instance.GroupUpdateInterval)
+			{
+				cache.InfoLastUpdateTime = now;
+				cache.Image = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
+				cache.Title = string.IsNullOrEmpty(group.Remark)
 					? group.Name
 					: $"{group.Remark} ({group.Name})";
-
-				Grid.SetRow(entry, groupIndex);
 			}
 
 			var lastMessage = _groupMessageDatabase.Last(group.Uin);
-			if (lastMessage is not null
-				&& model.ContentId != lastMessage.MessageId)
+			if (lastMessage != cache.LastMessage)
 			{
-				model.ContentId = lastMessage.MessageId;
-				model.Content = lastMessage is null
+				cache.LastMessage = lastMessage;
+				cache.Content = lastMessage is null
 					? Task.FromResult(string.Empty)
 					: _groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
 			}
-		}
 
-		_oldOffset = newOffset;
+			model.Icon = cache.Image;
+			model.Title = cache.Title;
+			model.Content = cache.Content;
+			Grid.SetRow(entry, groupIndex);
+		}
 	}
 
 	private void ScrollViewer_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
 	{
 		if (e.Property == ScrollViewer.OffsetProperty)
 		{
-			UpdateEntryContent();
+			UpdateDisplayedEntries();
 		}
 		else if (e.Property == BoundsProperty)
 		{
@@ -251,7 +299,7 @@ public partial class GroupListView : UserControl
 			UpdateFilteredGroupList();
 			UpdateDisplayedEntryList();
 			UpdateGrid();
-			UpdateEntryContent();
+			UpdateDisplayedEntries();
 		}
 	}
 
@@ -260,11 +308,11 @@ public partial class GroupListView : UserControl
 		UpdateFilteredGroupList();
 		UpdateDisplayedEntryList();
 		UpdateGrid();
-		UpdateEntryContent();
+		UpdateDisplayedEntries();
 	}
 
 	private void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
 	{
-		Dispatcher.UIThread.Invoke(UpdateEntryContent);
+		Dispatcher.UIThread.Invoke(UpdateDisplayedEntries);
 	}
 }

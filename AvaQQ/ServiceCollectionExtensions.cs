@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
 		.AddTransient<FriendListView>()
 		.AddTransient<GroupListView>()
 		.AddScoped<MainPanelWindow>()
-		.AddSingleton<IAppLifetimeController, LifetimeController>()
+		.AddSingleton<IAppLifetimeController, AppLifetimeController>()
 		.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
 		.AddSingleton<ILogWindowProvider, LogWindowProvider>()
 		.AddSingleton<ICategorySelectionProvider, CategorySelectionProvider>()

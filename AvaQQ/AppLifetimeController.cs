@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace AvaQQ;
 
-internal class LifetimeController : IAppLifetimeController
+internal class AppLifetimeController : IAppLifetimeController
 {
 	public CancellationTokenSource CancellationTokenSource { get; } = new();
 

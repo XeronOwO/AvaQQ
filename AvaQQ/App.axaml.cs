@@ -103,6 +103,12 @@ public partial class App : AppBase
 	{
 		_mainPanelScope = _serviceProvider.CreateScope();
 		MainWindow = _mainPanelScope.ServiceProvider.GetRequiredService<MainPanelWindow>();
+		MainWindow.Closed += (_, _) =>
+		{
+			MainWindow = null;
+			_mainPanelScope?.Dispose();
+			_mainPanelScope = null;
+		};
 		MainWindow.Show();
 	}
 
