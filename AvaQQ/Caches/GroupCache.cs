@@ -218,7 +218,11 @@ internal class GroupCache(
 				case ReplySegment:
 					break;
 				case TextSegment text:
-					sb.Append(text.Text);
+					sb.Append(
+						text.Text
+						.Replace("\r\n", " ")
+						.Replace("\n", " ")
+						);
 					break;
 				default:
 					logger.LogWarning("Unsupported message preview segment type {Type}.", segment.GetType());

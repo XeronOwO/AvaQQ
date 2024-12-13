@@ -2,6 +2,7 @@
 using AvaQQ.Plugins;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
+using AvaQQ.SDK.Databases;
 using AvaQQ.SDK.Views;
 using AvaQQ.ViewModels;
 using AvaQQ.Views.MainPanels;
@@ -15,18 +16,26 @@ public partial class App : AppBase
 {
 	private readonly IServiceProvider _serviceProvider;
 
-	public App(IServiceProvider serviceProvider)
-		: base(
+	private readonly GroupMessageDatabase _groupMessageDatabase;
+
+	public App(
+		IServiceProvider serviceProvider,
+		GroupMessageDatabase groupMessageDatabase
+		) : base(
 			serviceProvider.GetRequiredService<ILogger<AppBase>>(),
 			serviceProvider.GetRequiredService<IAppLifetimeController>()
 			)
 	{
 		_serviceProvider = serviceProvider;
+		_groupMessageDatabase = groupMessageDatabase;
 
 		DataContext = new AppViewModel();
 	}
 
-	public App() : this(DesignerServiceProviderHelper.Root)
+	public App() : this(
+		DesignerServiceProviderHelper.Root,
+		DesignerServiceProviderHelper.Root.GetRequiredService<GroupMessageDatabase>()
+		)
 	{
 	}
 
@@ -93,6 +102,8 @@ public partial class App : AppBase
 			_lifetime.Stop();
 			return;
 		}
+
+		_groupMessageDatabase.Initialize(adapter);
 
 		OpenMainPanelWindow();
 	}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AvaQQ.SDK.Adapters;
+using System;
 using System.IO;
 
 namespace AvaQQ.SDK.Databases;
@@ -24,7 +25,8 @@ public abstract class Database : IDisposable
 	/// <summary>
 	/// 初始化
 	/// </summary>
-	public abstract void Initialize();
+	/// <param name="adapter">适配器</param>
+	public abstract void Initialize(IAdapter adapter);
 
 	/// <inheritdoc/>
 	public abstract void Dispose();

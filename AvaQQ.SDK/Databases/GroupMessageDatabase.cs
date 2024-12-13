@@ -1,5 +1,4 @@
 ﻿using AvaQQ.SDK.Adapters;
-using System;
 
 namespace AvaQQ.SDK.Databases;
 
@@ -9,13 +8,8 @@ namespace AvaQQ.SDK.Databases;
 public abstract class GroupMessageDatabase : Database
 {
 	/// <inheritdoc/>
-	public override void Initialize()
+	public override void Initialize(IAdapter adapter)
 	{
-		if (AppBase.Current.Adapter is not { } adapter)
-		{
-			throw new InvalidOperationException("Adapter is null");
-		}
-
 		adapter.OnGroupMessage += Adapter_OnGroupMessage;
 	}
 
