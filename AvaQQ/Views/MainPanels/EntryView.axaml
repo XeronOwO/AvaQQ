@@ -17,6 +17,12 @@
 					CornerRadius="10"
 					HorizontalAlignment="Stretch">
 		<Button.Styles>
+			<Style Selector="Button TextBlock#textBlockTime">
+				<Setter Property="Foreground" Value="Gray"/>
+			</Style>
+			<Style Selector="Button TextBlock#textBlockContent">
+				<Setter Property="Foreground" Value="Gray"/>
+			</Style>
 			<Style Selector="Button:pointerover TextBlock">
 				<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
 			</Style>
@@ -45,11 +51,12 @@
 				<Grid Grid.Row="0"
 							ColumnDefinitions="*,auto">
 					<TextBlock Grid.Column="0"
+										 x:Name="textBlockTitle"
 										 Text="{Binding Title}"
 										 Margin="2.5"/>
 					<TextBlock Grid.Column="1"
+										 x:Name="textBlockTime"
 										 Text="{Binding Time}"
-										 Foreground="Gray"
 										 FontSize="12"
 										 HorizontalAlignment="Center"
 										 VerticalAlignment="Center"/>
@@ -67,9 +74,9 @@
 										 FontSize="12"
 										 IsVisible="{Binding IsContentEmphasisVisible}"/>
 					<TextBlock Grid.Column="2"
+										 x:Name="textBlockContent"
 										 Text="{Binding Content^}"
 										 Margin="2.5"
-										 Foreground="Gray"
 										 FontSize="12"/>
 					<Border Grid.Column="3"
 									Background="#F74C30"

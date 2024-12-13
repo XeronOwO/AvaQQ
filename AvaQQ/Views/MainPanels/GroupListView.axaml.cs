@@ -230,13 +230,15 @@ public partial class GroupListView : UserControl
 
 	private class Cache
 	{
-		public DateTime InfoLastUpdateTime { get; set; }
+		public DateTime InfoLastUpdateTime { get; set; } = DateTime.MinValue;
 
 		public Task<IImage?> Image { get; set; } = null!;
 
 		public string Title { get; set; } = null!;
 
 		public GroupMessageEntry? LastMessage { get; set; }
+
+		public string LastMessageTime { get; set; } = string.Empty;
 
 		public Task<string> Content { get; set; } = Task.FromResult(string.Empty);
 	}
@@ -275,6 +277,9 @@ public partial class GroupListView : UserControl
 			if (lastMessage != cache.LastMessage)
 			{
 				cache.LastMessage = lastMessage;
+				cache.LastMessageTime = lastMessage is null
+					? string.Empty
+					: lastMessage.Time.ToLocalTime().ToString("HH:mm");
 				cache.Content = lastMessage is null
 					? Task.FromResult(string.Empty)
 					: _groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
@@ -282,6 +287,7 @@ public partial class GroupListView : UserControl
 
 			model.Icon = cache.Image;
 			model.Title = cache.Title;
+			model.Time = cache.LastMessageTime;
 			model.Content = cache.Content;
 			Grid.SetRow(entry, groupIndex);
 		}
