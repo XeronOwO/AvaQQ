@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text.Json;
 
@@ -39,7 +40,7 @@ internal class PluginManager
 
 			DiscoverPlugins();
 			CleanPluginInfos();
-			LoadSearchingDirectories();
+			LoadSearchingPaths();
 			LoadPluginAssemblies();
 			InvokePluginPreLoad(hostBuilder);
 
@@ -195,43 +196,62 @@ internal class PluginManager
 	static PluginManager()
 	{
 		_context.Resolving += Resolving;
+		_context.ResolvingUnmanagedDll += ResolvingUnmanagedDll;
 	}
 
-	private static string[] _searchingDirectories = [];
+	private static readonly List<AssemblyDependencyResolver> _resolvers = [];
 
 	private static Assembly? Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
 	{
-		foreach (var directory in _searchingDirectories)
+		foreach (var resolver in _resolvers)
 		{
-			var path = Path.Combine(directory, $"{assemblyName.Name}.dll");
-			if (File.Exists(path))
+			var path = resolver.ResolveAssemblyToPath(assemblyName);
+			if (path is not null)
 			{
-				return context.LoadFromAssemblyPath(path);
+				return _context.LoadFromAssemblyPath(path);
 			}
 		}
 
 		return null;
 	}
 
-	private static void LoadSearchingDirectories()
+	private static IntPtr ResolvingUnmanagedDll(Assembly assembly, string unmanagedDllName)
 	{
-		List<string> searchDirectories = [Path.GetDirectoryName(typeof(PluginManager).Assembly.Location)];
-		List<string> cache = []; // 检测循环引用
+		foreach (var resolver in _resolvers)
+		{
+			var path = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+			if (path is not null)
+			{
+				return NativeLibrary.Load(path);
+			}
+		}
 
-		LoadSearchingDirectories(searchDirectories, cache);
-
-		_searchingDirectories = [.. searchDirectories];
+		return IntPtr.Zero;
 	}
 
-	private static void LoadSearchingDirectories(
-		List<string> directories,
+	private static void LoadSearchingPaths()
+	{
+		List<string> paths = [typeof(PluginManager).Assembly.Location];
+		List<string> cache = []; // 检测循环引用
+
+		LoadSearchingPaths(paths, cache);
+
+		_resolvers.Clear();
+		foreach (var path in paths)
+		{
+			_resolvers.Add(new(path));
+		}
+	}
+
+	private static void LoadSearchingPaths(
+		List<string> paths,
 		List<string> cache)
 	{
 		foreach (var (id, pluginInfo) in _pluginInfos)
 		{
 			try
 			{
-				LoadSearchingDirectory(directories, cache, id, pluginInfo);
+				LoadSearchingPath(paths, cache, id, pluginInfo);
 			}
 			catch (Exception e)
 			{
@@ -241,8 +261,8 @@ internal class PluginManager
 		}
 	}
 
-	private static void LoadSearchingDirectory(
-		List<string> directories,
+	private static void LoadSearchingPath(
+		List<string> paths,
 		List<string> cache,
 		string id,
 		PluginInfo pluginInfo)
@@ -260,12 +280,16 @@ internal class PluginManager
 				throw new InvalidOperationException(string.Format(SR.ExceptionPluginDependencyNotFound, dependency.Id));
 			}
 
-			LoadSearchingDirectory(directories, cache, dependency.Id, dependencyPluginInfo);
+			LoadSearchingPath(paths, cache, dependency.Id, dependencyPluginInfo);
 		}
 
-		if (!directories.Contains(pluginInfo.Directory))
+		foreach (var assembly in pluginInfo.Detail.Assemblies)
 		{
-			directories.Add(pluginInfo.Directory);
+			var path = Path.Combine(pluginInfo.Directory, assembly);
+			if (!paths.Contains(path))
+			{
+				paths.Add(path);
+			}
 		}
 
 		cache.Remove(id);
