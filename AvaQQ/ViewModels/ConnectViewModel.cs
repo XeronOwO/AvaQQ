@@ -14,23 +14,19 @@ public class ConnectViewModel : ViewModelBase
 
 	public string TextInputAccessToken => SR.TextInputAccessToken;
 
-	private bool _isConnecting;
-
 	public bool IsConnecting
 	{
-		get => _isConnecting;
+		get => field;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref _isConnecting, value);
+			this.RaiseAndSetIfChanged(ref field, value);
 			IsNotConnecting = !value;
 		}
-	}
-
-	private bool _isNotConnecting = true;
+	} = false;
 
 	public bool IsNotConnecting
 	{
-		get => _isNotConnecting;
-		set => this.RaiseAndSetIfChanged(ref _isNotConnecting, value);
-	}
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = true;
 }

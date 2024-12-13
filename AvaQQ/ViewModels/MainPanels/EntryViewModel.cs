@@ -9,106 +9,82 @@ internal class EntryViewModel : ViewModelBase
 {
 	public ulong Id { get; set; }
 
-	private Task<IImage?> _icon = Task.FromResult<IImage?>(null);
-
 	public Task<IImage?> Icon
 	{
-		get => _icon;
-		set => this.RaiseAndSetIfChanged(ref _icon, value);
-	}
-
-	private string _title = string.Empty;
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = Task.FromResult<IImage?>(null);
 
 	public string Title
 	{
-		get => _title;
-		set => this.RaiseAndSetIfChanged(ref _title, value);
-	}
-
-	private string _time = string.Empty;
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = string.Empty;
 
 	public string Time
 	{
-		get => _time;
-		set => this.RaiseAndSetIfChanged(ref _time, value);
-	}
-
-	public ulong ContentId { get; set; }
-
-	private Task<string> _content = Task.FromResult(string.Empty);
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = string.Empty;
 
 	public Task<string> Content
 	{
-		get => _content;
-		set => this.RaiseAndSetIfChanged(ref _content, value);
-	}
-
-	private Task<IImage?> _contentIcon = Task.FromResult<IImage?>(null);
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = Task.FromResult(string.Empty);
 
 	public Task<IImage?> ContentIcon
 	{
-		get => _contentIcon;
+		get => field;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref _contentIcon, value);
-			IsContentIconVisible = _contentIcon != null;
+			this.RaiseAndSetIfChanged(ref field, value);
+			IsContentIconVisible = field != null;
 		}
-	}
-
-	private bool _isContentIconVisible = false;
+	} = Task.FromResult<IImage?>(null);
 
 	public bool IsContentIconVisible
 	{
-		get => _isContentIconVisible;
-		set => this.RaiseAndSetIfChanged(ref _isContentIconVisible, value);
-	}
-
-	private string _contentEmphasis = string.Empty;
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = false;
 
 	public string ContentEmphasis
 	{
-		get => _contentEmphasis;
+		get => field;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref _contentEmphasis, value);
-			IsContentEmphasisVisible = !string.IsNullOrEmpty(_contentEmphasis);
+			this.RaiseAndSetIfChanged(ref field, value);
+			IsContentEmphasisVisible = !string.IsNullOrEmpty(field);
 		}
-	}
-
-	private bool _isContentEmphasisVisible = false;
+	} = string.Empty;
 
 	public bool IsContentEmphasisVisible
 	{
-		get => _isContentEmphasisVisible;
-		set => this.RaiseAndSetIfChanged(ref _isContentEmphasisVisible, value);
-	}
-
-	private int _unreadCount = 0;
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = false;
 
 	public int UnreadCount
 	{
-		get => _unreadCount;
+		get => field;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref _unreadCount, value);
-			IsUnreadCountVisible = _unreadCount > 0;
-			UnreadCountText = _unreadCount > 99 ? "99+" : _unreadCount.ToString();
+			this.RaiseAndSetIfChanged(ref field, value);
+			IsUnreadCountVisible = field > 0;
+			UnreadCountText = field > 99 ? "99+" : field.ToString();
 		}
-	}
-
-	private string _unreadCountText = string.Empty;
+	} = 0;
 
 	public string UnreadCountText
 	{
-		get => _unreadCountText;
-		set => this.RaiseAndSetIfChanged(ref _unreadCountText, value);
-	}
-
-	private bool _isUnreadCountVisible = false;
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = string.Empty;
 
 	public bool IsUnreadCountVisible
 	{
-		get => _isUnreadCountVisible;
-		set => this.RaiseAndSetIfChanged(ref _isUnreadCountVisible, value);
-	}
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = false;
 }

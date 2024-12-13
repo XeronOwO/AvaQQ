@@ -8,55 +8,41 @@ namespace AvaQQ.ViewModels.MainPanels;
 
 internal class MainPanelViewModel : ViewModelBase
 {
-	private int _width = Config.Instance.Width;
-
 	public int Width
 	{
-		get => _width;
+		get => field;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref _width, value);
+			this.RaiseAndSetIfChanged(ref field, value);
 			Config.Instance.Width = value;
 		}
-	}
-
-	private int _height = Config.Instance.Height;
+	} = Config.Instance.Width;
 
 	public int Height
 	{
-		get => _height;
+		get => field;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref _height, value);
+			this.RaiseAndSetIfChanged(ref field, value);
 			Config.Instance.Height = value;
 		}
-	}
-
-	#region Header
-
-	private ulong _headerUin = 10000;
+	} = Config.Instance.Height;
 
 	public ulong HeaderUin
 	{
-		get => _headerUin;
-		set => this.RaiseAndSetIfChanged(ref _headerUin, value);
-	}
-
-	private Task<IImage?> _headerAvatar = Task.FromResult<IImage?>(null);
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = 10000;
 
 	public Task<IImage?> HeaderAvatar
 	{
-		get => _headerAvatar;
-		set => this.RaiseAndSetIfChanged(ref _headerAvatar, value);
-	}
-
-	private Task<string> _headerName = Task.FromResult("User");
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = Task.FromResult<IImage?>(null);
 
 	public Task<string> HeaderName
 	{
-		get => _headerName;
-		set => this.RaiseAndSetIfChanged(ref _headerName, value);
-	}
-
-	#endregion
+		get => field;
+		set => this.RaiseAndSetIfChanged(ref field, value);
+	} = Task.FromResult("User");
 }
