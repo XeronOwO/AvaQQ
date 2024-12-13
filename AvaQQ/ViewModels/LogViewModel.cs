@@ -10,9 +10,11 @@ public class LogViewModel : ViewModelBase
 
 	public string TextCopy => SR.TextCopy;
 
+	private string _content = string.Empty;
+
 	public string Content
 	{
-		get => field;
-		set => this.RaiseAndSetIfChanged(ref field, value);
-	} = string.Empty;
+		get => _content;
+		set => this.RaiseAndSetIfChanged(ref _content, value);
+	}
 }

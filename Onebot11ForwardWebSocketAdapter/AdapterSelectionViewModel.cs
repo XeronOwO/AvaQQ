@@ -12,52 +12,64 @@ internal class AdapterSelectionViewModel : ViewModelBase
 
 	public string TextInputAccessToken => SR.TextInputAccessToken;
 
+	private bool _isConnecting = false;
+
 	public bool IsConnecting
 	{
-		get => field;
+		get => _isConnecting;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref field, value);
+			this.RaiseAndSetIfChanged(ref _isConnecting, value);
 			ButtonConnectText = value ? string.Empty : SR.TextConnect;
 			IsNotConnecting = !value;
 		}
-	} = false;
+	}
+
+	private bool _isNotConnecting = true;
 
 	public bool IsNotConnecting
 	{
-		get => field;
-		set => this.RaiseAndSetIfChanged(ref field, value);
-	} = true;
+		get => _isNotConnecting;
+		set => this.RaiseAndSetIfChanged(ref _isNotConnecting, value);
+	}
+
+	private string _url = Config.Instance.Url;
 
 	public string Url
 	{
-		get => field;
+		get => _url;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref field, value);
+			this.RaiseAndSetIfChanged(ref _url, value);
 			Config.Instance.Url = value;
 		}
-	} = Config.Instance.Url;
+	}
+
+	private string _accessToken = Config.Instance.AccessToken;
 
 	public string AccessToken
 	{
-		get => field;
+		get => _accessToken;
 		set
 		{
-			this.RaiseAndSetIfChanged(ref field, value);
+			this.RaiseAndSetIfChanged(ref _accessToken, value);
 			Config.Instance.AccessToken = value;
 		}
-	} = Config.Instance.AccessToken;
+	}
+
+	private string _buttonConnectText = SR.TextConnect;
 
 	public string ButtonConnectText
 	{
-		get => field;
-		set => this.RaiseAndSetIfChanged(ref field, value);
-	} = SR.TextConnect;
+		get => _buttonConnectText;
+		set => this.RaiseAndSetIfChanged(ref _buttonConnectText, value);
+	}
+
+	private string _textBlockErrorText = string.Empty;
 
 	public string TextBlockErrorText
 	{
-		get => field;
-		set => this.RaiseAndSetIfChanged(ref field, value);
-	} = string.Empty;
+		get => _textBlockErrorText;
+		set => this.RaiseAndSetIfChanged(ref _textBlockErrorText, value);
+	}
 }

@@ -9,13 +9,15 @@ namespace AvaQQ.SDK;
 /// </summary>
 public static class DesignerServiceProviderHelper
 {
+	private static IServiceProvider? _root;
+
 	/// <summary>
 	/// 根服务提供器，仅用于防止设计器崩溃，不推荐在正式代码中使用
 	/// </summary>
 	[NotNull]
 	public static IServiceProvider? Root
 	{
-		get => field ?? throw new Exception($"{nameof(Root)} not initialized.");
-		set => field = value!;
+		get => _root ?? throw new Exception($"{nameof(Root)} not initialized.");
+		set => _root = value!;
 	}
 }
