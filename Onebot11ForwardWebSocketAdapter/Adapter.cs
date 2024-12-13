@@ -29,10 +29,10 @@ internal class Adapter : IAdapter
 		{
 			if (disposing)
 			{
+				_makabaka.StopAsync().Wait();
+				_makabaka.Dispose();
 			}
 
-			_makabaka.StopAsync().Wait();
-			_makabaka.Dispose();
 			disposedValue = true;
 		}
 	}

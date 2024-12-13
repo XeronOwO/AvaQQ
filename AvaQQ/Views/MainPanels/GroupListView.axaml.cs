@@ -327,20 +327,19 @@ public partial class GroupListView : UserControl, IDisposable
 		{
 			if (disposing)
 			{
+				foreach (var (_, cache) in _caches)
+				{
+					cache.Image?.Result?.Dispose();
+					cache.Image?.Dispose();
+				}
+				_caches.Clear();
 			}
-
-			foreach (var (_, cache) in _caches)
-			{
-				cache.Image?.Result?.Dispose();
-				cache.Image?.Dispose();
-			}
-			_caches.Clear();
 
 			disposedValue = true;
 		}
 	}
 
-	 ~GroupListView()
+	~GroupListView()
 	{
 		Dispose(disposing: false);
 	}

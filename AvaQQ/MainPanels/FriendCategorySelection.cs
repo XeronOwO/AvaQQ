@@ -89,9 +89,9 @@ internal class FriendCategorySelection : ICategorySelection
 		{
 			if (disposing)
 			{
+				_watchdog.Dispose();
 			}
 
-			_watchdog.Dispose();
 			disposedValue = true;
 		}
 	}

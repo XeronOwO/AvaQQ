@@ -90,10 +90,9 @@ internal class GroupCategorySelection : ICategorySelection
 		{
 			if (disposing)
 			{
+				_watchdog.Dispose();
+				_view?.Dispose();
 			}
-
-			_watchdog.Dispose();
-			_view?.Dispose();
 
 			disposedValue = true;
 		}

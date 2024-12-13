@@ -35,9 +35,9 @@ internal class Watchdog(TimerCallback callback) : IDisposable
 		{
 			if (disposing)
 			{
+				_timer.Dispose();
 			}
 
-			_timer.Dispose();
 			disposedValue = true;
 		}
 	}

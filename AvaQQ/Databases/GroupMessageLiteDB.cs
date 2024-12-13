@@ -52,12 +52,12 @@ internal class GroupMessageLiteDB : GroupMessageDatabase
 		{
 			if (disposing)
 			{
+				foreach (var (_, database) in _databases)
+				{
+					database.Dispose();
+				}
 			}
 
-			foreach (var (_, database) in _databases)
-			{
-				database.Dispose();
-			}
 			disposedValue = true;
 		}
 	}
