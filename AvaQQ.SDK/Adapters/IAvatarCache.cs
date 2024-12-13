@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+﻿using Avalonia.Media.Imaging;
 using System.Threading.Tasks;
 
 namespace AvaQQ.SDK.Adapters;
@@ -18,7 +18,7 @@ public interface IAvatarCache
 	/// 240可以获取默认头像（可能是官方BUG or 特性？）
 	/// </param>
 	/// <param name="noCache">不使用缓存</param>
-	Task<IImage?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false);
+	Task<Bitmap?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false);
 
 	/// <summary>
 	/// 获取用户头像
@@ -30,5 +30,5 @@ public interface IAvatarCache
 	/// 240可以获取默认头像（可能是官方BUG or 特性？）
 	/// </param>
 	/// <param name="noCache">不使用缓存</param>
-	Task<IImage?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false);
+	Task<Bitmap?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false);
 }

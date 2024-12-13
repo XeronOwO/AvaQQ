@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+﻿using Avalonia.Media.Imaging;
 using AvaQQ.SDK;
 using ReactiveUI;
 using System.Threading.Tasks;
@@ -34,11 +34,11 @@ internal class MainPanelViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref field, value);
 	} = 10000;
 
-	public Task<IImage?> HeaderAvatar
+	public Task<Bitmap?> HeaderAvatar
 	{
 		get => field;
 		set => this.RaiseAndSetIfChanged(ref field, value);
-	} = Task.FromResult<IImage?>(null);
+	} = Task.FromResult<Bitmap?>(null);
 
 	public Task<string> HeaderName
 	{

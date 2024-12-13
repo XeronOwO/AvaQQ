@@ -1,5 +1,4 @@
-﻿using Avalonia.Media;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +33,7 @@ internal class AvatarCache : IAvatarCache
 
 	#region 用户
 
-	public Task<IImage?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false)
+	public Task<Bitmap?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false)
 	{
 		if (!Directory.Exists(_usersDirectory))
 		{
@@ -51,7 +50,7 @@ internal class AvatarCache : IAvatarCache
 		}
 	}
 
-	private async Task<IImage?> GetUserAvatarNoCacheAsync(ulong uin, int size)
+	private async Task<Bitmap?> GetUserAvatarNoCacheAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -83,7 +82,7 @@ internal class AvatarCache : IAvatarCache
 		}
 	}
 
-	private async Task<IImage?> GetUserAvatarFromCacheAsync(ulong uin, int size)
+	private async Task<Bitmap?> GetUserAvatarFromCacheAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -114,7 +113,7 @@ internal class AvatarCache : IAvatarCache
 
 	#region 群聊
 
-	public Task<IImage?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false)
+	public Task<Bitmap?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false)
 	{
 		if (!Directory.Exists(_groupsDirectory))
 		{
@@ -130,7 +129,7 @@ internal class AvatarCache : IAvatarCache
 		}
 	}
 
-	private async Task<IImage?> GetGroupAvatarNoCacheAsync(ulong uin, int size)
+	private async Task<Bitmap?> GetGroupAvatarNoCacheAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -159,7 +158,7 @@ internal class AvatarCache : IAvatarCache
 		}
 	}
 
-	private async Task<IImage?> GetGroupAvatarFromCacheAsync(ulong uin, int size)
+	private async Task<Bitmap?> GetGroupAvatarFromCacheAsync(ulong uin, int size)
 	{
 		try
 		{

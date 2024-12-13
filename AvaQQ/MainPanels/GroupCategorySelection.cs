@@ -53,6 +53,7 @@ internal class GroupCategorySelection : ICategorySelection
 	{
 		lock (_lock)
 		{
+			_view?.Dispose();
 			_view = null;
 			_watchdog.Stop();
 			_logger.LogInformation("GroupListView has been destroyed.");
@@ -92,6 +93,8 @@ internal class GroupCategorySelection : ICategorySelection
 			}
 
 			_watchdog.Dispose();
+			_view?.Dispose();
+
 			disposedValue = true;
 		}
 	}

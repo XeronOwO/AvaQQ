@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvaQQ.SDK;
 using AvaQQ.SDK.Adapters;
@@ -15,7 +15,7 @@ using Config = AvaQQ.SDK.Configuration<AvaQQ.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Views.MainPanels;
 
-public partial class GroupListView : UserControl
+public partial class GroupListView : UserControl, IDisposable
 {
 	private readonly IGroupCache _groupCache;
 
@@ -39,7 +39,6 @@ public partial class GroupListView : UserControl
 		Loaded += GroupListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-		Unloaded += GroupListView_Unloaded;
 		if (AppBase.Current.Adapter is { } adapter)
 		{
 			adapter.OnGroupMessage += Adapter_OnGroupMessage;
@@ -178,15 +177,6 @@ public partial class GroupListView : UserControl
 		}
 	}
 
-	private void GroupListView_Unloaded(object? sender, RoutedEventArgs e)
-	{
-		foreach (var (_, cache) in _caches)
-		{
-			cache.Image.Dispose();
-		}
-		_caches.Clear();
-	}
-
 	private double _oldOffset;
 
 	private void UpdateDisplayedEntries()
@@ -232,7 +222,7 @@ public partial class GroupListView : UserControl
 	{
 		public DateTime InfoLastUpdateTime { get; set; } = DateTime.MinValue;
 
-		public Task<IImage?> Image { get; set; } = null!;
+		public Task<Bitmap?>? Image { get; set; } = null;
 
 		public string Title { get; set; } = null!;
 
@@ -266,11 +256,16 @@ public partial class GroupListView : UserControl
 			var now = DateTime.Now;
 			if (now > cache.InfoLastUpdateTime + Config.Instance.GroupUpdateInterval)
 			{
+				var oldImage = cache.Image;
+
 				cache.InfoLastUpdateTime = now;
 				cache.Image = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
 				cache.Title = string.IsNullOrEmpty(group.Remark)
 					? group.Name
 					: $"{group.Remark} ({group.Name})";
+
+				oldImage?.Result?.Dispose();
+				oldImage?.Dispose();
 			}
 
 			var lastMessage = _groupMessageDatabase.Last(group.Uin);
@@ -285,7 +280,7 @@ public partial class GroupListView : UserControl
 					: _groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
 			}
 
-			model.Icon = cache.Image;
+			model.Icon = cache.Image!;
 			model.Title = cache.Title;
 			model.Time = cache.LastMessageTime;
 			model.Content = cache.Content;
@@ -321,4 +316,40 @@ public partial class GroupListView : UserControl
 	{
 		Dispatcher.UIThread.Invoke(UpdateDisplayedEntries);
 	}
+
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+			}
+
+			foreach (var (_, cache) in _caches)
+			{
+				cache.Image?.Result?.Dispose();
+				cache.Image?.Dispose();
+			}
+			_caches.Clear();
+
+			disposedValue = true;
+		}
+	}
+
+	 ~GroupListView()
+	{
+		Dispose(disposing: false);
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 }

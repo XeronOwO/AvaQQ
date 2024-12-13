@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+﻿using Avalonia.Media.Imaging;
 using AvaQQ.SDK;
 using ReactiveUI;
 using System.Threading.Tasks;
@@ -9,11 +9,11 @@ internal class EntryViewModel : ViewModelBase
 {
 	public ulong Id { get; set; }
 
-	public Task<IImage?> Icon
+	public Task<Bitmap?> Icon
 	{
 		get => field;
 		set => this.RaiseAndSetIfChanged(ref field, value);
-	} = Task.FromResult<IImage?>(null);
+	} = Task.FromResult<Bitmap?>(null);
 
 	public string Title
 	{
@@ -33,7 +33,7 @@ internal class EntryViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref field, value);
 	} = Task.FromResult(string.Empty);
 
-	public Task<IImage?> ContentIcon
+	public Task<Bitmap?> ContentIcon
 	{
 		get => field;
 		set
@@ -41,7 +41,7 @@ internal class EntryViewModel : ViewModelBase
 			this.RaiseAndSetIfChanged(ref field, value);
 			IsContentIconVisible = field != null;
 		}
-	} = Task.FromResult<IImage?>(null);
+	} = Task.FromResult<Bitmap?>(null);
 
 	public bool IsContentIconVisible
 	{
