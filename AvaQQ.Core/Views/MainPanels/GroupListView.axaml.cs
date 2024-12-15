@@ -330,6 +330,9 @@ public partial class GroupListView : UserControl, IDisposable
 
 	private bool disposedValue;
 
+	/// <summary>
+	/// 释放资源
+	/// </summary>
 	protected virtual void Dispose(bool disposing)
 	{
 		if (!disposedValue)
@@ -348,11 +351,15 @@ public partial class GroupListView : UserControl, IDisposable
 		}
 	}
 
+	/// <summary>
+	/// 终结器
+	/// </summary>
 	~GroupListView()
 	{
 		Dispose(disposing: false);
 	}
 
+	/// <inheritdoc/>
 	public void Dispose()
 	{
 		Dispose(disposing: true);
