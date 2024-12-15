@@ -2,5 +2,5 @@
 
 internal class ConnectConfiguration
 {
-	public string AdapterIndex { get; set; } = string.Empty;
+	public string SelectedAdapter { get; set; } = string.Empty;
 }

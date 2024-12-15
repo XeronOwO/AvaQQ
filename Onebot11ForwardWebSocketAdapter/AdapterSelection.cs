@@ -7,6 +7,8 @@ internal class AdapterSelection(AdapterSelectionView view) : IAdapterSelection
 {
 	public UserControl? View => view;
 
+	public string Id => nameof(Onebot11ForwardWebSocketAdapter);
+
 	public void OnSelected()
 	{
 

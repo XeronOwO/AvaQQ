@@ -34,7 +34,8 @@ public partial class ConnectView : UserControl
 			adapterSelector.Items.Add(selection);
 		}
 		adapterSelector.SelectedItem = adapterSelector.Items.Where(
-			x => x is not null && x.ToString() == Config.Instance.AdapterIndex
+			x => x is IAdapterSelection adapterSelection
+				&& adapterSelection.Id == Config.Instance.SelectedAdapter
 		).FirstOrDefault();
 		UpdateSelection();
 	}
@@ -51,17 +52,14 @@ public partial class ConnectView : UserControl
 
 	private void UpdateSelection()
 	{
-		Config.Instance.AdapterIndex = string.Empty;
-		if (adapterSelector.SelectedItem is not null
-			&& adapterSelector.SelectedItem.ToString() is { } index)
-		{
-			Config.Instance.AdapterIndex = index;
-		}
+		Config.Instance.SelectedAdapter = string.Empty;
 
 		if (adapterSelector.SelectedItem is not IAdapterSelection selection)
 		{
 			return;
 		}
+
+		Config.Instance.SelectedAdapter = selection.Id;
 
 		gridAdapterOptions.Children.Clear();
 		var control = selection.View;

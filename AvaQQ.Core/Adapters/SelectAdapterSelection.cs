@@ -7,6 +7,8 @@ internal class SelectAdapterSelection : IAdapterSelection
 {
 	public UserControl? View => null;
 
+	public string Id => "SelectAdapter";
+
 	public void OnSelected()
 	{
 

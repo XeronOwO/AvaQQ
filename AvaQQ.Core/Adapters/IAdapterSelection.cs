@@ -14,6 +14,11 @@ public interface IAdapterSelection : IDisposable
 	UserControl? View { get; }
 
 	/// <summary>
+	/// 适配器的唯一标识，用于区分不同的适配器
+	/// </summary>
+	public string Id { get; }
+
+	/// <summary>
 	/// 选中该适配器时触发
 	/// </summary>
 	void OnSelected();
