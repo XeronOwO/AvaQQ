@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+						 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+						 xmlns:vm="using:AvaQQ.Core.ViewModels.MainPanels"
+						 mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="200"
+						 x:Class="AvaQQ.Core.Views.MainPanels.HeaderView"
+						 x:DataType="vm:MainPanelViewModel">
+	<Design.DataContext>
+		<vm:MainPanelViewModel/>
+	</Design.DataContext>
+
+	<Grid Margin="10"
+				RowDefinitions="auto"
+				ColumnDefinitions="auto,*,auto">
+		
+		<!-- 头像 -->
+		<Grid Grid.Column="0"
+					Margin="10">
+			
+			<!-- 头像圆形边框 -->
+			<Rectangle Fill="{DynamicResource ControlBrush}">
+				<Rectangle.Clip>
+					<CombinedGeometry GeometryCombineMode="Exclude">
+						<CombinedGeometry.Geometry1>
+							<EllipseGeometry Center="22,22" RadiusX="22" RadiusY="22"/>
+						</CombinedGeometry.Geometry1>
+						<CombinedGeometry.Geometry2>
+							<EllipseGeometry Center="22,22" RadiusX="20" RadiusY="20"/>
+						</CombinedGeometry.Geometry2>
+					</CombinedGeometry>
+				</Rectangle.Clip>
+			</Rectangle>
+			
+			<!-- 圆形裁剪图片 -->
+			<Image Height="40"
+						 Width="40"
+						 Source="{Binding HeaderAvatar^}"
+						 Margin="2">
+				<Image.Clip>
+					<EllipseGeometry Center="20,20"
+													 RadiusX="20"
+													 RadiusY="20"/>
+				</Image.Clip>
+			</Image>
+			<Button VerticalAlignment="Stretch"
+							HorizontalAlignment="Stretch"
+							Padding="0"
+							CornerRadius="20"
+							Click="ButtonUploadAvatar_Click">
+				<Button.Styles>
+					<Style Selector="Button">
+						<Setter Property="Background" Value="Transparent"/>
+					</Style>
+					<Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+						<Setter Property="Background" Value="Transparent"/>
+					</Style>
+					<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+						<Setter Property="Background" Value="{Binding Source={DynamicResource ControlPointoverBrush}, Converter={StaticResource ColorAlphaChannelConverter}, ConverterParameter=127}"/>
+					</Style>
+					<Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+						<Setter Property="Background" Value="{Binding Source={DynamicResource ControlPressedBrush}, Converter={StaticResource ColorAlphaChannelConverter}, ConverterParameter=127}"/>
+					</Style>
+				</Button.Styles>
+			</Button>
+		</Grid>
+		
+		<!-- 用户信息 -->
+		<Grid Grid.Column="1"
+					Margin="10">
+			<Grid RowDefinitions="auto,auto"
+						ColumnDefinitions="*">
+				<Grid Grid.Row="0">
+					<Button Padding="0"
+									Classes="transparent"
+									Content="{Binding HeaderName^}"
+									HorizontalAlignment="Stretch"
+									Click="ButtonEditNickname_Click"/>
+				</Grid>
+				<Grid Grid.Row="1">
+					<Button Padding="0"
+									Classes="transparent"
+									Content="{Binding HeaderUin}"
+									Click="ButtonCopyUinToClipboard_Click">
+					</Button>
+				</Grid>
+			</Grid>
+		</Grid>
+		
+		<!-- 更多 -->
+		<Grid Grid.Column="2"
+					Margin="10"
+					VerticalAlignment="Center">
+			<Button Classes="transparent"
+							Padding="0"
+							Click="ButtonMore_Click">
+				<Button.Styles>
+					<Style Selector="Button Ellipse">
+						<Setter Property="Fill" Value="{DynamicResource TextBrush}"/>
+					</Style>
+					<Style Selector="Button:pointerover Ellipse">
+						<Setter Property="Fill" Value="{DynamicResource ControlTextBrush}"/>
+					</Style>
+				</Button.Styles>
+				<Canvas Width="24"
+								Height="24"
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center">
+					<Ellipse Width="3" Height="3" Canvas.Left="4.5" Canvas.Top="10.5"/>
+					<Ellipse Width="3" Height="3" Canvas.Left="10.5" Canvas.Top="10.5"/>
+					<Ellipse Width="3" Height="3" Canvas.Left="16.5" Canvas.Top="10.5"/>
+				</Canvas>
+			</Button>
+		</Grid>
+		
+	</Grid>
+	
+</UserControl>

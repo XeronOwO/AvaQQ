@@ -1,4 +1,5 @@
-﻿using AvaQQ.SDK.Adapters;
+﻿using AvaQQ.Core.Adapters;
+using AvaQQ.Core.Caches;
 using AvaQQ.SDK.Logging;
 using Makabaka;
 using Makabaka.Events;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
-using AGroupMessageEventArgs = AvaQQ.SDK.Adapters.GroupMessageEventArgs;
+using AGroupMessageEventArgs = AvaQQ.Core.Adapters.GroupMessageEventArgs;
 using MGroupMessageEventArgs = Makabaka.Events.GroupMessageEventArgs;
 
 namespace Onebot11ForwardWebSocketAdapter;
@@ -18,37 +19,6 @@ internal class Adapter : IAdapter
 	private readonly MakabakaApp _makabaka;
 
 	private readonly ILogger<Adapter> _logger;
-
-	#region Dispose
-
-	private bool disposedValue;
-
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				_makabaka.StopAsync().Wait();
-				_makabaka.Dispose();
-			}
-
-			disposedValue = true;
-		}
-	}
-
-	~Adapter()
-	{
-		Dispose(disposing: false);
-	}
-
-	public void Dispose()
-	{
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
-	}
-
-	#endregion
 
 	private readonly TaskCompletionSource _connectCompletionSource = new();
 
@@ -254,4 +224,35 @@ internal class Adapter : IAdapter
 
 		OnGroupMessage.Invoke(this, eventArgs);
 	}
+
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				_makabaka.StopAsync().Wait();
+				_makabaka.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	~Adapter()
+	{
+		Dispose(disposing: false);
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 }

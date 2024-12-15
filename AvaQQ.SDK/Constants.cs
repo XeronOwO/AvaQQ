@@ -1,7 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using System;
-using System.IO;
 using System.Text.Json;
 
 namespace AvaQQ.SDK;
@@ -20,11 +18,6 @@ public static class Constants
 		? Path.GetDirectoryName(typeof(Application).Assembly.Location)!
 		// 使用工作目录作为根目录，方便定制化部署
 		: Environment.CurrentDirectory;
-
-	/// <summary>
-	/// 链接超时时间
-	/// </summary>
-	public static TimeSpan ConnectionSpan { get; set; } = TimeSpan.FromSeconds(10);
 
 	/// <summary>
 	/// 配置存储序列化选项

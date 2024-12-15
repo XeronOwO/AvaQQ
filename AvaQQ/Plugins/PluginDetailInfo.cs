@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AvaQQ.Plugins;
+﻿namespace AvaQQ.Plugins;
 
 internal class PluginDetailInfo
 {

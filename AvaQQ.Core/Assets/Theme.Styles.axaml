@@ -1,0 +1,151 @@
+<Styles xmlns="https://github.com/avaloniaui"
+				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Styles.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="avares://AvaQQ.Core/Assets/Theme.Resources.Light.axaml"/>
+				<ResourceInclude Source="avares://AvaQQ.Core/Assets/Theme.Resources.Dark.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Styles.Resources>
+
+	<Design.PreviewWith>
+		<Border Padding="10" Background="Gray">
+			<Grid ColumnDefinitions="auto auto">
+				<ThemeVariantScope Grid.Column="0" RequestedThemeVariant="Light">
+					<Grid Background="{DynamicResource WindowBackgroundBrush}">
+						<StackPanel Margin="10">
+							<TextBlock Text="Text Block"/>
+							<TextBox Text="Text Box"/>
+							<TextBox Text="Text Box" IsEnabled="False"/>
+							<Button Content="Button"/>
+							<Button Content="Button" IsEnabled="False"/>
+							<Button Content="Button" Classes="transparent" IsEnabled="False"/>
+							<ComboBox SelectedIndex="0">
+								<ComboBoxItem>Combo Box</ComboBoxItem>
+							</ComboBox>
+							<ComboBox SelectedIndex="0" IsEnabled="False">
+								<ComboBoxItem>Combo Box</ComboBoxItem>
+							</ComboBox>
+						</StackPanel>
+					</Grid>
+				</ThemeVariantScope>
+				<ThemeVariantScope Grid.Column="1" RequestedThemeVariant="Dark">
+					<Grid Background="{DynamicResource WindowBackgroundBrush}">
+						<StackPanel Margin="10">
+							<TextBlock Text="Text Block"/>
+							<TextBox Text="Text Box"/>
+							<TextBox Text="Text Box" IsEnabled="False"/>
+							<Button Content="Button"/>
+							<Button Content="Button" IsEnabled="False"/>
+							<Button Content="Button" Classes="transparent" IsEnabled="False"/>
+							<ComboBox SelectedIndex="0">
+								<ComboBoxItem>Combo Box</ComboBoxItem>
+							</ComboBox>
+							<ComboBox SelectedIndex="0" IsEnabled="False">
+								<ComboBoxItem>Combo Box</ComboBoxItem>
+							</ComboBox>
+						</StackPanel>
+					</Grid>
+				</ThemeVariantScope>
+			</Grid>
+		</Border>
+	</Design.PreviewWith>
+
+	<Style Selector="Button">
+		<Setter Property="Background" Value="{DynamicResource ControlBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+	</Style>
+	<Style Selector="Button:disabled ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ControlDisabledBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ControlDisabledTextBrush}"/>
+	</Style>
+	<Style Selector="Button:pointerover ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ControlPointoverBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+	</Style>
+	<Style Selector="Button:pressed ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ControlPressedBrush}"/>
+		<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+	</Style>
+	<Style Selector="Button.transparent">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+	</Style>
+	<Style Selector="Button.transparent:disabled ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+	</Style>
+
+	<Style Selector="ComboBox">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+	</Style>
+	<Style Selector="ComboBox:pointerover Border#Background">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderPointoverBrush}"/>
+	</Style>
+	<Style Selector="ComboBox:focus Border#Background">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderFocusBrush}"/>
+		<Setter Property="BorderThickness" Value="2"/>
+	</Style>
+	<Style Selector="ComboBox:dropdownopen Border#Background">
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderFocusBrush}"/>
+		<Setter Property="BorderThickness" Value="2"/>
+	</Style>
+	<Style Selector="ComboBox:dropdownopen Border#PopupBorder">
+		<Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+	</Style>
+	
+	<Style Selector="ComboBoxItem:selected ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ControlSelectedBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:selected TextBlock">
+		<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:pointerover ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ControlPointoverBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:pointerover TextBlock">
+		<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:pressed ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource ControlPressedBrush}"/>
+	</Style>
+	<Style Selector="ComboBoxItem:pressed TextBlock">
+		<Setter Property="Foreground" Value="{DynamicResource ControlTextBrush}"/>
+	</Style>
+
+	<Style Selector="TextBlock">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+	</Style>
+	<Style Selector="TextBlock:disabled">
+		<Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+	</Style>
+
+	<Style Selector="TextBox">
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+		<Setter Property="SelectionBrush" Value="{DynamicResource ControlBrush}"/>
+		<Setter Property="SelectionForegroundBrush" Value="{DynamicResource ControlTextBrush}"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+	</Style>
+	<Style Selector="TextBox:pointerover Border#PART_BorderElement">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderPointoverBrush}"/>
+	</Style>
+	<Style Selector="TextBox:focus Border#PART_BorderElement">
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBorderFocusBrush}"/>
+	</Style>
+
+	<Style Selector="Window">
+		<Setter Property="FontFamily" Value="Microsoft YaHei"/>
+		<Setter Property="Icon" Value="avares://AvaQQ.Core/Assets/logo.ico"/>
+		<Setter Property="TransparencyLevelHint" Value="AcrylicBlur"/>
+		<Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+		<Setter Property="Opacity" Value="0.85"/>
+	</Style>
+</Styles>

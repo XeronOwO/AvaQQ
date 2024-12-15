@@ -1,0 +1,9 @@
+{
+	"Id": "AvaQQ.Core",
+	"Name": "AvaQQ Core",
+	"Description": "The core of AvaQQ.",
+	"Authors": [ "XeronOwO" ],
+	"Version": "1.0.0",
+	"Assemblies": [ "AvaQQ.Core.dll" ],
+	"Dependencies": []
+}

@@ -1,5 +1,4 @@
 ﻿using AvaQQ.SDK;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace AvaQQ.Plugins;

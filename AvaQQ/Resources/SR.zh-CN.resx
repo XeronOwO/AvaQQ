@@ -117,97 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ExceptionFailedToLoadConfiguration" xml:space="preserve">
-    <value>配置文件 "{0}" 加载失败。</value>
-  </data>
-  <data name="TextConnect" xml:space="preserve">
-    <value>连接</value>
-  </data>
-  <data name="TextSelectAdapter" xml:space="preserve">
-    <value>选择适配器</value>
-  </data>
-  <data name="TextOnebot11ForwardWebSocketAdapter" xml:space="preserve">
-    <value>Onebot 11 - 正向WebSocket</value>
-  </data>
-  <data name="TextInputUrl" xml:space="preserve">
-    <value>请输入URL。。。</value>
-  </data>
-  <data name="TextInputAccessToken" xml:space="preserve">
-    <value>请输入鉴权令牌。。。</value>
-  </data>
-  <data name="TextConnectFailed" xml:space="preserve">
-    <value>连接失败。</value>
-  </data>
-  <data name="TextLogs" xml:space="preserve">
-    <value>日志</value>
-  </data>
-  <data name="TextCopy" xml:space="preserve">
-    <value>复制</value>
-  </data>
-  <data name="ExceptionAdapterNotSet" xml:space="preserve">
-    <value>适配器未设置。</value>
-  </data>
-  <data name="ExceptionConnectWindowAlreadyOpened" xml:space="preserve">
-    <value>ConnectWindow 已打开。</value>
-  </data>
-  <data name="ExceptionMainPanelWindowAlreadyOpened" xml:space="preserve">
-    <value>MainPanel 已打开。</value>
-  </data>
-  <data name="ExceptionConnectWindowNotOpened" xml:space="preserve">
-    <value>ConnectWindow 未打开。</value>
-  </data>
-  <data name="ExceptionMainPanelWindowNotOpened" xml:space="preserve">
-    <value>MainPanel 未打开。</value>
-  </data>
-  <data name="ExceptionAvatarDiameterMustEven" xml:space="preserve">
-    <value>头像直径必须为偶数。</value>
-  </data>
-  <data name="ErrorFailedToLoadSearchingDirectory" xml:space="preserve">
-    <value>加载搜索目录 "{0}" 失败。</value>
-  </data>
   <data name="ExceptionCircularReferenceDetected" xml:space="preserve">
     <value>加载插件时发现循环引用。</value>
   </data>
   <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
     <value>找不到ID为 "{0}" 的依赖插件。</value>
-  </data>
-  <data name="ErrorFailedToDiscoverPlugin" xml:space="preserve">
-    <value>在 "{0}" 寻找插件失败。</value>
-  </data>
-  <data name="ErrorErrorWhilePreloadingPlugins" xml:space="preserve">
-    <value>预加载插件时出错。</value>
-  </data>
-  <data name="ErrorFailedToLoadPluginAssembly" xml:space="preserve">
-    <value>加载插件程序集 "{0}" 失败。</value>
-  </data>
-  <data name="TextRecent" xml:space="preserve">
-    <value>最近</value>
-  </data>
-  <data name="TextFriend" xml:space="preserve">
-    <value>好友</value>
-  </data>
-  <data name="TextGroup" xml:space="preserve">
-    <value>群聊</value>
-  </data>
-  <data name="TextInputFilterKeywords" xml:space="preserve">
-    <value>请输入筛选关键词</value>
-  </data>
-  <data name="AppName" xml:space="preserve">
-    <value>AvaQQ</value>
-  </data>
-  <data name="MenuTextExit" xml:space="preserve">
-    <value>退出</value>
-  </data>
-  <data name="FaceSegmentPreview" xml:space="preserve">
-    <value>[表情]</value>
-  </data>
-  <data name="ForwardSegmentPreview" xml:space="preserve">
-    <value>[转发消息]</value>
-  </data>
-  <data name="ImageSegmentPreview0" xml:space="preserve">
-    <value>[图片]</value>
-  </data>
-  <data name="ImageSegmentPreview1" xml:space="preserve">
-    <value>[动画表情]</value>
   </data>
 </root>

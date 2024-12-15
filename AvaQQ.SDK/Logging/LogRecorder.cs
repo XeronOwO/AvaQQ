@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
 using System.Text;
-using System.Threading;
 
 namespace AvaQQ.SDK.Logging;
 

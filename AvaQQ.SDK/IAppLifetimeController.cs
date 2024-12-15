@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-
-namespace AvaQQ.SDK;
+﻿namespace AvaQQ.SDK;
 
 /// <summary>
 /// 应用生命周期控制器

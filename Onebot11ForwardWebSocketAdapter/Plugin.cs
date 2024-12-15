@@ -1,4 +1,4 @@
-﻿using AvaQQ.SDK.Adapters;
+﻿using AvaQQ.Core.Adapters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,9 +8,9 @@ namespace Onebot11ForwardWebSocketAdapter;
 
 public class Plugin : AvaQQ.SDK.Plugin
 {
-	public override void OnPreload(IHostBuilder hostBuilder)
+	public override void OnPreLoad(IHostBuilder hostBuilder)
 	{
-		Debug.WriteLine(nameof(OnPreload));
+		Debug.WriteLine(nameof(OnPreLoad));
 
 		hostBuilder.ConfigureServices(services =>
 		{

@@ -1,7 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AvaQQ.Core.Logging;
+using AvaQQ.Core.Views.Connecting;
 using AvaQQ.SDK;
-using AvaQQ.SDK.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Config = AvaQQ.SDK.Configuration<Onebot11ForwardWebSocketAdapter.AdapterConfiguration>;
 
@@ -13,9 +14,9 @@ public partial class AdapterSelectionView : UserControl
 
 	private readonly ILogWindowProvider _logWindowProvider;
 
-	private readonly Lazy<ConnectWindowBase> _lazyConnectWindow;
+	private readonly Lazy<ConnectWindow> _lazyConnectWindow;
 
-	private ConnectWindowBase ConnectWindow => _lazyConnectWindow.Value;
+	private ConnectWindow ConnectWindow => _lazyConnectWindow.Value;
 
 	public AdapterSelectionView(
 		IServiceProvider serviceProvider,
@@ -24,7 +25,7 @@ public partial class AdapterSelectionView : UserControl
 	{
 		_serviceProvider = serviceProvider;
 		_logWindowProvider = logWindowProvider;
-		_lazyConnectWindow = new(serviceProvider.GetRequiredService<ConnectWindowBase>);
+		_lazyConnectWindow = new(serviceProvider.GetRequiredService<ConnectWindow>);
 
 		DataContext = new AdapterSelectionViewModel();
 		InitializeComponent();
@@ -56,7 +57,7 @@ public partial class AdapterSelectionView : UserControl
 		model.TextBlockErrorText = string.Empty;
 
 		var adapter = new Adapter(_serviceProvider, model.Url, model.AccessToken);
-		var (success, log) = await adapter.TryConnectAsync(Constants.ConnectionSpan);
+		var (success, log) = await adapter.TryConnectAsync(Config.Instance.ConnectTimeout);
 
 		if (!success)
 		{

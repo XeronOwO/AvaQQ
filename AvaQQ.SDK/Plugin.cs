@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
-using System.Diagnostics;
+﻿using AvaQQ.SDK.Logging;
+using Microsoft.Extensions.Hosting;
 
 namespace AvaQQ.SDK;
 
@@ -12,9 +11,9 @@ public class Plugin
 	/// <summary>
 	/// 预加载时调用。<br/>
 	/// 在此处添加主机构建器的配置，例如注册一些服务，以供自己或其它插件使用 <see cref="IServiceProvider"/> 调用。<br/>
-	/// 注意：请不要写过于复杂的逻辑，这部分是没有日志记录器的，日志无法保存到文件，只能通过 <see cref="Debug"/> 在调试器查看。
+	/// 注意：不推荐写过于复杂的逻辑，如果有必要在此处记录日志，请使用 <see cref="FileLoggingExecutor"/> 记录日志到文件。
 	/// </summary>
-	public virtual void OnPreload(IHostBuilder hostBuilder)
+	public virtual void OnPreLoad(IHostBuilder hostBuilder)
 	{
 	}
 

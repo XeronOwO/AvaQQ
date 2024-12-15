@@ -1,12 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using AvaQQ.Logging;
 using AvaQQ.Plugins;
 using AvaQQ.SDK;
+using AvaQQ.SDK.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace AvaQQ.Desktop;
 
@@ -23,8 +22,7 @@ internal class Program
 					.AddFileLogger()
 			)
 			.ConfigureServices(services =>
-				services.AddAvaQQ()
-					.AddHostedService<AppService>()
+				services.AddHostedService<AppService>()
 			)
 			.ConfigurePlugins()
 			.Build()
@@ -41,14 +39,17 @@ internal class Program
 							.AddFileLogger()
 					)
 					.ConfigureServices(services =>
-						services.AddAvaQQ()
-							.AddHostedService<AppService>()
+						services.AddHostedService<AppService>()
 					)
 					.ConfigurePlugins()
 					.Build();
 				DesignerServiceProviderHelper.Root = builder.Services.GetRequiredService<IServiceProvider>();
 
-				return (App)builder.Services.GetRequiredService<AppBase>();
+				var pluginManager = builder.Services.GetRequiredService<IPluginManager>();
+				pluginManager.LoadPlugins(builder.Services);
+				pluginManager.PostLoadPlugins(builder.Services);
+
+				return builder.Services.GetRequiredService<AppBase>();
 			})
 			.UsePlatformDetect()
 			.WithInterFont()

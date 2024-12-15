@@ -1,5 +1,5 @@
 ﻿using Avalonia.Controls;
-using AvaQQ.SDK.Adapters;
+using AvaQQ.Core.Adapters;
 
 namespace Onebot11ForwardWebSocketAdapter;
 

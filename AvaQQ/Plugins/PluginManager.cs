@@ -1,13 +1,9 @@
 ﻿using AvaQQ.Resources;
 using AvaQQ.SDK;
+using AvaQQ.SDK.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -15,7 +11,7 @@ using System.Text.Json;
 
 namespace AvaQQ.Plugins;
 
-internal class PluginManager
+internal class PluginManager : IPluginManager
 {
 	private static readonly string _rootDirectory = Constants.RootDirectory;
 
@@ -23,14 +19,16 @@ internal class PluginManager
 
 	private static readonly string _pluginsInfoFilePath = Path.Combine(_pluginsDirectory, "plugins.json");
 
-	private static PluginInfos _pluginInfos = [];
+	private PluginInfos _pluginInfos = [];
 
 	#region Preload
 
-	public static void PreloadPlugins(IHostBuilder hostBuilder)
+	public void PreloadPlugins(IHostBuilder hostBuilder)
 	{
 		try
 		{
+			FileLoggingExecutor.Information<PluginManager>("Preloading plugins...");
+
 			if (!Directory.Exists(_pluginsDirectory))
 			{
 				Directory.CreateDirectory(_pluginsDirectory);
@@ -48,12 +46,11 @@ internal class PluginManager
 		}
 		catch (Exception e)
 		{
-			Debug.WriteLine(SR.ErrorErrorWhilePreloadingPlugins);
-			Debug.WriteLine(e);
+			FileLoggingExecutor.Error<PluginManager>(e, "Error while preloading plugins.");
 		}
 	}
 
-	private static void LoadPluginInfos()
+	private void LoadPluginInfos()
 	{
 		if (File.Exists(_pluginsInfoFilePath))
 		{
@@ -65,7 +62,7 @@ internal class PluginManager
 		}
 	}
 
-	private static void CleanPluginInfos()
+	private void CleanPluginInfos()
 	{
 		var pluginInfos = new PluginInfos();
 		foreach (var (id, pluginInfo) in _pluginInfos)
@@ -78,12 +75,12 @@ internal class PluginManager
 		_pluginInfos = pluginInfos;
 	}
 
-	private static void SavePluginInfos()
+	private void SavePluginInfos()
 	{
 		File.WriteAllText(_pluginsInfoFilePath, JsonSerializer.Serialize(_pluginInfos, Constants.ConfigSerializationOptions));
 	}
 
-	private static void DiscoverPlugins()
+	private void DiscoverPlugins()
 	{
 		foreach (var pluginDirectory in Directory.GetDirectories(_pluginsDirectory))
 		{
@@ -91,7 +88,7 @@ internal class PluginManager
 		}
 	}
 
-	private static void DiscoverPlugin(string directory)
+	private void DiscoverPlugin(string directory)
 	{
 		try
 		{
@@ -115,15 +112,16 @@ internal class PluginManager
 			info.Visited = true;
 			info.Directory = directory;
 			info.Detail = detail;
+
+			FileLoggingExecutor.Information<PluginManager>($"Plugin discovered: {info.Detail.Name}.");
 		}
 		catch (Exception e)
 		{
-			Debug.WriteLine(string.Format(SR.ErrorFailedToDiscoverPlugin, directory));
-			Debug.WriteLine(e);
+			FileLoggingExecutor.Error<PluginManager>(e, $"Failed to discover plugin in \"{directory}\".");
 		}
 	}
 
-	private static void LoadPluginAssemblies()
+	private void LoadPluginAssemblies()
 	{
 		foreach (var (id, pluginInfo) in _pluginInfos)
 		{
@@ -135,10 +133,12 @@ internal class PluginManager
 		}
 	}
 
-	private static void LoadPluginAssembly(PluginInfo pluginInfo, string path)
+	private void LoadPluginAssembly(PluginInfo pluginInfo, string path)
 	{
 		try
 		{
+			FileLoggingExecutor.Information<PluginManager>($"Loading assembly: {path}.");
+
 			var assembly = _context.LoadFromAssemblyPath(path);
 
 			var pluginTypes = assembly.GetTypes().Where(t => typeof(Plugin).IsAssignableFrom(t));
@@ -159,29 +159,25 @@ internal class PluginManager
 		}
 		catch (Exception e)
 		{
-			Debug.WriteLine(string.Format(SR.ErrorFailedToLoadPluginAssembly, path));
-			Debug.WriteLine(e);
+			FileLoggingExecutor.Error<PluginManager>(e, $"Failed to load plugin assembly \"{path}\".");
 		}
 	}
 
-	private static void InvokePluginPreLoad(IHostBuilder hostBuilder)
+	private void InvokePluginPreLoad(IHostBuilder hostBuilder)
 	{
+		FileLoggingExecutor.Information<PluginManager>($"Invoking plugin {nameof(Plugin.OnPreLoad)}...");
+
 		foreach (var (_, pluginInfo) in _pluginInfos)
 		{
 			foreach (var instance in pluginInfo.PluginInstances)
 			{
 				try
 				{
-					instance.OnPreload(hostBuilder);
+					instance.OnPreLoad(hostBuilder);
 				}
 				catch (Exception e)
 				{
-					Debug.WriteLine(string.Format(
-						"Error while invoking plugin method `{0}` in `{1}`.",
-						nameof(Plugin.OnPreload),
-						instance.GetType().FullName
-						));
-					Debug.WriteLine(e);
+					FileLoggingExecutor.Error<PluginManager>(e, $"Error while invoking plugin method `{nameof(Plugin.OnPreLoad)}` in `{instance.GetType().FullName}`.");
 				}
 			}
 		}
@@ -191,23 +187,25 @@ internal class PluginManager
 
 	#region Assembly Resolving
 
-	private static readonly AssemblyLoadContext _context = AssemblyLoadContext.Default;
+	private readonly AssemblyLoadContext _context = AssemblyLoadContext.Default;
 
-	static PluginManager()
+	public PluginManager()
 	{
 		_context.Resolving += Resolving;
 		_context.ResolvingUnmanagedDll += ResolvingUnmanagedDll;
 	}
 
-	private static readonly List<AssemblyDependencyResolver> _resolvers = [];
+	private readonly List<AssemblyDependencyResolver> _resolvers = [];
 
-	private static Assembly? Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
+	private Assembly? Resolving(AssemblyLoadContext context, AssemblyName assemblyName)
 	{
 		foreach (var resolver in _resolvers)
 		{
 			var path = resolver.ResolveAssemblyToPath(assemblyName);
 			if (path is not null)
 			{
+				FileLoggingExecutor.Information<PluginManager>($"Loading dependent assembly: {path}.");
+
 				return _context.LoadFromAssemblyPath(path);
 			}
 		}
@@ -215,13 +213,15 @@ internal class PluginManager
 		return null;
 	}
 
-	private static IntPtr ResolvingUnmanagedDll(Assembly assembly, string unmanagedDllName)
+	private IntPtr ResolvingUnmanagedDll(Assembly assembly, string unmanagedDllName)
 	{
 		foreach (var resolver in _resolvers)
 		{
 			var path = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
 			if (path is not null)
 			{
+				FileLoggingExecutor.Information<PluginManager>($"Loading dependent unmanaged dll: {path}.");
+
 				return NativeLibrary.Load(path);
 			}
 		}
@@ -229,7 +229,7 @@ internal class PluginManager
 		return IntPtr.Zero;
 	}
 
-	private static void LoadSearchingPaths()
+	private void LoadSearchingPaths()
 	{
 		List<string> paths = [typeof(PluginManager).Assembly.Location];
 		List<string> cache = []; // 检测循环引用
@@ -243,7 +243,7 @@ internal class PluginManager
 		}
 	}
 
-	private static void LoadSearchingPaths(
+	private void LoadSearchingPaths(
 		List<string> paths,
 		List<string> cache)
 	{
@@ -255,13 +255,12 @@ internal class PluginManager
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine(string.Format(SR.ErrorFailedToLoadSearchingDirectory, id));
-				Debug.WriteLine(e);
+				FileLoggingExecutor.Error<PluginManager>(e, $"Failed to load searching directory \"{id}\".");
 			}
 		}
 	}
 
-	private static void LoadSearchingPath(
+	private void LoadSearchingPath(
 		List<string> paths,
 		List<string> cache,
 		string id,
@@ -299,9 +298,11 @@ internal class PluginManager
 
 	#region Load
 
-	public static void LoadPlugins(IServiceProvider serviceProvider)
+	public void LoadPlugins(IServiceProvider serviceProvider)
 	{
 		var logger = serviceProvider.GetRequiredService<ILogger<PluginManager>>();
+
+		logger.LogInformation($"Invoking plugin {nameof(Plugin.OnLoad)}...");
 
 		foreach (var (_, pluginInfo) in _pluginInfos)
 		{
@@ -327,9 +328,11 @@ internal class PluginManager
 
 	#region Post Load
 
-	public static void PostLoadPlugins(IServiceProvider serviceProvider)
+	public void PostLoadPlugins(IServiceProvider serviceProvider)
 	{
 		var logger = serviceProvider.GetRequiredService<ILogger<PluginManager>>();
+
+		logger.LogInformation($"Invoking plugin {nameof(Plugin.OnPostLoad)}...");
 
 		foreach (var (_, pluginInfo) in _pluginInfos)
 		{
@@ -355,9 +358,11 @@ internal class PluginManager
 
 	#region Unload
 
-	public static void UnloadPlugins(IServiceProvider serviceProvider)
+	public void UnloadPlugins(IServiceProvider serviceProvider)
 	{
 		var logger = serviceProvider.GetRequiredService<ILogger<PluginManager>>();
+
+		logger.LogInformation($"Invoking plugin {nameof(Plugin.OnUnload)}...");
 
 		foreach (var (_, pluginInfo) in _pluginInfos)
 		{

@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				xmlns:vm="using:AvaQQ.Core.ViewModels"
+				mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+				x:Class="AvaQQ.Core.Views.Connecting.ConnectWindow"
+				x:DataType="vm:ConnectViewModel"
+				Title="{Binding TextConnect}"
+				Width="400"
+				Height="600"
+				WindowStartupLocation="CenterScreen"
+				CanResize="False">
+	<Design.DataContext>
+		<vm:ConnectViewModel/>
+	</Design.DataContext>
+	<Grid x:Name="gridConnectView"/>
+</Window>

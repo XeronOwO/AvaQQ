@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AvaQQ.SDK;
+﻿namespace AvaQQ.SDK;
 
 /// <summary>
 /// 配置名称特性

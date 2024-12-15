@@ -4,21 +4,19 @@ using Avalonia.ReactiveUI;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AvaQQ.Desktop;
 
 internal class AppService(
 	IServiceProvider serviceProvider,
 	IHost host,
-	IAppLifetimeController lifetime
+	IAppLifetimeController lifetime,
+	IPluginManager pluginManager
 	) : BackgroundService
 {
 	private AppBuilder BuildAvaloniaApp()
 	{
-		return AppBuilder.Configure(() => (App)serviceProvider.GetRequiredService<AppBase>())
+		return AppBuilder.Configure(serviceProvider.GetRequiredService<AppBase>)
 			.UsePlatformDetect()
 			.WithInterFont()
 			.LogToTrace()
@@ -31,11 +29,15 @@ internal class AppService(
 
 		return Task.Run(() =>
 		{
+			pluginManager.LoadPlugins(serviceProvider);
+			pluginManager.PostLoadPlugins(serviceProvider);
+
 			BuildAvaloniaApp().Start((Application application, string[] args) =>
 			{
-				if (application is App app)
+				if (application is AppBase app)
 				{
 					app.Run(lifetime.CancellationTokenSource.Token);
+					pluginManager.UnloadPlugins(serviceProvider);
 					_ = host.StopAsync();
 				}
 			}, Environment.GetCommandLineArgs());

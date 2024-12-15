@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 17
+# Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaQQ", "AvaQQ\AvaQQ.csproj", "{811D3411-5CFC-4C68-B537-DF5E02A77C4D}"
@@ -8,7 +8,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaQQ.Desktop", "AvaQQ.Desk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaQQ.SDK", "AvaQQ.SDK\AvaQQ.SDK.csproj", "{FE7D86C4-F88D-4A4B-872C-55A6F8D1CCC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onebot11ForwardWebSocketAdapter", "Onebot11ForwardWebSocketAdapter\Onebot11ForwardWebSocketAdapter.csproj", "{1FC74DAD-6B68-43DC-A55B-D3DCEA0C03C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaQQ.Core", "AvaQQ.Core\AvaQQ.Core.csproj", "{B13334DE-67D3-4963-B222-ADBD18608516}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onebot11ForwardWebSocketAdapter", "Onebot11ForwardWebSocketAdapter\Onebot11ForwardWebSocketAdapter.csproj", "{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,10 +30,14 @@ Global
 		{FE7D86C4-F88D-4A4B-872C-55A6F8D1CCC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE7D86C4-F88D-4A4B-872C-55A6F8D1CCC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE7D86C4-F88D-4A4B-872C-55A6F8D1CCC2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1FC74DAD-6B68-43DC-A55B-D3DCEA0C03C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1FC74DAD-6B68-43DC-A55B-D3DCEA0C03C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1FC74DAD-6B68-43DC-A55B-D3DCEA0C03C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1FC74DAD-6B68-43DC-A55B-D3DCEA0C03C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B13334DE-67D3-4963-B222-ADBD18608516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B13334DE-67D3-4963-B222-ADBD18608516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B13334DE-67D3-4963-B222-ADBD18608516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B13334DE-67D3-4963-B222-ADBD18608516}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
