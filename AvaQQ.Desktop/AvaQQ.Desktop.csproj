@@ -16,8 +16,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AvaQQ.Core\AvaQQ.Core.csproj" />
 		<ProjectReference Include="..\AvaQQ\AvaQQ.csproj" />
-		<ProjectReference Include="..\Onebot11ForwardWebSocketAdapter\Onebot11ForwardWebSocketAdapter.csproj" />
+		<ProjectReference Include="..\AvaQQ.Core\AvaQQ.Core.csproj">
+			<Private>False</Private>
+			<ExcludeAssets>all</ExcludeAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Onebot11ForwardWebSocketAdapter\Onebot11ForwardWebSocketAdapter.csproj">
+			<Private>False</Private>
+			<ExcludeAssets>all</ExcludeAssets>
+		</ProjectReference>
 	</ItemGroup>
 </Project>
