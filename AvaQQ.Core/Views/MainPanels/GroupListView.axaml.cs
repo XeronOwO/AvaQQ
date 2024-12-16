@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
+using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,8 @@ public partial class GroupListView : UserControl, IDisposable
 		GroupMessageDatabase groupMessageDatabase
 		)
 	{
+		CirculationInjectionDetector<GroupListView>.Enter();
+
 		_groupCache = groupCache;
 		_avatarCache = avatarCache;
 		_groupMessageDatabase = groupMessageDatabase;
@@ -48,6 +51,8 @@ public partial class GroupListView : UserControl, IDisposable
 		{
 			adapter.OnGroupMessage += Adapter_OnGroupMessage;
 		}
+
+		CirculationInjectionDetector<GroupListView>.Leave();
 	}
 
 	/// <summary>

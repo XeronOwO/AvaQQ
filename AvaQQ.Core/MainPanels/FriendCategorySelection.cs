@@ -25,9 +25,13 @@ internal class FriendCategorySelection : ICategorySelection
 		ILogger<FriendCategorySelection> logger
 		)
 	{
+		CirculationInjectionDetector<FriendCategorySelection>.Enter();
+
 		_serviceProvider = serviceProvider;
 		_logger = logger;
 		_watchdog = new(DestroyView);
+
+		CirculationInjectionDetector<FriendCategorySelection>.Leave();
 	}
 
 	public UserControl? View

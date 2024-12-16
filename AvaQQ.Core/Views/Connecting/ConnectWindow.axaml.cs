@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using AvaQQ.Core.Adapters;
+using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,8 @@ public partial class ConnectWindow : Window
 		IAdapterProvider adapterProvider
 		)
 	{
+		CirculationInjectionDetector<ConnectWindow>.Enter();
+
 		_adapterProvider = adapterProvider;
 
 		DataContext = new ConnectViewModel();
@@ -29,6 +32,8 @@ public partial class ConnectWindow : Window
 		gridConnectView.Children.Add(connectView);
 
 		Closed += ConnectWindow_Closed;
+
+		CirculationInjectionDetector<ConnectWindow>.Leave();
 	}
 
 	/// <summary>

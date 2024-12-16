@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AvaQQ.Core.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AvaQQ.Core.MainPanels;
@@ -11,11 +12,15 @@ internal class CategorySelectionProvider : ICategorySelectionProvider
 
 	public CategorySelectionProvider(IServiceProvider serviceProvider)
 	{
+		CirculationInjectionDetector<CategorySelectionProvider>.Enter();
+
 		_logger = serviceProvider.GetRequiredService<ILogger<CategorySelectionProvider>>();
 
 		Register<RecentCategorySelection>();
 		Register<FriendCategorySelection>();
 		Register<GroupCategorySelection>();
+
+		CirculationInjectionDetector<CategorySelectionProvider>.Leave();
 	}
 
 	public void Register<T>() where T : ICategorySelection

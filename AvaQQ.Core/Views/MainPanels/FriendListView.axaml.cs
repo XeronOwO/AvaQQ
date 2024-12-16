@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,8 @@ public partial class FriendListView : UserControl
 	/// </summary>
 	public FriendListView(IAvatarCache avatarCache, IFriendCache friendCache)
 	{
+		CirculationInjectionDetector<FriendListView>.Enter();
+
 		DataContext = new FriendListViewModel();
 		InitializeComponent();
 
@@ -31,6 +34,8 @@ public partial class FriendListView : UserControl
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
 		_avatarManager = avatarCache;
 		_friendManager = friendCache;
+
+		CirculationInjectionDetector<FriendListView>.Leave();
 	}
 
 	/// <summary>

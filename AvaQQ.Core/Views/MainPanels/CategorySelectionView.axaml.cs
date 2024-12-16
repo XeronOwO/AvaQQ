@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using AvaQQ.Core.MainPanels;
+using AvaQQ.Core.Utils;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -94,9 +95,13 @@ public partial class CategorySelectionView : UserControl
 	/// </summary>
 	public CategorySelectionView()
 	{
+		CirculationInjectionDetector<CategorySelectionView>.Enter();
+
 		Items.CollectionChanged += Items_CollectionChanged;
 
 		InitializeComponent();
+
+		CirculationInjectionDetector<CategorySelectionView>.Leave();
 	}
 
 	private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

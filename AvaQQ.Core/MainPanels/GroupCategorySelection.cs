@@ -25,9 +25,13 @@ internal class GroupCategorySelection : ICategorySelection
 		ILogger<GroupCategorySelection> logger
 		)
 	{
+		CirculationInjectionDetector<GroupCategorySelection>.Enter();
+
 		_serviceProvider = serviceProvider;
 		_logger = logger;
 		_watchdog = new(DestroyView);
+
+		CirculationInjectionDetector<GroupCategorySelection>.Leave();
 	}
 
 	public UserControl? View

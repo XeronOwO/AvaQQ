@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AvaQQ.Core.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AvaQQ.Core.Adapters;
@@ -11,9 +12,13 @@ internal class AdapterSelectionProvider : IAdapterSelectionProvider
 
 	public AdapterSelectionProvider(IServiceProvider serviceProvider)
 	{
+		CirculationInjectionDetector<AdapterSelectionProvider>.Enter();
+
 		_logger = serviceProvider.GetRequiredService<ILogger<AdapterSelectionProvider>>();
 
 		Register<SelectAdapterSelection>();
+
+		CirculationInjectionDetector<AdapterSelectionProvider>.Leave();
 	}
 
 	public void Register<T>() where T : IAdapterSelection

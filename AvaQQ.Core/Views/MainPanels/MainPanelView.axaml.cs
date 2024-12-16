@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using AvaQQ.Core.Utils;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,10 +18,14 @@ public partial class MainPanelView : UserControl
 		CategorizedListView categorizedListView
 		)
 	{
+		CirculationInjectionDetector<MainPanelView>.Enter();
+
 		InitializeComponent();
 
 		gridHeaderView.Children.Add(headerView);
 		gridCategorizedListView.Children.Add(categorizedListView);
+
+		CirculationInjectionDetector<MainPanelView>.Leave();
 	}
 
 	/// <summary>

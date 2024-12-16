@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaQQ.Core.MainPanels;
+using AvaQQ.Core.Utils;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +19,8 @@ public partial class CategorizedListView : UserControl
 	/// </summary>
 	public CategorizedListView(IServiceProvider serviceProvider)
 	{
+		CirculationInjectionDetector<CategorizedListView>.Enter();
+
 		InitializeComponent();
 
 		_serviceScope = serviceProvider.CreateScope();
@@ -25,6 +28,8 @@ public partial class CategorizedListView : UserControl
 		Loaded += CategorizedListView_Loaded;
 		categorySelectionView.SelectionChanged += CategorySelectionView_SelectionChanged;
 		Unloaded += CategorizedListView_Unloaded;
+
+		CirculationInjectionDetector<CategorizedListView>.Leave();
 	}
 
 	/// <summary>

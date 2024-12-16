@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,8 @@ public partial class MainPanelWindow : Window
 		MainPanelView view
 		)
 	{
+		CirculationInjectionDetector<MainPanelWindow>.Enter();
+
 		var model = new MainPanelViewModel();
 		if (adapterProvider.Adapter is { } adapter)
 		{
@@ -37,6 +40,8 @@ public partial class MainPanelWindow : Window
 		{
 			Config.Save();
 		};
+
+		CirculationInjectionDetector<MainPanelWindow>.Leave();
 	}
 
 	/// <summary>

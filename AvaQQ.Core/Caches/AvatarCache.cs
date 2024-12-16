@@ -20,11 +20,15 @@ internal class AvatarCache : IAvatarCache
 
 	public AvatarCache(IServiceProvider serviceProvider)
 	{
+		CirculationInjectionDetector<AvatarCache>.Enter();
+
 		_serviceProvider = serviceProvider;
 		_baseDirectory = Path.Combine(Constants.RootDirectory, "cache", "avatars");
 		_usersDirectory = Path.Combine(_baseDirectory, "users");
 		_groupsDirectory = Path.Combine(_baseDirectory, "groups");
 		_logger = _serviceProvider.GetRequiredService<ILogger<AvatarCache>>();
+
+		CirculationInjectionDetector<AvatarCache>.Leave();
 	}
 
 	#region 用户

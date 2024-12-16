@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 
 namespace AvaQQ.Core.Views.MainPanels;
@@ -14,7 +15,11 @@ public partial class HeaderView : UserControl
 	/// </summary>
 	public HeaderView()
 	{
+		CirculationInjectionDetector<HeaderView>.Enter();
+
 		InitializeComponent();
+
+		CirculationInjectionDetector<HeaderView>.Leave();
 	}
 
 	private void ButtonUploadAvatar_Click(object? sender, RoutedEventArgs e)

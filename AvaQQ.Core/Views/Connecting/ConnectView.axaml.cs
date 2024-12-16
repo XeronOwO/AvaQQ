@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using AvaQQ.Core.Adapters;
+using AvaQQ.Core.Utils;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.ConnectConfiguration>;
@@ -23,6 +24,8 @@ public partial class ConnectView : UserControl
 		IAdapterSelectionProvider adapterSelectionProvider
 		)
 	{
+		CirculationInjectionDetector<ConnectView>.Enter();
+
 		_serviceProvider = serviceProvider;
 		_adapterSelectionProvider = adapterSelectionProvider;
 
@@ -38,6 +41,8 @@ public partial class ConnectView : UserControl
 				&& adapterSelection.Id == Config.Instance.SelectedAdapter
 		).FirstOrDefault();
 		UpdateSelection();
+
+		CirculationInjectionDetector<ConnectView>.Leave();
 	}
 
 	/// <summary>
