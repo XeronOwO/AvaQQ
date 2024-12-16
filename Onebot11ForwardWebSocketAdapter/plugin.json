@@ -5,5 +5,10 @@
 	"Authors": [ "XeronOwO" ],
 	"Version": "1.0.0",
 	"Assemblies": [ "Onebot11ForwardWebSocketAdapter.dll" ],
-	"Dependencies": []
+	"Dependencies": [
+		{
+			"Id": "AvaQQ.Core",
+			"Version": "1.0.0"
+		}
+	]
 }

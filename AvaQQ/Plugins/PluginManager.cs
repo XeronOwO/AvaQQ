@@ -113,7 +113,7 @@ internal class PluginManager : IPluginManager
 			info.Directory = directory;
 			info.Detail = detail;
 
-			FileLoggingExecutor.Information<PluginManager>($"Plugin discovered: {info.Detail.Name}.");
+			FileLoggingExecutor.Information<PluginManager>($"Plugin discovered: [{info.Detail.Id}]{info.Detail.Name}.");
 		}
 		catch (Exception e)
 		{

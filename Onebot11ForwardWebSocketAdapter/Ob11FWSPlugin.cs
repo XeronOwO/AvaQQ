@@ -25,7 +25,6 @@ public class Ob11FWSPlugin : Plugin
 	public override void OnLoad(IServiceProvider services)
 	{
 		_logger = services.GetRequiredService<ILogger<Ob11FWSPlugin>>();
-		_logger.LogInformation(nameof(OnLoad));
 
 		services.GetRequiredService<IAdapterSelectionProvider>()
 			.Register<AdapterSelection>();
