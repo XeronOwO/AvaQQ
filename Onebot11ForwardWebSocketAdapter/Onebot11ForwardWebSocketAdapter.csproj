@@ -43,9 +43,5 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="XCOPY /E /Y $(OutputPath) ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\" />
-	</Target>
-
+	
 </Project>

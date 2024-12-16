@@ -55,9 +55,5 @@
 	<ItemGroup>
 	  <PackageReference Include="LiteDB" Version="5.0.21" />
 	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="XCOPY /E /Y $(OutputPath) ..\AvaQQ.Desktop\$(OutputPath)plugins\$(MSBuildProjectName)\" />
-	</Target>
-
+	
 </Project>
