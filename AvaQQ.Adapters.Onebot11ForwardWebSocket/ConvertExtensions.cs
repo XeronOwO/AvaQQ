@@ -6,7 +6,7 @@ using MGroupMessageEventType = Makabaka.Events.GroupMessageEventType;
 using MGroupRoleType = Makabaka.Models.GroupRoleType;
 using MSexType = Makabaka.Models.SexType;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 internal static class ConvertExtensions
 {

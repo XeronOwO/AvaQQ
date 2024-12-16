@@ -4,9 +4,9 @@ using AvaQQ.Core.Logging;
 using AvaQQ.Core.Views.Connecting;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
-using Config = AvaQQ.SDK.Configuration<Onebot11ForwardWebSocketAdapter.AdapterConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Adapters.Onebot11ForwardWebSocket.AdapterConfiguration>;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 public partial class AdapterSelectionView : UserControl
 {

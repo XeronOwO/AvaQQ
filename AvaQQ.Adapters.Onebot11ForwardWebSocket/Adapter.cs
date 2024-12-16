@@ -12,7 +12,7 @@ using System.Text.Json;
 using AGroupMessageEventArgs = AvaQQ.Core.Adapters.GroupMessageEventArgs;
 using MGroupMessageEventArgs = Makabaka.Events.GroupMessageEventArgs;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 internal class Adapter : IAdapter
 {

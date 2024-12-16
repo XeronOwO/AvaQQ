@@ -4,7 +4,7 @@
 	"Description": "Onebot 11 Forward Web Socket Adapter",
 	"Authors": [ "XeronOwO" ],
 	"Version": "1.0.0",
-	"Assemblies": [ "Onebot11ForwardWebSocketAdapter.dll" ],
+	"Assemblies": [ "AvaQQ.Adapters.Onebot11ForwardWebSocket.dll" ],
 	"Dependencies": [
 		{
 			"Id": "AvaQQ.Core",

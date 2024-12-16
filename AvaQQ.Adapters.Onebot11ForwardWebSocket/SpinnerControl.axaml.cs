@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 public partial class SpinnerControl : UserControl
 {

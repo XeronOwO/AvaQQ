@@ -1,6 +1,6 @@
 ﻿using AvaQQ.SDK;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 [ConfigurationName("onebot_11_forward_web_socket.json")]
 internal class AdapterConfiguration

@@ -1,13 +1,13 @@
 ﻿using Avalonia.Controls;
 using AvaQQ.Core.Adapters;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 internal class AdapterSelection(AdapterSelectionView view) : IAdapterSelection
 {
 	public UserControl? View => view;
 
-	public string Id => nameof(Onebot11ForwardWebSocketAdapter);
+	public string Id => nameof(Onebot11ForwardWebSocket);
 
 	public void OnSelected()
 	{

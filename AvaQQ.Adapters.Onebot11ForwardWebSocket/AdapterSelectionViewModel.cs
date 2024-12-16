@@ -1,8 +1,8 @@
 ﻿using AvaQQ.SDK;
 using ReactiveUI;
-using Config = AvaQQ.SDK.Configuration<Onebot11ForwardWebSocketAdapter.AdapterConfiguration>;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Adapters.Onebot11ForwardWebSocket.AdapterConfiguration>;
 
-namespace Onebot11ForwardWebSocketAdapter;
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
 
 internal class AdapterSelectionViewModel : ViewModelBase
 {

@@ -21,7 +21,7 @@
 			<Private>False</Private>
 			<ExcludeAssets>all</ExcludeAssets>
 		</ProjectReference>
-		<ProjectReference Include="..\Onebot11ForwardWebSocketAdapter\Onebot11ForwardWebSocketAdapter.csproj">
+		<ProjectReference Include="..\AvaQQ.Adapters.Onebot11ForwardWebSocket\AvaQQ.Adapters.Onebot11ForwardWebSocket.csproj">
 			<Private>False</Private>
 			<ExcludeAssets>all</ExcludeAssets>
 		</ProjectReference>

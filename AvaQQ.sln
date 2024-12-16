@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaQQ.SDK", "AvaQQ.SDK\AvaQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaQQ.Core", "AvaQQ.Core\AvaQQ.Core.csproj", "{B13334DE-67D3-4963-B222-ADBD18608516}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onebot11ForwardWebSocketAdapter", "Onebot11ForwardWebSocketAdapter\Onebot11ForwardWebSocketAdapter.csproj", "{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaQQ.Adapters.Onebot11ForwardWebSocket", "AvaQQ.Adapters.Onebot11ForwardWebSocket\AvaQQ.Adapters.Onebot11ForwardWebSocket.csproj", "{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

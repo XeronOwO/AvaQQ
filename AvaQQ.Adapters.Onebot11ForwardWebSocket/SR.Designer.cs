@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Onebot11ForwardWebSocketAdapter {
+namespace AvaQQ.Adapters.Onebot11ForwardWebSocket {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Onebot11ForwardWebSocketAdapter {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Onebot11ForwardWebSocketAdapter.SR", typeof(SR).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AvaQQ.Adapters.Onebot11ForwardWebSocket.SR", typeof(SR).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
