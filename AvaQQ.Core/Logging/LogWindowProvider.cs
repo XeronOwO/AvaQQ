@@ -1,32 +1,28 @@
 ﻿using Avalonia.Controls;
 using AvaQQ.Core.ViewModels;
 using AvaQQ.Core.Views;
+using Microsoft.Extensions.Logging;
 
 namespace AvaQQ.Core.Logging;
 
-internal class LogWindowProvider : ILogWindowProvider
+internal class LogWindowProvider(ILogger<LogWindowProvider> logger) : ILogWindowProvider
 {
 	public void Show(string log)
-	{
-		var logWindow = new LogWindow()
-		{
-			DataContext = new LogViewModel()
-			{
-				Content = log,
-			},
-		};
-		logWindow.Show();
-	}
+		=> CreateDialog(log).Show();
 
 	public Task ShowDialog(Window window, string log)
+		=> CreateDialog(log).ShowDialog(window);
+
+	private LogWindow CreateDialog(string log)
 	{
-		var logWindow = new LogWindow()
+		logger.LogInformation("Creating {Window}.", nameof(LogWindow));
+
+		return new()
 		{
 			DataContext = new LogViewModel()
 			{
 				Content = log,
 			},
 		};
-		return logWindow.ShowDialog(window);
 	}
 }

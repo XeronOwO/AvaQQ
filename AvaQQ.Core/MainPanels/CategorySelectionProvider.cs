@@ -56,7 +56,7 @@ internal class CategorySelectionProvider : ICategorySelectionProvider
 			}
 			catch (Exception e)
 			{
-				_logger.LogWarning(e, "Failed to create category selection from type {Type}.", type);
+				_logger.LogError(e, "Failed to create category selection from type {Type}.", type);
 			}
 		}
 		return selections;

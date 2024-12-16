@@ -18,10 +18,13 @@ internal partial class App : AppBase, IDisposable
 
 	private readonly GroupMessageDatabase _groupMessageDatabase;
 
+	private readonly ILogger<App> _logger;
+
 	public App(
 		IServiceProvider serviceProvider,
 		IAdapterProvider adapterProvider,
-		GroupMessageDatabase groupMessageDatabase
+		GroupMessageDatabase groupMessageDatabase,
+		ILogger<App> logger
 		) : base(
 			serviceProvider.GetRequiredService<ILogger<AppBase>>(),
 			serviceProvider.GetRequiredService<IAppLifetimeController>()
@@ -30,6 +33,7 @@ internal partial class App : AppBase, IDisposable
 		_serviceProvider = serviceProvider;
 		_adapterProvider = adapterProvider;
 		_groupMessageDatabase = groupMessageDatabase;
+		_logger = logger;
 
 		DataContext = new AppViewModel();
 	}
@@ -37,13 +41,16 @@ internal partial class App : AppBase, IDisposable
 	public App() : this(
 		DesignerServiceProviderHelper.Root,
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterProvider>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<GroupMessageDatabase>()
+		DesignerServiceProviderHelper.Root.GetRequiredService<GroupMessageDatabase>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<ILogger<App>>()
 		)
 	{
 	}
 
 	public override void Initialize()
 	{
+		_logger.LogInformation("Initializing App.");
+
 		AvaloniaXamlLoader.Load(this);
 	}
 
@@ -65,6 +72,8 @@ internal partial class App : AppBase, IDisposable
 
 	private void NativeMenuItemExit_Click(object? sender, EventArgs e)
 	{
+		_logger.LogInformation("App exiting.");
+
 		_lifetime.Stop();
 	}
 
@@ -92,6 +101,8 @@ internal partial class App : AppBase, IDisposable
 
 	private void OpenConnectWindow()
 	{
+		_logger.LogInformation("Opening {Window}.", nameof(ConnectWindow));
+
 		_connectScope = _serviceProvider.CreateScope();
 		MainWindow = _connectScope.ServiceProvider.GetRequiredService<ConnectWindow>();
 		MainWindow.Show();
@@ -100,6 +111,8 @@ internal partial class App : AppBase, IDisposable
 
 	private void ConnectWindow_Closed(object? sender, EventArgs e)
 	{
+		_logger.LogInformation("{Window} closed.", nameof(ConnectWindow));
+
 		MainWindow = null;
 		_connectScope?.Dispose();
 		_connectScope = null;
@@ -119,6 +132,8 @@ internal partial class App : AppBase, IDisposable
 
 	private void OpenMainPanelWindow()
 	{
+		_logger.LogInformation("Opening {Window}.", nameof(MainPanelWindow));
+
 		_mainPanelScope = _serviceProvider.CreateScope();
 		MainWindow = _mainPanelScope.ServiceProvider.GetRequiredService<MainPanelWindow>();
 		MainWindow.Show();
@@ -127,6 +142,8 @@ internal partial class App : AppBase, IDisposable
 
 	private void MainPanelWindow_Closed(object? sender, EventArgs e)
 	{
+		_logger.LogInformation("{Window} closed.", nameof(MainPanelWindow));
+
 		MainWindow = null;
 		_mainPanelScope?.Dispose();
 		_mainPanelScope = null;

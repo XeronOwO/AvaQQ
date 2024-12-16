@@ -54,7 +54,7 @@ internal class AdapterSelectionProvider : IAdapterSelectionProvider
 			}
 			catch (Exception e)
 			{
-				_logger.LogWarning(e, "Failed to create adapter selection from type {Type}.", type);
+				_logger.LogError(e, "Failed to create adapter selection from type {Type}.", type);
 			}
 		}
 		return selections;
