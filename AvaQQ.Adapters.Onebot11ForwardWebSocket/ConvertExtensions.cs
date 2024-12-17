@@ -69,6 +69,7 @@ internal static class ConvertExtensions
 					Filename = image.Data.Filename!,
 					Url = image.Data.Url!,
 					SubType = image.Data.SubType,
+					Summary = image.Data.Summary,
 				};
 			case Makabaka.Messages.NodeSegment node:
 				return new AvaQQ.Core.Messages.NodeSegment()

@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
@@ -10,14 +9,13 @@ using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
-using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Core.Views.MainPanels;
 
 /// <summary>
 /// 群聊列表视图
 /// </summary>
-public partial class GroupListView : UserControl, IDisposable
+public partial class GroupListView : UserControl
 {
 	private readonly IGroupCache _groupCache;
 
@@ -144,7 +142,7 @@ public partial class GroupListView : UserControl, IDisposable
 
 	private async Task UpdateGroupInfoListAsync()
 	{
-		_groups = await _groupCache.GetAllGroupInfosAsync();
+		_groups = [.. await _groupCache.GetAllGroupInfosAsync()];
 	}
 
 	private void UpdateFilteredGroupList()
@@ -232,23 +230,6 @@ public partial class GroupListView : UserControl, IDisposable
 		}
 	}
 
-	private class Cache
-	{
-		public DateTime InfoLastUpdateTime { get; set; } = DateTime.MinValue;
-
-		public Task<Bitmap?>? Image { get; set; } = null;
-
-		public string Title { get; set; } = null!;
-
-		public GroupMessageEntry? LastMessage { get; set; }
-
-		public string LastMessageTime { get; set; } = string.Empty;
-
-		public Task<string> Content { get; set; } = Task.FromResult(string.Empty);
-	}
-
-	private readonly Dictionary<ulong, Cache> _caches = [];
-
 	private void UpdateDisplayedEntryContents(int newIndex)
 	{
 		for (int i = 0; i < _displayedEntries.Count; i++)
@@ -262,42 +243,12 @@ public partial class GroupListView : UserControl, IDisposable
 			}
 
 			var group = _filteredGroups[groupIndex];
-			if (!_caches.TryGetValue(group.Uin, out var cache))
-			{
-				_caches[group.Uin] = cache = new();
-			}
 
-			var now = DateTime.Now;
-			if (now > cache.InfoLastUpdateTime + Config.Instance.GroupUpdateInterval)
-			{
-				var oldImage = cache.Image;
+			model.Icon = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
+			model.Title = _groupCache.GetGroupNameAsync(group.Uin);
+			model.Time = _groupCache.GetLatestMessageTimeAsync(group.Uin);
+			model.Content = _groupCache.GetLatestMessagePreviewAsync(group.Uin);
 
-				cache.InfoLastUpdateTime = now;
-				cache.Image = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
-				cache.Title = string.IsNullOrEmpty(group.Remark)
-					? group.Name
-					: $"{group.Remark} ({group.Name})";
-
-				oldImage?.Result?.Dispose();
-				oldImage?.Dispose();
-			}
-
-			var lastMessage = _groupMessageDatabase.Last(group.Uin);
-			if (lastMessage != cache.LastMessage)
-			{
-				cache.LastMessage = lastMessage;
-				cache.LastMessageTime = lastMessage is null
-					? string.Empty
-					: lastMessage.Time.ToLocalTime().ToString("HH:mm");
-				cache.Content = lastMessage is null
-					? Task.FromResult(string.Empty)
-					: _groupCache.GenerateMessagePreviewAsync(group.Uin, lastMessage);
-			}
-
-			model.Icon = cache.Image!;
-			model.Title = cache.Title;
-			model.Time = cache.LastMessageTime;
-			model.Content = cache.Content;
 			Grid.SetRow(entry, groupIndex);
 		}
 	}
@@ -330,46 +281,4 @@ public partial class GroupListView : UserControl, IDisposable
 	{
 		Dispatcher.UIThread.Invoke(UpdateDisplayedEntries);
 	}
-
-	#region Dispose
-
-	private bool disposedValue;
-
-	/// <summary>
-	/// 释放资源
-	/// </summary>
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				foreach (var (_, cache) in _caches)
-				{
-					cache.Image?.Result?.Dispose();
-					cache.Image?.Dispose();
-				}
-				_caches.Clear();
-			}
-
-			disposedValue = true;
-		}
-	}
-
-	/// <summary>
-	/// 终结器
-	/// </summary>
-	~GroupListView()
-	{
-		Dispose(disposing: false);
-	}
-
-	/// <inheritdoc/>
-	public void Dispose()
-	{
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
-	}
-
-	#endregion
 }

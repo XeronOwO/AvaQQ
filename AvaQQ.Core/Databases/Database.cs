@@ -1,5 +1,4 @@
-﻿using AvaQQ.Core.Adapters;
-using AvaQQ.SDK;
+﻿using AvaQQ.SDK;
 
 namespace AvaQQ.Core.Databases;
 
@@ -20,12 +19,6 @@ public abstract class Database : IDisposable
 			Directory.CreateDirectory(BaseDirectory);
 		}
 	}
-
-	/// <summary>
-	/// 初始化
-	/// </summary>
-	/// <param name="adapter">适配器</param>
-	public abstract void Initialize(IAdapter adapter);
 
 	/// <inheritdoc/>
 	public abstract void Dispose();

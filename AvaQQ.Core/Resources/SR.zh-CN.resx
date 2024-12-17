@@ -126,12 +126,6 @@
   <data name="ForwardSegmentPreview" xml:space="preserve">
     <value>[转发消息]</value>
   </data>
-  <data name="ImageSegmentPreview0" xml:space="preserve">
-    <value>[图片]</value>
-  </data>
-  <data name="ImageSegmentPreview1" xml:space="preserve">
-    <value>[动画表情]</value>
-  </data>
   <data name="MenuTextExit" xml:space="preserve">
     <value>退出</value>
   </data>

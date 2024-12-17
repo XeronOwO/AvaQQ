@@ -13,30 +13,16 @@ internal class GroupMessageLiteDB : GroupMessageDatabase
 	private LiteDatabase GetOrCreateDatabase(ulong groupUin)
 		=> _databases.GetOrAdd(groupUin, CreateDatabase);
 
-	private readonly ConcurrentDictionary<ulong, GroupMessageEntry?> _lastMessage = [];
-
 	public override void Insert(ulong groupUin, GroupMessageEntry entry)
-	{
-		GetOrCreateDatabase(groupUin)
+		=> GetOrCreateDatabase(groupUin)
 			.GetCollection<GroupMessageEntry>("messages")
 			.Insert(entry);
 
-		var oldEntry = _lastMessage.GetOrAdd(groupUin, _ => null);
-		if (oldEntry is null
-			|| entry.Time > oldEntry.Time)
-		{
-			_lastMessage[groupUin] = entry;
-		}
-	}
-
-	public override GroupMessageEntry? Last(ulong groupUin)
-		=> _lastMessage.GetOrAdd(
-			groupUin,
-			_ => GetOrCreateDatabase(groupUin)
-				.GetCollection<GroupMessageEntry>("messages")
-				.Find(Query.All(nameof(GroupMessageEntry.Time), Query.Descending), limit: 1)
-				.FirstOrDefault()
-		);
+	public override GroupMessageEntry? Latest(ulong groupUin)
+		=> GetOrCreateDatabase(groupUin)
+			.GetCollection<GroupMessageEntry>("messages")
+			.Find(Query.All(nameof(GroupMessageEntry.Time), Query.Descending), limit: 1)
+			.FirstOrDefault();
 
 	#region Dispose
 

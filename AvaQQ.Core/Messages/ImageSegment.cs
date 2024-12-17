@@ -19,4 +19,9 @@ public class ImageSegment : Segment
 	/// 子类型
 	/// </summary>
 	public int SubType { get; set; }
+
+	/// <summary>
+	/// 摘要
+	/// </summary>
+	public string Summary { get; set; } = string.Empty;
 }

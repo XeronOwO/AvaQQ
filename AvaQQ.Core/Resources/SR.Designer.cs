@@ -88,24 +88,6 @@ namespace AvaQQ.Core.Resources {
         }
         
         /// <summary>
-        ///   查找类似 [Image] 的本地化字符串。
-        /// </summary>
-        internal static string ImageSegmentPreview0 {
-            get {
-                return ResourceManager.GetString("ImageSegmentPreview0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 [Animation] 的本地化字符串。
-        /// </summary>
-        internal static string ImageSegmentPreview1 {
-            get {
-                return ResourceManager.GetString("ImageSegmentPreview1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Exit 的本地化字符串。
         /// </summary>
         internal static string MenuTextExit {

@@ -225,9 +225,9 @@ public partial class FriendListView : UserControl
 
 			model.Id = friend.Uin;
 			model.Icon = _avatarManager.GetUserAvatarAsync(friend.Uin, 40);
-			model.Title = string.IsNullOrEmpty(friend.Remark)
+			model.Title = Task.FromResult(string.IsNullOrEmpty(friend.Remark)
 				? friend.Nickname
-				: $"{friend.Remark} ({friend.Nickname})";
+				: $"{friend.Remark} ({friend.Nickname})");
 
 			Grid.SetRow(entry, friendIndex);
 		}

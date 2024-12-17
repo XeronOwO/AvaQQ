@@ -3,6 +3,7 @@ using AvaQQ.Core.Utils;
 using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Core.Caches;
 
@@ -14,8 +15,6 @@ internal class AvatarCache : IAvatarCache
 
 	private readonly string _usersDirectory;
 
-	private readonly string _groupsDirectory;
-
 	private readonly ILogger<AvatarCache> _logger;
 
 	public AvatarCache(IServiceProvider serviceProvider)
@@ -25,7 +24,6 @@ internal class AvatarCache : IAvatarCache
 		_serviceProvider = serviceProvider;
 		_baseDirectory = Path.Combine(Constants.RootDirectory, "cache", "avatars");
 		_usersDirectory = Path.Combine(_baseDirectory, "users");
-		_groupsDirectory = Path.Combine(_baseDirectory, "groups");
 		_logger = _serviceProvider.GetRequiredService<ILogger<AvatarCache>>();
 
 		CirculationInjectionDetector<AvatarCache>.Leave();
@@ -113,42 +111,13 @@ internal class AvatarCache : IAvatarCache
 
 	#region 群聊
 
-	public Task<Bitmap?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false)
-	{
-		if (!Directory.Exists(_groupsDirectory))
-		{
-			Directory.CreateDirectory(_groupsDirectory);
-		}
-		if (noCache)
-		{
-			return GetGroupAvatarNoCacheAsync(uin, size);
-		}
-		else
-		{
-			return GetGroupAvatarFromCacheAsync(uin, size);
-		}
-	}
-
-	private async Task<Bitmap?> GetGroupAvatarNoCacheAsync(ulong uin, int size)
+	private async Task<Bitmap?> GetGroupAvatarFromWebsiteAsync(ulong uin, int size)
 	{
 		try
 		{
 			var response = await Shared.HttpClient.GetAsync($"https://p.qlogo.cn/gh/{uin}/{uin}/{size}");
 			response.EnsureSuccessStatusCode();
-			var bytes = await response.Content.ReadAsByteArrayAsync();
-			var type = bytes.GetMediaType();
-			if (type == MediaType.Unknown)
-			{
-				return null;
-			}
-			var directory = Path.Combine(_groupsDirectory, size.ToString());
-			if (!Directory.Exists(directory))
-			{
-				Directory.CreateDirectory(directory);
-			}
-			var path = Path.Combine(directory, $"{uin}{type.GetFileExtension()}");
-			await File.WriteAllBytesAsync(path, bytes);
-			using var stream = new MemoryStream(bytes);
+			using var stream = await response.Content.ReadAsStreamAsync();
 			return new Bitmap(stream);
 		}
 		catch (Exception e)
@@ -158,29 +127,44 @@ internal class AvatarCache : IAvatarCache
 		}
 	}
 
-	private async Task<Bitmap?> GetGroupAvatarFromCacheAsync(ulong uin, int size)
+	private class GroupAvatarCache
 	{
-		try
+		public required DateTime LastUpdateTime { get; set; }
+
+		public required Task<Bitmap?> Avatar { get; set; }
+	}
+
+	private readonly Dictionary<ulong, Dictionary<int, GroupAvatarCache>> _groups = [];
+
+	public Task<Bitmap?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false)
+	{
+		if (!_groups.TryGetValue(uin, out var caches))
 		{
-			var directory = Path.Combine(_groupsDirectory, size.ToString());
-			if (!Directory.Exists(directory))
-			{
-				Directory.CreateDirectory(directory);
-			}
-			var paths = Directory.GetFiles(directory, $"{uin}.*");
-			var path = paths.FirstOrDefault();
-			if (string.IsNullOrEmpty(path)
-				|| !File.Exists(path))
-			{
-				return await GetGroupAvatarNoCacheAsync(uin, size);
-			}
-			return new Bitmap(path);
+			caches = _groups[uin] = [];
 		}
-		catch (Exception e)
+
+		var now = DateTime.Now;
+		if (!caches.TryGetValue(size, out var cache))
 		{
-			_logger.LogError(e, "Failed to get group {Uin}'s avatar of size {Size}.", uin, size);
-			return null;
+			cache = caches[size] = new GroupAvatarCache()
+			{
+				LastUpdateTime = now,
+				Avatar = GetGroupAvatarFromWebsiteAsync(uin, size)
+			};
 		}
+
+		if (now > cache.LastUpdateTime + Config.Instance.GroupAvatarExpiration)
+		{
+			cache.LastUpdateTime = now;
+			cache.Avatar = GetGroupAvatarFromWebsiteAsync(uin, size);
+		}
+
+		return cache.Avatar;
+	}
+
+	public void ReleaseGroupAvatars()
+	{
+		_groups.Clear();
 	}
 
 	#endregion

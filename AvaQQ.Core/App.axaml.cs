@@ -123,8 +123,6 @@ internal partial class App : AppBase, IDisposable
 			return;
 		}
 
-		_groupMessageDatabase.Initialize(adapter);
-
 		OpenMainPanelWindow();
 	}
 

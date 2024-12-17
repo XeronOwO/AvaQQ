@@ -51,11 +51,11 @@
 							ColumnDefinitions="*,auto">
 					<TextBlock Grid.Column="0"
 										 x:Name="textBlockTitle"
-										 Text="{Binding Title}"
+										 Text="{Binding Title^}"
 										 Margin="2.5"/>
 					<TextBlock Grid.Column="1"
 										 x:Name="textBlockTime"
-										 Text="{Binding Time}"
+										 Text="{Binding Time^}"
 										 FontSize="12"
 										 HorizontalAlignment="Center"
 										 VerticalAlignment="Center"/>

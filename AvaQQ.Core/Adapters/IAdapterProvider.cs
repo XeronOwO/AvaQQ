@@ -9,5 +9,10 @@ public interface IAdapterProvider : IDisposable
 	/// <summary>
 	/// 适配器
 	/// </summary>
-	public IAdapter? Adapter { get; set; }
+	IAdapter? Adapter { get; set; }
+
+	/// <summary>
+	/// 当适配器改变时触发
+	/// </summary>
+	event EventHandler<AdapterChangedEventArgs>? OnAdapterChanged;
 }

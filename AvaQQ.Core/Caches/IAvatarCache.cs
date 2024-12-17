@@ -30,4 +30,9 @@ public interface IAvatarCache
 	/// </param>
 	/// <param name="noCache">不使用缓存</param>
 	Task<Bitmap?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false);
+
+	/// <summary>
+	/// 释放用户头像
+	/// </summary>
+	void ReleaseGroupAvatars();
 }

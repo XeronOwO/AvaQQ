@@ -22,23 +22,23 @@ public class EntryViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref _icon, value);
 	}
 
-	private string _title = string.Empty;
+	private Task<string> _title = Task.FromResult(string.Empty);
 
 	/// <summary>
 	/// 标题
 	/// </summary>
-	public string Title
+	public Task<string> Title
 	{
 		get => _title;
 		set => this.RaiseAndSetIfChanged(ref _title, value);
 	}
 
-	private string _time = string.Empty;
+	private Task<string> _time = Task.FromResult(string.Empty);
 
 	/// <summary>
 	/// 时间
 	/// </summary>
-	public string Time
+	public Task<string> Time
 	{
 		get => _time;
 		set => this.RaiseAndSetIfChanged(ref _time, value);
