@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
-using AvaQQ.Core.Databases;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;

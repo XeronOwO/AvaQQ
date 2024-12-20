@@ -1,7 +1,6 @@
 ﻿using Avalonia.Markup.Xaml;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
-using AvaQQ.Core.Databases;
 using AvaQQ.Core.ViewModels;
 using AvaQQ.Core.Views.Connecting;
 using AvaQQ.Core.Views.MainPanels;
