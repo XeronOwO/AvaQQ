@@ -36,13 +36,13 @@ public interface IGroupCache
 	/// 获取群聊最新消息
 	/// </summary>
 	/// <param name="group">群号</param>
-	Task<GroupMessageEntry?> GetLatestMessageEntryAsync(ulong group);
+	GroupMessageEntry? GetLatestMessageEntry(ulong group);
 
 	/// <summary>
 	/// 获取群聊最新消息时间
 	/// </summary>
 	/// <param name="group">群号</param>
-	Task<string> GetLatestMessageTimeAsync(ulong group);
+	string GetLatestMessageTime(ulong group);
 
 	/// <summary>
 	/// 获取群聊最新消息预览
@@ -54,4 +54,15 @@ public interface IGroupCache
 	/// 当收到群消息时触发
 	/// </summary>
 	void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e);
+
+	/// <summary>
+	/// 开始同步消息任务
+	/// </summary>
+	/// <param name="token">取消令牌</param>
+	void StartMessageSyncTask(CancellationToken token);
+
+	/// <summary>
+	/// 当有内容更新时触发
+	/// </summary>
+	event EventHandler? OnUpdated;
 }

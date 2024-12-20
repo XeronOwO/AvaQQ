@@ -33,12 +33,12 @@ public class EntryViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref _title, value);
 	}
 
-	private Task<string> _time = Task.FromResult(string.Empty);
+	private string _time = string.Empty;
 
 	/// <summary>
 	/// 时间
 	/// </summary>
-	public Task<string> Time
+	public string Time
 	{
 		get => _time;
 		set => this.RaiseAndSetIfChanged(ref _time, value);

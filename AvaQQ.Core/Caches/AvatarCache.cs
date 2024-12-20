@@ -162,8 +162,12 @@ internal class AvatarCache : IAvatarCache
 		return cache.Avatar;
 	}
 
-	public void ReleaseGroupAvatars()
+	public void ClearGroupAvatars()
 	{
+		foreach (var (_, group) in _groups)
+		{
+			group.Clear();
+		}
 		_groups.Clear();
 	}
 

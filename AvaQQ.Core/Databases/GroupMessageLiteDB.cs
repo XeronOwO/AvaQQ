@@ -24,6 +24,18 @@ internal class GroupMessageLiteDB : GroupMessageDatabase
 			.Find(Query.All(nameof(GroupMessageEntry.Time), Query.Descending), limit: 1)
 			.FirstOrDefault();
 
+	public override void Sync(ulong groupUin, IEnumerable<GroupMessageEntry> entries)
+	{
+		var collection = GetOrCreateDatabase(groupUin)
+			.GetCollection<GroupMessageEntry>("messages");
+
+		collection.InsertBulk(
+			entries.Where(entry => !collection.Exists(
+				record => record.MessageId == entry.MessageId && record.Time == entry.Time
+			))
+		);
+	}
+
 	#region Dispose
 
 	private bool disposedValue;

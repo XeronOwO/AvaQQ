@@ -1,6 +1,4 @@
-﻿using AvaQQ.Core.Adapters;
-
-namespace AvaQQ.Core.Databases;
+﻿namespace AvaQQ.Core.Databases;
 
 /// <summary>
 /// 群消息数据库
@@ -21,10 +19,9 @@ public abstract class GroupMessageDatabase : Database
 	public abstract GroupMessageEntry? Latest(ulong groupUin);
 
 	/// <summary>
-	/// 当收到群消息时触发
+	/// 同步群消息
 	/// </summary>
-	public void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
-	{
-		Insert(e.GroupUin, e);
-	}
+	/// <param name="groupUin">群号</param>
+	/// <param name="entries">条目</param>
+	public abstract void Sync(ulong groupUin, IEnumerable<GroupMessageEntry> entries);
 }

@@ -1,5 +1,6 @@
 ﻿using Avalonia.Markup.Xaml;
 using AvaQQ.Core.Adapters;
+using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.ViewModels;
 using AvaQQ.Core.Views.Connecting;
@@ -16,14 +17,17 @@ internal partial class App : AppBase, IDisposable
 
 	private readonly IAdapterProvider _adapterProvider;
 
-	private readonly GroupMessageDatabase _groupMessageDatabase;
+	private readonly IGroupCache _groupCache;
+
+	private readonly IAvatarCache _avatarCache;
 
 	private readonly ILogger<App> _logger;
 
 	public App(
 		IServiceProvider serviceProvider,
 		IAdapterProvider adapterProvider,
-		GroupMessageDatabase groupMessageDatabase,
+		IGroupCache groupCache,
+		IAvatarCache avatarCache,
 		ILogger<App> logger
 		) : base(
 			serviceProvider.GetRequiredService<ILogger<AppBase>>(),
@@ -32,7 +36,8 @@ internal partial class App : AppBase, IDisposable
 	{
 		_serviceProvider = serviceProvider;
 		_adapterProvider = adapterProvider;
-		_groupMessageDatabase = groupMessageDatabase;
+		_groupCache = groupCache;
+		_avatarCache = avatarCache;
 		_logger = logger;
 
 		DataContext = new AppViewModel();
@@ -41,7 +46,8 @@ internal partial class App : AppBase, IDisposable
 	public App() : this(
 		DesignerServiceProviderHelper.Root,
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterProvider>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<GroupMessageDatabase>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<IGroupCache>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
 		DesignerServiceProviderHelper.Root.GetRequiredService<ILogger<App>>()
 		)
 	{
@@ -124,6 +130,8 @@ internal partial class App : AppBase, IDisposable
 		}
 
 		OpenMainPanelWindow();
+
+		_groupCache.StartMessageSyncTask(_lifetime.CancellationTokenSource.Token);
 	}
 
 	private IServiceScope? _mainPanelScope;
@@ -143,8 +151,18 @@ internal partial class App : AppBase, IDisposable
 		_logger.LogInformation("{Window} closed.", nameof(MainPanelWindow));
 
 		MainWindow = null;
+
+		TryReleaseMainPanelResources();
+	}
+
+	private void TryReleaseMainPanelResources()
+	{
+		// TODO: 多窗口全部关闭时才释放资源
+
 		_mainPanelScope?.Dispose();
 		_mainPanelScope = null;
+
+		_avatarCache.ClearGroupAvatars();
 	}
 
 	#region Dispose

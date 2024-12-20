@@ -6,7 +6,7 @@ namespace AvaQQ.Core.Adapters;
 /// <summary>
 /// 群消息事件参数
 /// </summary>
-public class GroupMessageEventArgs
+public class GroupMessageEventArgs : EventArgs
 {
 	/// <summary>
 	/// 类型

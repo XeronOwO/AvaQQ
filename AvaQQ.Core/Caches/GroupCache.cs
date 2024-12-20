@@ -233,45 +233,43 @@ internal class GroupCache(
 
 	#region 消息
 
-	private readonly ConcurrentDictionary<ulong, Task<GroupMessageEntry?>> _latestMessages = [];
+	private readonly ConcurrentDictionary<ulong, GroupMessageEntry?> _latestMessages = [];
 
-	private async Task<GroupMessageEntry?> GetLatestMessageEntryInternalAsync(ulong group)
+	private GroupMessageEntry? GetLatestMessageEntryInternal(ulong group)
+		=> groupMessageDatabase.Latest(group);
+
+	public GroupMessageEntry? GetLatestMessageEntry(ulong group)
+		=> _latestMessages.GetOrAdd(group, GetLatestMessageEntryInternal);
+
+	private bool TryUpdateLatestMessage(GroupMessageEventArgs e)
 	{
-		try
+		if (!_latestMessages.TryGetValue(e.GroupUin, out var entry))
 		{
-			if (groupMessageDatabase.Latest(group) is { } result)
-			{
-				return result;
-			}
-
-			if (adapterProvider.Adapter is not { } adapter)
-			{
-				throw new InvalidOperationException("Adapter is not available.");
-			}
-
-			// TODO: 从服务器拉取最新消息
-
-			return null;
+			return false;
 		}
-		catch (Exception e)
+		if (entry is not null && entry.Time > e.Time)
 		{
-			logger.LogError(e, "Failed to get latest message of group {GroupUin}.", group);
-			return null;
+			return false;
 		}
+
+		_latestMessages[e.GroupUin] = e;
+		_latestMessageTimes.TryRemove(e.GroupUin, out _);
+		_latestMessagePreviews.TryRemove(e.GroupUin, out _);
+
+		OnUpdated?.Invoke(this, e);
+
+		return true;
 	}
-
-	public Task<GroupMessageEntry?> GetLatestMessageEntryAsync(ulong group)
-		=> _latestMessages.GetOrAdd(group, GetLatestMessageEntryInternalAsync);
 
 	#endregion
 
 	#region 时间
 
-	private readonly ConcurrentDictionary<ulong, Task<string>> _latestMessageTimes = [];
+	private readonly ConcurrentDictionary<ulong, string> _latestMessageTimes = [];
 
-	private async Task<string> GetLatestMessageTimeInternalAsync(ulong group)
+	private string GetLatestMessageTimeInternal(ulong group)
 	{
-		if (await GetLatestMessageEntryAsync(group) is not { } entry)
+		if (GetLatestMessageEntry(group) is not { } entry)
 		{
 			return string.Empty;
 		}
@@ -279,8 +277,8 @@ internal class GroupCache(
 		return entry.Time.ToLocalTime().ToString("HH:mm");
 	}
 
-	public Task<string> GetLatestMessageTimeAsync(ulong group)
-		=> _latestMessageTimes.GetOrAdd(group, GetLatestMessageTimeInternalAsync);
+	public string GetLatestMessageTime(ulong group)
+		=> _latestMessageTimes.GetOrAdd(group, GetLatestMessageTimeInternal);
 
 	#endregion
 
@@ -339,7 +337,7 @@ internal class GroupCache(
 
 	private async Task<string> GetLatestMessagePreviewInternalAsync(ulong group)
 	{
-		if (await GetLatestMessageEntryAsync(group) is not { } entry)
+		if (GetLatestMessageEntry(group) is not { } entry)
 		{
 			return string.Empty;
 		}
@@ -352,11 +350,74 @@ internal class GroupCache(
 
 	#endregion
 
+	#region 同步
+
+	public void StartMessageSyncTask(CancellationToken token)
+		=> Task.Run(() => SyncMessageAsync(token), token);
+
+	private async Task SyncMessageAsync(CancellationToken token)
+	{
+		try
+		{
+			await PreSyncMessageAsync(token);
+			await PostSyncMessageAsync(token);
+
+			logger.LogInformation("Message sync task finished successfully.");
+		}
+		catch (OperationCanceledException)
+		{
+			logger.LogInformation("Message sync task has been canceled.");
+		}
+		catch (Exception e)
+		{
+			logger.LogError(e, "Message sync task exited unexpectedly.");
+		}
+	}
+
+	public event EventHandler? OnUpdated;
+
+	/// <summary>
+	/// 预同步消息<br/>
+	/// 只会同步部分最新消息，不会同步全部历史消息
+	/// </summary>
+	private async Task PreSyncMessageAsync(CancellationToken token)
+	{
+		if (adapterProvider.Adapter is not { } adapter)
+		{
+			throw new InvalidOperationException("Adapter is not available.");
+		}
+
+		foreach (var group in await GetAllGroupInfosAsync())
+		{
+			var eventArgs = await adapter.GetGroupMessageHistoryAsync(group.Uin, 0, Config.Instance.PreSyncMessageCount);
+
+			foreach (var eventArg in eventArgs)
+			{
+				TryUpdateLatestMessage(eventArg);
+			}
+
+			groupMessageDatabase.Sync(group.Uin, eventArgs.Select(e => (GroupMessageEntry)e));
+		}
+	}
+
+	/// <summary>
+	/// 后同步消息<br/>
+	/// 同步全部历史消息
+	/// </summary>
+	private Task PostSyncMessageAsync(CancellationToken token)
+	{
+		// TODO: 同步全部历史消息
+
+		return Task.CompletedTask;
+	}
+
+	#endregion
+
 	public void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
 	{
-		_latestMessages[e.GroupUin] = Task.FromResult<GroupMessageEntry?>(e);
-		_latestMessageTimes.TryRemove(e.GroupUin, out _);
-		_latestMessagePreviews.TryRemove(e.GroupUin, out _);
+		TryUpdateLatestMessage(e);
+
+		groupMessageDatabase.Insert(e.GroupUin, e);
 	}
 
 	#endregion

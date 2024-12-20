@@ -51,6 +51,8 @@ internal class Adapter : IAdapter
 		_friendManager = serviceProvider.GetRequiredService<IFriendCache>();
 	}
 
+	#region API
+
 	public ulong Uin => _makabaka.BotContext.SelfId;
 
 	public async Task<string> GetNicknameAsync()
@@ -183,6 +185,38 @@ internal class Adapter : IAdapter
 		}
 	}
 
+	public async Task<IEnumerable<AGroupMessageEventArgs>> GetGroupMessageHistoryAsync(ulong groupUin, ulong messageId, uint count)
+	{
+		try
+		{
+			var info = (await _makabaka.BotContext.GetGroupMessageHistoryAsync(groupUin, (long)messageId, count)).Result;
+			return info.Messages.Select(m => new AGroupMessageEventArgs()
+			{
+				Type = m.SubType.ToAvaQQ(),
+				MessageId = (ulong)m.MessageId,
+				Time = m.Time,
+				GroupUin = m.GroupId,
+				SenderUin = m.UserId,
+				Message = m.Message.ToAvaQQ(_logger),
+				SenderNickname = m.Sender!.Nickname,
+				SenderGroupNickname = m.Sender!.Card,
+				SenderRemark = string.Empty,
+				SenderLevel = int.Parse(m.Sender!.Level),
+				SenderRole = m.Sender!.Role.ToAvaQQ(),
+				SpecificTitle = m.Sender!.Title,
+			});
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to fetch group history messages of {GroupUin}.", groupUin);
+			return [];
+		}
+	}
+
+	#endregion
+
+	#region 事件
+
 	public event EventHandler<AGroupMessageEventArgs>? OnGroupMessage;
 
 	private async Task BotContext_OnGroupMessage(object sender, MGroupMessageEventArgs e)
@@ -224,6 +258,8 @@ internal class Adapter : IAdapter
 
 		OnGroupMessage.Invoke(this, eventArgs);
 	}
+
+	#endregion
 
 	#region Dispose
 

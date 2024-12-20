@@ -21,23 +21,18 @@ public partial class GroupListView : UserControl
 
 	private readonly IAvatarCache _avatarCache;
 
-	private readonly GroupMessageDatabase _groupMessageDatabase;
-
 	/// <summary>
 	/// 创建群聊列表视图
 	/// </summary>
 	public GroupListView(
-		IAdapterProvider adapterProvider,
 		IGroupCache groupCache,
-		IAvatarCache avatarCache,
-		GroupMessageDatabase groupMessageDatabase
+		IAvatarCache avatarCache
 		)
 	{
 		CirculationInjectionDetector<GroupListView>.Enter();
 
 		_groupCache = groupCache;
 		_avatarCache = avatarCache;
-		_groupMessageDatabase = groupMessageDatabase;
 
 		DataContext = new GroupListViewModel();
 		InitializeComponent();
@@ -45,10 +40,7 @@ public partial class GroupListView : UserControl
 		Loaded += GroupListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-		if (adapterProvider.Adapter is { } adapter)
-		{
-			adapter.OnGroupMessage += Adapter_OnGroupMessage;
-		}
+		groupCache.OnUpdated += GroupCache_OnUpdated;
 
 		CirculationInjectionDetector<GroupListView>.Leave();
 	}
@@ -57,10 +49,8 @@ public partial class GroupListView : UserControl
 	/// 创建群聊列表视图
 	/// </summary>
 	public GroupListView() : this(
-		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterProvider>(),
 		DesignerServiceProviderHelper.Root.GetRequiredService<IGroupCache>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<GroupMessageDatabase>()
+		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>()
 		)
 	{
 	}
@@ -246,7 +236,7 @@ public partial class GroupListView : UserControl
 
 			model.Icon = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
 			model.Title = _groupCache.GetGroupNameAsync(group.Uin);
-			model.Time = _groupCache.GetLatestMessageTimeAsync(group.Uin);
+			model.Time = _groupCache.GetLatestMessageTime(group.Uin);
 			model.Content = _groupCache.GetLatestMessagePreviewAsync(group.Uin);
 
 			Grid.SetRow(entry, groupIndex);
@@ -277,7 +267,7 @@ public partial class GroupListView : UserControl
 		UpdateDisplayedEntries();
 	}
 
-	private void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e)
+	private void GroupCache_OnUpdated(object? sender, EventArgs e)
 	{
 		Dispatcher.UIThread.Invoke(UpdateDisplayedEntries);
 	}

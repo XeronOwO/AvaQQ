@@ -38,6 +38,14 @@ public interface IAdapter : IDisposable
 	Task<IEnumerable<GroupMemberInfo>> GetGroupMemberListAsync(ulong groupUin);
 
 	/// <summary>
+	/// 获取群历史消息
+	/// </summary>
+	/// <param name="groupUin">群号</param>
+	/// <param name="messageId">消息 ID</param>
+	/// <param name="count">数量</param>
+	Task<IEnumerable<GroupMessageEventArgs>> GetGroupMessageHistoryAsync(ulong groupUin, ulong messageId, uint count);
+
+	/// <summary>
 	/// 当收到群消息时触发
 	/// </summary>
 	event EventHandler<GroupMessageEventArgs>? OnGroupMessage;

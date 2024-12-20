@@ -32,7 +32,7 @@ public interface IAvatarCache
 	Task<Bitmap?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false);
 
 	/// <summary>
-	/// 释放用户头像
+	/// 只移除引用，实际释放内存由 GC 完成
 	/// </summary>
-	void ReleaseGroupAvatars();
+	void ClearGroupAvatars();
 }

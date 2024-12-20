@@ -47,13 +47,11 @@ internal class AdapterProvider : IAdapterProvider
 	{
 		if (e.Old is not null)
 		{
-			e.Old.OnGroupMessage -= GroupMessageDatabase.Adapter_OnGroupMessage;
 			e.Old.OnGroupMessage -= GroupCache.Adapter_OnGroupMessage;
 		}
 
 		if (e.New is not null)
 		{
-			e.New.OnGroupMessage += GroupMessageDatabase.Adapter_OnGroupMessage;
 			e.New.OnGroupMessage += GroupCache.Adapter_OnGroupMessage;
 		}
 	}
