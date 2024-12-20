@@ -43,28 +43,28 @@ internal static class ConvertExtensions
 		};
 	}
 
-	public static AvaQQ.Core.Messages.Segment? ToAvaQQ(this Makabaka.Messages.Segment segment, ILogger logger)
+	public static Core.Messages.Segment? ToAvaQQ(this Makabaka.Messages.Segment segment, ILogger logger)
 	{
 		switch (segment)
 		{
 			case Makabaka.Messages.AtSegment at:
-				return new AvaQQ.Core.Messages.AtSegment()
+				return new Core.Messages.AtSegment()
 				{
 					Uin = at.Data.QQ == "all" ? 0 : ulong.Parse(at.Data.QQ),
 				};
 			case Makabaka.Messages.FaceSegment face:
-				return new AvaQQ.Core.Messages.FaceSegment()
+				return new Core.Messages.FaceSegment()
 				{
 					Id = ulong.Parse(face.Data.Id),
 					IsLarge = face.Data.IsLarge,
 				};
 			case Makabaka.Messages.ForwardSegment forward:
-				return new AvaQQ.Core.Messages.ForwardSegment()
+				return new Core.Messages.ForwardSegment()
 				{
 					ResId = forward.Data.Id,
 				};
 			case Makabaka.Messages.ImageSegment image:
-				return new AvaQQ.Core.Messages.ImageSegment()
+				return new Core.Messages.ImageSegment()
 				{
 					Filename = image.Data.Filename!,
 					Url = image.Data.Url!,
@@ -72,21 +72,26 @@ internal static class ConvertExtensions
 					Summary = image.Data.Summary,
 				};
 			case Makabaka.Messages.NodeSegment node:
-				return new AvaQQ.Core.Messages.NodeSegment()
+				return new Core.Messages.NodeSegment()
 				{
 					Uin = ulong.Parse(node.Data.Id!),
 					DisplayName = node.Data.Nickname!,
 					Content = node.Data.Content!.ToAvaQQ(logger),
 				};
 			case Makabaka.Messages.ReplySegment reply:
-				return new AvaQQ.Core.Messages.ReplySegment()
+				return new Core.Messages.ReplySegment()
 				{
 					MessageId = (ulong)long.Parse(reply.Data.Id),
 				};
 			case Makabaka.Messages.TextSegment text:
-				return new AvaQQ.Core.Messages.TextSegment()
+				return new Core.Messages.TextSegment()
 				{
 					Text = text.Data.Text,
+				};
+			case Makabaka.Messages.JsonSegment json:
+				return new Core.Messages.JsonSegment()
+				{
+					Data = json.Data.Data,
 				};
 			default:
 				logger.LogWarning("Unsupported segment type: {Type}", segment.GetType());
@@ -94,9 +99,9 @@ internal static class ConvertExtensions
 		}
 	}
 
-	public static AvaQQ.Core.Messages.Message ToAvaQQ(this Makabaka.Messages.Message message, ILogger logger)
+	public static Core.Messages.Message ToAvaQQ(this Makabaka.Messages.Message message, ILogger logger)
 	{
-		var result = new AvaQQ.Core.Messages.Message();
+		var result = new Core.Messages.Message();
 		foreach (var segment in message)
 		{
 			var segment1 = segment.ToAvaQQ(logger);
