@@ -22,8 +22,7 @@ public static class FileLoggerExtensions
 			ServiceDescriptor.Singleton<ILoggerProvider, FileLoggerProvider>()
 		);
 
-		LoggerProviderOptions.RegisterProviderOptions
-			<FileLoggerConfiguration, FileLoggerProvider>(builder.Services);
+		LoggerProviderOptions.RegisterProviderOptions<LoggerFilterOptions, FileLoggerProvider>(builder.Services);
 
 		return builder;
 	}
