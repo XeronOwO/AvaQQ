@@ -310,6 +310,9 @@ internal class GroupCache(
 				case ImageSegment image:
 					sb.Append(image.Summary);
 					break;
+				case MarketFaceSegment marketFace:
+					sb.Append(marketFace.Summary);
+					break;
 				case ReplySegment:
 					break;
 				case TextSegment { Text: { } } text:

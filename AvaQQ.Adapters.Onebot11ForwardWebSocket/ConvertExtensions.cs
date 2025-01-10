@@ -71,6 +71,15 @@ internal static class ConvertExtensions
 					SubType = image.Data.SubType,
 					Summary = image.Data.Summary,
 				};
+			case Makabaka.Messages.MarketFaceSegment json:
+				return new Core.Messages.MarketFaceSegment()
+				{
+					Url = json.Data.Url,
+					EmojiPackageId = json.Data.EmojiPackageId,
+					EmojiId = json.Data.EmojiId,
+					Key = json.Data.Key,
+					Summary = json.Data.Summary,
+				};
 			case Makabaka.Messages.NodeSegment node:
 				return new Core.Messages.NodeSegment()
 				{
