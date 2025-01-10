@@ -243,11 +243,9 @@ internal class GroupCache(
 
 	private bool TryUpdateLatestMessage(GroupMessageEventArgs e)
 	{
-		if (!_latestMessages.TryGetValue(e.GroupUin, out var entry))
-		{
-			return false;
-		}
-		if (entry is not null && entry.Time > e.Time)
+		if (_latestMessages.TryGetValue(e.GroupUin, out var entry)
+			&& entry is not null
+			&& entry.Time > e.Time)
 		{
 			return false;
 		}
@@ -391,12 +389,12 @@ internal class GroupCache(
 		{
 			var eventArgs = await adapter.GetGroupMessageHistoryAsync(group.Uin, 0, Config.Instance.PreSyncMessageCount);
 
+			groupMessageDatabase.Sync(group.Uin, eventArgs.Select(e => (GroupMessageEntry)e));
+
 			foreach (var eventArg in eventArgs)
 			{
 				TryUpdateLatestMessage(eventArg);
 			}
-
-			groupMessageDatabase.Sync(group.Uin, eventArgs.Select(e => (GroupMessageEntry)e));
 		}
 	}
 

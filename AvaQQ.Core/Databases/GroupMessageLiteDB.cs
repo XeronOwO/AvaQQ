@@ -15,14 +15,16 @@ internal class GroupMessageLiteDB : GroupMessageDatabase
 
 	public override void Insert(ulong groupUin, GroupMessageEntry entry)
 		=> GetOrCreateDatabase(groupUin)
-			.GetCollection<GroupMessageEntry>("messages")
-			.Insert(entry);
+		.GetCollection<GroupMessageEntry>("messages")
+		.Insert(entry);
 
 	public override GroupMessageEntry? Latest(ulong groupUin)
 		=> GetOrCreateDatabase(groupUin)
-			.GetCollection<GroupMessageEntry>("messages")
-			.Find(Query.All(nameof(GroupMessageEntry.Time), Query.Descending), limit: 1)
-			.FirstOrDefault();
+		.GetCollection<GroupMessageEntry>("messages")
+		.Query()
+		.OrderByDescending(x => x.Time)
+		.Limit(1)
+		.FirstOrDefault();
 
 	public override void Sync(ulong groupUin, IEnumerable<GroupMessageEntry> entries)
 	{
