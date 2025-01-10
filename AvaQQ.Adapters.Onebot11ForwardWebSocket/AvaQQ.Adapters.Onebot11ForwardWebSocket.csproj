@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Makabaka" Version="2.0.1.3" />
+		<PackageReference Include="Makabaka" Version="2.0.1.4" />
 	</ItemGroup>
 
 	<ItemGroup>

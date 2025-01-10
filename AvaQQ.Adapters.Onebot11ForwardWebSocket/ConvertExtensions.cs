@@ -56,7 +56,7 @@ internal static class ConvertExtensions
 				return new Core.Messages.FaceSegment()
 				{
 					Id = ulong.Parse(face.Data.Id),
-					IsLarge = face.Data.IsLarge,
+					IsLarge = face.Data.IsLarge ?? false,
 				};
 			case Makabaka.Messages.ForwardSegment forward:
 				return new Core.Messages.ForwardSegment()
