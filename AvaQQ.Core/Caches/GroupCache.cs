@@ -135,66 +135,64 @@ internal class GroupCache(
 
 	#region 群成员信息
 
-	private class MemberCache
+	private async Task<Dictionary<ulong, GroupMemberInfo>> GetAllGroupMemberInfosInternalAsync(ulong groupUin)
 	{
-		public DateTime LastUpdateTime { get; set; } = DateTime.MinValue;
+		try
+		{
+			if (adapterProvider.Adapter is not { } adapter)
+			{
+				throw new InvalidOperationException("Adapter is not available.");
+			}
 
-		public ConcurrentDictionary<ulong, GroupMemberInfo> Members { get; } = [];
+			var memberList = await adapter.GetGroupMemberListAsync(groupUin);
+			var result = new Dictionary<ulong, GroupMemberInfo>();
+			foreach (var member in memberList)
+			{
+				result[member.Uin] = member;
+			}
+			return result;
+		}
+		catch (Exception e)
+		{
+			logger.LogError(e, "Failed to update group member list of group {GroupUin}.", groupUin);
+			return [];
+		}
+	}
+
+	private class MemberCache(Task<Dictionary<ulong, GroupMemberInfo>> task)
+	{
+		public DateTime LastUpdateTime { get; set; } = DateTime.Now;
+
+		public Task<Dictionary<ulong, GroupMemberInfo>> Task { get; set; } = task;
 
 		public bool RequiresUpdate
 			=> DateTime.Now - LastUpdateTime > Config.Instance.GroupMemberUpdateInterval;
 	}
 
-	private readonly ConcurrentDictionary<ulong, MemberCache> _memberCaches = [];
+	private readonly ReaderWriterLockSlim _memberCacheLock = new();
 
-	private async Task UpdateMemberListAsync(ulong groupUin)
+	private readonly Dictionary<ulong, MemberCache> _memberCaches = [];
+
+	public Task<Dictionary<ulong, GroupMemberInfo>> GetAllGroupMemberInfosAsync(ulong groupUin, bool noCache = false)
 	{
-		if (adapterProvider.Adapter is not { } adapter)
+		_memberCacheLock.EnterReadLock();
+
+		if (!_memberCaches.TryGetValue(groupUin, out var cache)
+			|| cache.RequiresUpdate)
 		{
-			return;
+			_memberCacheLock.ExitReadLock();
+
+			_memberCacheLock.EnterWriteLock();
+			var task = GetAllGroupMemberInfosInternalAsync(groupUin);
+			_memberCaches[groupUin] = new MemberCache(task);
+			_memberCacheLock.ExitWriteLock();
+
+			return task;
 		}
 
-		try
-		{
-			var memberList = await adapter.GetGroupMemberListAsync(groupUin);
-			var cache = _memberCaches.GetOrAdd(groupUin, _ => new());
-			cache.Members.Clear();
-			foreach (var member in memberList)
-			{
-				cache.Members[member.Uin] = member;
-			}
-			cache.LastUpdateTime = DateTime.Now;
-		}
-		catch (Exception e)
-		{
-			logger.LogError(e, "Failed to update group member list of group {GroupUin}.", groupUin);
-		}
-	}
+		_memberCacheLock.ExitReadLock();
 
-	public async Task<GroupMemberInfo[]> GetAllGroupMemberInfosAsync(ulong groupUin, bool noCache = false)
-	{
-		if (_memberCaches.TryGetValue(groupUin, out var cache)
-			&& !cache.RequiresUpdate
-			&& !noCache)
-		{
-			return [.. cache.Members.Values];
-		}
-		await UpdateMemberListAsync(groupUin);
-		return [.. _memberCaches[groupUin].Members.Values];
-	}
-
-	public async Task<GroupMemberInfo?> GetGroupMemberInfoAsync(ulong groupUin, ulong memberUin, bool noCache = false)
-	{
-		if (_memberCaches.TryGetValue(groupUin, out var cache)
-			&& !cache.RequiresUpdate
-			&& !noCache
-			&& cache.Members.TryGetValue(memberUin, out var info))
-		{
-			return info;
-		}
-		await UpdateMemberListAsync(groupUin);
-		return _memberCaches[groupUin].Members.TryGetValue(memberUin, out info) ?
-			info : null;
+		return cache.Task;
 	}
 
 	public async Task<string> ResolveGroupMemberDisplayNameAsync(ulong groupUin, ulong memberUin, bool noCache = false)
@@ -206,7 +204,7 @@ internal class GroupCache(
 			return friend.Remark; // 优先备注名
 		}
 
-		if (await GetGroupMemberInfoAsync(groupUin, memberUin, noCache) is { } member
+		if ((await GetAllGroupMemberInfosAsync(groupUin, noCache)).TryGetValue(memberUin, out var member)
 			&& !string.IsNullOrEmpty(member.Card))
 		{
 			return member.Card; // 其次群名片
