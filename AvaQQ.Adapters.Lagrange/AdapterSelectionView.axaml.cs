@@ -25,14 +25,14 @@ public partial class AdapterSelectionView : UserControl
 	private ConnectWindow ConnectWindow => _lazyConnectWindow.Value;
 
 	public AdapterSelectionView(IServiceProvider serviceProvider)
-    {
+	{
 		_logger = serviceProvider.GetRequiredService<ILogger<AdapterSelectionView>>();
 		_serviceProvider = serviceProvider;
 		_lazyConnectWindow = new(serviceProvider.GetRequiredService<ConnectWindow>);
 		_controller = serviceProvider.GetRequiredService<IAppLifetimeController>();
 
 		DataContext = new AdapterSelectionViewModel();
-        InitializeComponent();
+		InitializeComponent();
 	}
 
 	public AdapterSelectionView() : this(

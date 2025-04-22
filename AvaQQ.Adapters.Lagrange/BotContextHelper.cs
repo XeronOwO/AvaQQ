@@ -1,7 +1,7 @@
 ﻿using AvaQQ.SDK;
-using Lagrange.Core.Common.Interface;
-using Lagrange.Core.Common;
 using Lagrange.Core;
+using Lagrange.Core.Common;
+using Lagrange.Core.Common.Interface;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 

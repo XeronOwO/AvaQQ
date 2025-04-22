@@ -26,10 +26,6 @@ internal class Adapter : IAdapter
 		_context.Invoker.OnBotLogEvent += OnBotLog;
 	}
 
-	#region 创建上下文
-
-	#endregion
-
 	private void OnBotLog(BotContext context, BotLogEvent e)
 	{
 		_botLogger.Log(e.Level switch

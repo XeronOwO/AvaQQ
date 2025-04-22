@@ -42,10 +42,10 @@ internal class AppService(
 					TrayIcons? trays = TrayIcon.GetIcons(application);
 					if (trays != null)
 					{
-					    foreach (TrayIcon tray in trays)
-					    {
-					        tray.Dispose();
-					    }
+						foreach (TrayIcon tray in trays)
+						{
+							tray.Dispose();
+						}
 					}
 					_ = host.StopAsync();
 				}
