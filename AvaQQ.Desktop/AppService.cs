@@ -38,6 +38,15 @@ internal class AppService(
 				{
 					app.Run(lifetime.CancellationToken);
 					pluginManager.UnloadPlugins(serviceProvider);
+					// Clean tray icon
+					TrayIcons? trays = TrayIcon.GetIcons(application);
+					if (trays != null)
+					{
+					    foreach (TrayIcon tray in trays)
+					    {
+					        tray.Dispose();
+					    }
+					}
 					_ = host.StopAsync();
 				}
 			}, Environment.GetCommandLineArgs());
