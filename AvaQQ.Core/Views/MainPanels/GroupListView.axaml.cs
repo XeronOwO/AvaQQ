@@ -101,39 +101,14 @@ public partial class GroupListView : UserControl
 
 	#endregion
 
-	private static bool Compare<T>(T[] left, List<T> right)
-		where T : class
-	{
-		if (left.Length != right.Count)
-		{
-			return false;
-		}
-
-		for (int i = 0; i < left.Length; i++)
-		{
-			if (left[i] != right[i])
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	#region Ⱥ
 
 	private readonly List<CachedGroupInfo> _groups = [];
 
 	private void UpdateGroups(CachedGroupInfo[] groups)
 	{
-		var oldGroups = _groups.ToArray();
 		_groups.Clear();
 		_groups.AddRange(groups);
-
-		if (Compare(oldGroups, _groups))
-		{
-			return;
-		}
 
 		UpdateFilteredGroups();
 	}
@@ -166,7 +141,6 @@ public partial class GroupListView : UserControl
 
 	private void UpdateFilteredGroups()
 	{
-		var oldFilteredGroups = _filteredGroups.ToArray();
 		_filteredGroups.Clear();
 
 		var filter = Filter;
@@ -183,11 +157,6 @@ public partial class GroupListView : UserControl
 					_filteredGroups.Add(group);
 				}
 			}
-		}
-
-		if (Compare(oldFilteredGroups, _filteredGroups))
-		{
-			return;
 		}
 
 		UpdateDisplayedEntries();
@@ -274,7 +243,7 @@ public partial class GroupListView : UserControl
 			var entry = _displayedEntries[i];
 			var model = (EntryViewModel)entry.DataContext!;
 			model.Icon = _avatarCache.GetGroupAvatar(group.Uin, 40);
-			model.Title = group.Name;
+			model.Title = group.Remark ?? group.Name;
 			Grid.SetRow(entry, groupIndex);
 		}
 	}

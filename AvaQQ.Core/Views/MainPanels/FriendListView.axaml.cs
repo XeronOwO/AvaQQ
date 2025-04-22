@@ -102,39 +102,14 @@ public partial class FriendListView : UserControl
 
 	#endregion
 
-	private static bool Compare<T>(T[] left, List<T> right)
-		where T : class
-	{
-		if (left.Length != right.Count)
-		{
-			return false;
-		}
-
-		for (int i = 0; i < left.Length; i++)
-		{
-			if (left[i] != right[i])
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	#region ºÃÓÑ
 
 	private readonly List<CachedUserInfo> _friends = [];
 
 	private void UpdateFriends(CachedUserInfo[] users)
 	{
-		var oldFriends = _friends.ToArray();
 		_friends.Clear();
 		_friends.AddRange(users);
-
-		if (Compare(oldFriends, _friends))
-		{
-			return;
-		}
 
 		UpdateFilteredFriends();
 	}
@@ -167,7 +142,6 @@ public partial class FriendListView : UserControl
 
 	private void UpdateFilteredFriends()
 	{
-		var oldFilteredGroups = _filteredFriends.ToArray();
 		_filteredFriends.Clear();
 
 		var filter = Filter;
@@ -184,11 +158,6 @@ public partial class FriendListView : UserControl
 					_filteredFriends.Add(friend);
 				}
 			}
-		}
-
-		if (Compare(oldFilteredGroups, _filteredFriends))
-		{
-			return;
 		}
 
 		UpdateDisplayedEntries();
@@ -275,7 +244,7 @@ public partial class FriendListView : UserControl
 			var entry = _displayedEntries[i];
 			var model = (EntryViewModel)entry.DataContext!;
 			model.Icon = _avatarCache.GetUserAvatar(friend.Uin, 40);
-			model.Title = friend.Nickname;
+			model.Title = friend.Remark ?? friend.Nickname;
 			Grid.SetRow(entry, friendIndex);
 		}
 	}
