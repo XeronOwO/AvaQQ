@@ -5,9 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace AvaQQ.Adapters.Onebot11ForwardWebSocket;
+namespace AvaQQ.Adapters.Lagrange;
 
-public class Ob11FWSPlugin : Plugin
+public class LagrangePlugin : Plugin
 {
 	public override void OnPreLoad(IHostBuilder hostBuilder)
 	{
@@ -17,28 +17,28 @@ public class Ob11FWSPlugin : Plugin
 				.AddScoped<AdapterSelectionView>();
 		});
 
-		FileLoggingExecutor.Information<Ob11FWSPlugin>($"{nameof(Ob11FWSPlugin)} preloaded.");
+		FileLoggingExecutor.Information<LagrangePlugin>($"{nameof(LagrangePlugin)} preloaded.");
 	}
 
-	private ILogger<Ob11FWSPlugin> _logger = null!;
+	private ILogger<LagrangePlugin> _logger = null!;
 
 	public override void OnLoad(IServiceProvider services)
 	{
-		_logger = services.GetRequiredService<ILogger<Ob11FWSPlugin>>();
+		_logger = services.GetRequiredService<ILogger<LagrangePlugin>>();
 
 		services.GetRequiredService<IAdapterSelectionProvider>()
 			.Register<AdapterSelection>();
 
-		_logger.LogInformation($"{nameof(Ob11FWSPlugin)} loaded.");
+		_logger.LogInformation($"{nameof(LagrangePlugin)} loaded.");
 	}
 
 	public override void OnPostLoad(IServiceProvider services)
 	{
-		_logger.LogInformation($"{nameof(Ob11FWSPlugin)} post loaded.");
+		_logger.LogInformation($"{nameof(LagrangePlugin)} post loaded.");
 	}
 
 	public override void OnUnload()
 	{
-		_logger.LogInformation($"{nameof(Ob11FWSPlugin)} unloaded.");
+		_logger.LogInformation($"{nameof(LagrangePlugin)} unloaded.");
 	}
 }

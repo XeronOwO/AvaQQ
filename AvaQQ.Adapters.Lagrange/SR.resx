@@ -120,16 +120,7 @@
   <data name="TextConnect" xml:space="preserve">
     <value>Connect</value>
   </data>
-  <data name="TextConnectFailed" xml:space="preserve">
-    <value>Failed to connect.</value>
-  </data>
-  <data name="TextInputAccessToken" xml:space="preserve">
-    <value>Input Access Token...</value>
-  </data>
-  <data name="TextInputUrl" xml:space="preserve">
-    <value>Input URL...</value>
-  </data>
-  <data name="TextOnebot11ForwardWebSocketAdapter" xml:space="preserve">
-    <value>Onebot 11 - Forward Web Socket Adapter</value>
+  <data name="TextLagrangeAdapter" xml:space="preserve">
+    <value>Lagrange Adapter</value>
   </data>
 </root>

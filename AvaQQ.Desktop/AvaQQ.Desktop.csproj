@@ -16,12 +16,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\AvaQQ.Adapters.Lagrange\AvaQQ.Adapters.Lagrange.csproj" />
 		<ProjectReference Include="..\AvaQQ\AvaQQ.csproj" />
 		<ProjectReference Include="..\AvaQQ.Core\AvaQQ.Core.csproj">
-			<Private>False</Private>
-			<ExcludeAssets>all</ExcludeAssets>
-		</ProjectReference>
-		<ProjectReference Include="..\AvaQQ.Adapters.Onebot11ForwardWebSocket\AvaQQ.Adapters.Onebot11ForwardWebSocket.csproj">
 			<Private>False</Private>
 			<ExcludeAssets>all</ExcludeAssets>
 		</ProjectReference>

@@ -4,13 +4,15 @@ namespace AvaQQ.Core;
 
 internal class AppLifetimeController : IAppLifetimeController
 {
-	public CancellationTokenSource CancellationTokenSource { get; } = new();
+	private readonly CancellationTokenSource _cts = new();
+
+	public CancellationToken CancellationToken => _cts.Token;
 
 	public event EventHandler? Stopping;
 
 	public void Stop()
 	{
 		Stopping?.Invoke(this, EventArgs.Empty);
-		CancellationTokenSource.Cancel();
+		_cts.Cancel();
 	}
 }

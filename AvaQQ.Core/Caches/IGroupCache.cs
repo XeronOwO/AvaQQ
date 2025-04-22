@@ -1,5 +1,4 @@
-﻿using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Databases;
+﻿using AvaQQ.Core.Events;
 
 namespace AvaQQ.Core.Caches;
 
@@ -9,60 +8,18 @@ namespace AvaQQ.Core.Caches;
 public interface IGroupCache
 {
 	/// <summary>
-	/// 手动更新群聊列表缓存
+	/// 获取所有群聊信息，包括已加入的、已退出的、搜索缓存的等<br/>
+	/// 如果触发更新，请订阅 <see cref="EventStation.GetAllJoinedGroups"/> 事件
 	/// </summary>
-	Task UpdateGroupListAsync();
+	/// <param name="predicate">描述</param>
+	/// <param name="forceUpdate">强制更新</param>
+	CachedGroupInfo[] GetGroups(Func<CachedGroupInfo, bool> predicate, bool forceUpdate = false);
 
 	/// <summary>
-	/// 获取所有群聊简略信息
-	/// </summary>
-	/// <param name="noCache">是否启用缓存</param>
-	Task<IEnumerable<GroupInfo>> GetAllGroupInfosAsync(bool noCache = false);
-
-	/// <summary>
-	/// 获取群聊简略信息
+	/// 获取加入的群聊信息<br/>
+	/// 如果触发更新，请订阅 <see cref="EventStation.GetJoinedGroup"/> 事件
 	/// </summary>
 	/// <param name="uin">群号</param>
-	/// <param name="noCache">是否启用缓存</param>
-	Task<GroupInfo?> GetGroupInfoAsync(ulong uin, bool noCache = false);
-
-	/// <summary>
-	/// 获取群聊名称
-	/// </summary>
-	/// <param name="uin">群号</param>
-	Task<string> GetGroupNameAsync(ulong uin);
-
-	/// <summary>
-	/// 获取群聊最新消息
-	/// </summary>
-	/// <param name="group">群号</param>
-	GroupMessageEntry? GetLatestMessageEntry(ulong group);
-
-	/// <summary>
-	/// 获取群聊最新消息时间
-	/// </summary>
-	/// <param name="group">群号</param>
-	string GetLatestMessageTime(ulong group);
-
-	/// <summary>
-	/// 获取群聊最新消息预览
-	/// </summary>
-	/// <param name="group">群号</param>
-	Task<string> GetLatestMessagePreviewAsync(ulong group);
-
-	/// <summary>
-	/// 当收到群消息时触发
-	/// </summary>
-	void Adapter_OnGroupMessage(object? sender, GroupMessageEventArgs e);
-
-	/// <summary>
-	/// 开始同步消息任务
-	/// </summary>
-	/// <param name="token">取消令牌</param>
-	void StartMessageSyncTask(CancellationToken token);
-
-	/// <summary>
-	/// 当有内容更新时触发
-	/// </summary>
-	event EventHandler? OnUpdated;
+	/// <param name="forceUpdate">强制更新</param>
+	CachedGroupInfo? GetJoinedGroup(ulong uin, bool forceUpdate = false);
 }

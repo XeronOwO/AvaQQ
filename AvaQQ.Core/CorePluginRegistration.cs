@@ -1,6 +1,7 @@
 ﻿using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
+using AvaQQ.Core.Events;
 using AvaQQ.Core.Logging;
 using AvaQQ.Core.MainPanels;
 using AvaQQ.Core.Views.Connecting;
@@ -38,11 +39,11 @@ internal static class CorePluginRegistration
 				.AddSingleton<IAdapterProvider, AdapterProvider>()
 				.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
 				.AddSingleton<ILogWindowProvider, LogWindowProvider>()
-				.AddSingleton<GroupMessageDatabase, GroupMessageLiteDB>()
+				.AddSingleton<Database, SqliteDatabase>()
 				.AddSingleton<IAvatarCache, AvatarCache>()
-				.AddSingleton<IFriendCache, FriendCache>()
 				.AddSingleton<IGroupCache, GroupCache>()
 				.AddSingleton<IUserCache, UserCache>()
+				.AddSingleton<EventStation>()
 				;
 		});
 

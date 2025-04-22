@@ -35,7 +35,7 @@
 			<!-- 圆形裁剪图片 -->
 			<Image Height="40"
 						 Width="40"
-						 Source="{Binding HeaderAvatar^}"
+						 Source="{Binding HeaderAvatar}"
 						 Margin="2">
 				<Image.Clip>
 					<EllipseGeometry Center="20,20"
@@ -73,7 +73,7 @@
 				<Grid Grid.Row="0">
 					<Button Padding="0"
 									Classes="transparent"
-									Content="{Binding HeaderName^}"
+									Content="{Binding HeaderName}"
 									HorizontalAlignment="Stretch"
 									Click="ButtonEditNickname_Click"/>
 				</Grid>

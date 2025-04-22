@@ -51,23 +51,23 @@ public class MainPanelViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref _headerUin, value);
 	}
 
-	private Task<Bitmap?> _headerAvatar = Task.FromResult<Bitmap?>(null);
+	private Bitmap? _headerAvatar = null;
 
 	/// <summary>
 	/// 顶部头像
 	/// </summary>
-	public Task<Bitmap?> HeaderAvatar
+	public Bitmap? HeaderAvatar
 	{
 		get => _headerAvatar;
 		set => this.RaiseAndSetIfChanged(ref _headerAvatar, value);
 	}
 
-	private Task<string> _headerName = Task.FromResult("User");
+	private string _headerName = "User";
 
 	/// <summary>
 	/// 顶部名称
 	/// </summary>
-	public Task<string> HeaderName
+	public string HeaderName
 	{
 		get => _headerName;
 		set => this.RaiseAndSetIfChanged(ref _headerName, value);

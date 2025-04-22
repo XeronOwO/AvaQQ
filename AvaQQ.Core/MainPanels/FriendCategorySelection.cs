@@ -57,7 +57,7 @@ internal class FriendCategorySelection : ICategorySelection
 		{
 			_view = null;
 			_watchdog.Stop();
-			_logger.LogInformation("FriendListView has been destroyed.");
+			_logger.LogDebug("FriendListView has been destroyed.");
 		}
 	}
 
@@ -69,13 +69,13 @@ internal class FriendCategorySelection : ICategorySelection
 	public void OnSelected()
 	{
 		_watchdog.Stop();
-		_logger.LogInformation("FriendListView has been stopped from destruction.");
+		_logger.LogDebug("FriendListView has been stopped from destruction.");
 	}
 
 	public void OnDeselected()
 	{
 		_watchdog.Start(Config.Instance.UnusedViewDestructionTime);
-		_logger.LogInformation(
+		_logger.LogDebug(
 			"FriendListView has been scheduled for destruction after {Delay}.",
 			Config.Instance.UnusedViewDestructionTime
 		);

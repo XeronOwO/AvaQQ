@@ -9,25 +9,28 @@ namespace AvaQQ.Core.ViewModels.MainPanels;
 /// </summary>
 public class EntryViewModel : ViewModelBase
 {
+	/// <summary>
+	/// ID
+	/// </summary>
 	public ulong Id { get; set; }
 
-	private Task<Bitmap?> _icon = Task.FromResult<Bitmap?>(null);
+	private Bitmap? _icon = null;
 
 	/// <summary>
 	/// 图标
 	/// </summary>
-	public Task<Bitmap?> Icon
+	public Bitmap? Icon
 	{
 		get => _icon;
 		set => this.RaiseAndSetIfChanged(ref _icon, value);
 	}
 
-	private Task<string> _title = Task.FromResult(string.Empty);
+	private string _title = string.Empty;
 
 	/// <summary>
 	/// 标题
 	/// </summary>
-	public Task<string> Title
+	public string Title
 	{
 		get => _title;
 		set => this.RaiseAndSetIfChanged(ref _title, value);

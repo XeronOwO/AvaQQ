@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
+using AvaQQ.Core.Events;
 
 namespace AvaQQ.Core.Caches;
 
@@ -14,10 +15,11 @@ public interface IAvatarCache
 	/// <param name="size">
 	/// 头像尺寸<br/>
 	/// 仅限官方支持的尺寸，例如 0、40、100、160、640，其中 0 是原图<br/>
-	/// 240可以获取默认头像（可能是官方BUG or 特性？）
+	/// 240可以获取默认头像，是一个企鹅（可能是特性？）
 	/// </param>
-	/// <param name="noCache">不使用缓存</param>
-	Task<Bitmap?> GetGroupAvatarAsync(ulong uin, int size = 0, bool noCache = false);
+	/// <param name="forceUpdate">强制触发更新，请订阅 <see cref="EventStation.UserAvatar"/> 接收更新事件</param>
+	/// <returns>此方法返回的是缓存的头像，若头像不存在或者过期，会触发更新，请订阅 <see cref="EventStation.UserAvatar"/> 接收更新事件</returns>
+	Bitmap? GetGroupAvatar(ulong uin, int size = 0, bool forceUpdate = false);
 
 	/// <summary>
 	/// 获取用户头像
@@ -26,13 +28,14 @@ public interface IAvatarCache
 	/// <param name="size">
 	/// 头像尺寸<br/>
 	/// 仅限官方支持的尺寸，例如 0、40、100、160、640，其中 0 是原图<br/>
-	/// 240可以获取默认头像（可能是官方BUG or 特性？）
+	/// 240可以获取默认头像，是一个企鹅（可能是特性？）
 	/// </param>
-	/// <param name="noCache">不使用缓存</param>
-	Task<Bitmap?> GetUserAvatarAsync(ulong uin, int size = 0, bool noCache = false);
+	/// <param name="forceUpdate">强制触发更新，请订阅 <see cref="EventStation.UserAvatar"/> 接收更新事件</param>
+	/// <returns>此方法返回的是缓存的头像，若头像不存在或者过期，会触发更新，请订阅 <see cref="EventStation.UserAvatar"/> 接收更新事件</returns>
+	Bitmap? GetUserAvatar(ulong uin, int size = 0, bool forceUpdate = false);
 
 	/// <summary>
-	/// 只移除引用，实际释放内存由 GC 完成
+	/// 清空缓存
 	/// </summary>
-	void ClearGroupAvatars();
+	void Clear();
 }

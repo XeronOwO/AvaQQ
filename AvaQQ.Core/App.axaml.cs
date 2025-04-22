@@ -129,8 +129,6 @@ internal partial class App : AppBase, IDisposable
 		}
 
 		OpenMainPanelWindow();
-
-		_groupCache.StartMessageSyncTask(_lifetime.CancellationTokenSource.Token);
 	}
 
 	private IServiceScope? _mainPanelScope;
@@ -161,7 +159,7 @@ internal partial class App : AppBase, IDisposable
 		_mainPanelScope?.Dispose();
 		_mainPanelScope = null;
 
-		_avatarCache.ClearGroupAvatars();
+		_avatarCache.Clear();
 	}
 
 	#region Dispose

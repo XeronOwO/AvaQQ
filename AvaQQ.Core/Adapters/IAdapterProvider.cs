@@ -12,7 +12,8 @@ public interface IAdapterProvider : IDisposable
 	IAdapter? Adapter { get; set; }
 
 	/// <summary>
-	/// 当适配器改变时触发
+	/// 适配器（确保不为空）
 	/// </summary>
-	event EventHandler<AdapterChangedEventArgs>? OnAdapterChanged;
+	/// <exception cref="InvalidOperationException"/>
+	IAdapter EnsuredAdapter => Adapter ?? throw new InvalidOperationException("Adapter is not available.");
 }

@@ -11,42 +11,24 @@ public interface IAdapter : IDisposable
 	ulong Uin { get; }
 
 	/// <summary>
-	/// 获取用户昵称
-	/// </summary>
-	Task<string> GetNicknameAsync();
-
-	/// <summary>
-	/// 获取好友列表
-	/// </summary>
-	Task<IEnumerable<FriendInfo>> GetFriendListAsync();
-
-	/// <summary>
-	/// 获取群列表
-	/// </summary>
-	Task<IEnumerable<GroupInfo>> GetGroupListAsync();
-
-	/// <summary>
 	/// 获取用户信息
 	/// </summary>
 	/// <param name="uin">QQ 号</param>
-	Task<UserInfo?> GetUserInfoAsync(ulong uin);
+	Task<AdaptedUserInfo?> GetUserAsync(ulong uin);
 
 	/// <summary>
-	/// 获取群成员列表
+	/// 获取所有好友信息
 	/// </summary>
-	/// <param name="groupUin">群号</param>
-	Task<IEnumerable<GroupMemberInfo>> GetGroupMemberListAsync(ulong groupUin);
+	Task<AdaptedUserInfo[]> GetAllFriendsAsync();
 
 	/// <summary>
-	/// 获取群历史消息
+	/// 获取所有加入的群聊
 	/// </summary>
-	/// <param name="groupUin">群号</param>
-	/// <param name="messageId">消息 ID</param>
-	/// <param name="count">数量</param>
-	Task<IEnumerable<GroupMessageEventArgs>> GetGroupMessageHistoryAsync(ulong groupUin, ulong messageId, uint count);
+	Task<AdaptedGroupInfo[]> GetAllJoinedGroupsAsync();
 
 	/// <summary>
-	/// 当收到群消息时触发
+	/// 获取加入的群聊信息
 	/// </summary>
-	event EventHandler<GroupMessageEventArgs>? OnGroupMessage;
+	/// <param name="uin">群号</param>
+	Task<AdaptedGroupInfo?> GetJoinedGroupAsync(ulong uin);
 }

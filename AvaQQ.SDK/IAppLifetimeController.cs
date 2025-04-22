@@ -6,10 +6,9 @@
 public interface IAppLifetimeController
 {
 	/// <summary>
-	/// 获取一个 CancellationTokenSource，用于停止应用。<br/>
-	/// 请勿直接调用 <see cref="CancellationTokenSource.Cancel()"/>，请使用 <see cref="Stop"/>。
+	/// 当应用退出时触发取消令牌
 	/// </summary>
-	CancellationTokenSource CancellationTokenSource { get; }
+	CancellationToken CancellationToken { get; }
 
 	/// <summary>
 	/// 停止应用

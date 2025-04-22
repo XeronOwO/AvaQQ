@@ -36,7 +36,7 @@ internal class AppService(
 			{
 				if (application is AppBase app)
 				{
-					app.Run(lifetime.CancellationTokenSource.Token);
+					app.Run(lifetime.CancellationToken);
 					pluginManager.UnloadPlugins(serviceProvider);
 					_ = host.StopAsync();
 				}

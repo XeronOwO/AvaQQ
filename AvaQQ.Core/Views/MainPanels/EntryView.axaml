@@ -34,7 +34,7 @@
 			
 			<!-- 头像 -->
 			<Image Grid.Column="0"
-						 Source="{Binding Icon^}"
+						 Source="{Binding Icon}"
 						 Width="40"
 						 Height="40"
 						 Margin="2.5">
@@ -51,7 +51,7 @@
 							ColumnDefinitions="*,auto">
 					<TextBlock Grid.Column="0"
 										 x:Name="textBlockTitle"
-										 Text="{Binding Title^}"
+										 Text="{Binding Title}"
 										 Margin="2.5"/>
 					<TextBlock Grid.Column="1"
 										 x:Name="textBlockTime"

@@ -10,7 +10,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaQQ.SDK", "AvaQQ.SDK\AvaQ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaQQ.Core", "AvaQQ.Core\AvaQQ.Core.csproj", "{B13334DE-67D3-4963-B222-ADBD18608516}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaQQ.Adapters.Onebot11ForwardWebSocket", "AvaQQ.Adapters.Onebot11ForwardWebSocket\AvaQQ.Adapters.Onebot11ForwardWebSocket.csproj", "{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaQQ.Adapters.Lagrange", "AvaQQ.Adapters.Lagrange\AvaQQ.Adapters.Lagrange.csproj", "{CB08510B-9F6D-4186-ACB7-B13EA3AD7C66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lagrange.Core", "Lagrange.Core\Lagrange.Core\Lagrange.Core.csproj", "{CF14FBDF-6B9B-4910-9723-44F46938EBA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +36,14 @@ Global
 		{B13334DE-67D3-4963-B222-ADBD18608516}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B13334DE-67D3-4963-B222-ADBD18608516}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B13334DE-67D3-4963-B222-ADBD18608516}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BC0DA44-EDFD-418D-92F1-DD4E8A5C0083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB08510B-9F6D-4186-ACB7-B13EA3AD7C66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB08510B-9F6D-4186-ACB7-B13EA3AD7C66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB08510B-9F6D-4186-ACB7-B13EA3AD7C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB08510B-9F6D-4186-ACB7-B13EA3AD7C66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF14FBDF-6B9B-4910-9723-44F46938EBA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF14FBDF-6B9B-4910-9723-44F46938EBA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF14FBDF-6B9B-4910-9723-44F46938EBA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF14FBDF-6B9B-4910-9723-44F46938EBA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

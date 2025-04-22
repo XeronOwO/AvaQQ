@@ -1,6 +1,9 @@
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
@@ -14,23 +17,38 @@ namespace AvaQQ.Core.Views.MainPanels;
 /// </summary>
 public partial class MainPanelWindow : Window
 {
+	private readonly IAdapterProvider _adapterProvider;
+
+	private readonly EventStation _events;
+
 	/// <summary>
 	/// 创建主面板窗口
 	/// </summary>
 	public MainPanelWindow(
 		IAdapterProvider adapterProvider,
 		IAvatarCache avatarCache,
-		MainPanelView view
+		IUserCache userCache,
+		MainPanelView view,
+		EventStation events
 		)
 	{
 		CirculationInjectionDetector<MainPanelWindow>.Enter();
 
+		_adapterProvider = adapterProvider;
+		_events = events;
 		var model = new MainPanelViewModel();
 		if (adapterProvider.Adapter is { } adapter)
 		{
 			model.HeaderUin = adapter.Uin;
-			model.HeaderAvatar = avatarCache.GetUserAvatarAsync(adapter.Uin, 40);
-			model.HeaderName = adapter.GetNicknameAsync();
+			model.HeaderAvatar = avatarCache.GetUserAvatar(adapter.Uin, 40);
+			model.HeaderName = userCache.GetUser(adapter.Uin)?.Nickname ?? string.Empty;
+			_events.UserAvatar.OnDone += (_, e) =>
+			{
+				if (e.Id.Uin == adapter.Uin)
+				{
+					model.HeaderAvatar = e.Result;
+				}
+			};
 		}
 		DataContext = model;
 		InitializeComponent();
@@ -42,6 +60,56 @@ public partial class MainPanelWindow : Window
 		};
 
 		CirculationInjectionDetector<MainPanelWindow>.Leave();
+
+		_events.UserAvatar.OnDone += OnUserAvatar;
+		_events.GetUser.OnDone += OnGetUser;
+	}
+
+	/// <summary>
+	/// 析构函数
+	/// </summary>
+	~MainPanelWindow()
+	{
+		_events.UserAvatar.OnDone -= OnUserAvatar;
+		_events.GetUser.OnDone -= OnGetUser;
+	}
+
+	private void OnGetUser(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)
+	{
+		if (_adapterProvider.Adapter is not { } adapter ||
+			e.Id.Uin != adapter.Uin)
+		{
+			return;
+		}
+
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			if (DataContext is not MainPanelViewModel model)
+			{
+				return;
+			}
+
+			model.HeaderName = e.Result?.Nickname ?? string.Empty;
+		});
+	}
+
+	private void OnUserAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
+	{
+		if (_adapterProvider.Adapter is not { } adapter ||
+			e.Id.Uin != adapter.Uin)
+		{
+			return;
+		}
+
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			if (DataContext is not MainPanelViewModel model)
+			{
+				return;
+			}
+
+			model.HeaderAvatar = e.Result;
+		});
 	}
 
 	/// <summary>
@@ -50,7 +118,9 @@ public partial class MainPanelWindow : Window
 	public MainPanelWindow() : this(
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterProvider>(),
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<MainPanelView>()
+		DesignerServiceProviderHelper.Root.GetRequiredService<IUserCache>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<MainPanelView>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<EventStation>()
 		)
 	{
 	}

@@ -27,10 +27,12 @@ public class FileLoggingExecutor
 
 	static FileLoggingExecutor()
 	{
-		if (!Directory.Exists(_logDirectory))
+		if (Design.IsDesignMode)
 		{
-			Directory.CreateDirectory(_logDirectory);
+			return;
 		}
+
+		Directory.CreateDirectory(_logDirectory);
 
 		CompressLatestLog();
 		DeleteOldLogs();
@@ -125,7 +127,13 @@ public class FileLoggingExecutor
 	/// 记录跟踪日志
 	/// </summary>
 	public static void Log<T>(LogLevel logLevel, Exception? exception, string message)
-		=> Append(SimpleLogFormatter.Format(
+	{
+		if (Design.IsDesignMode)
+		{
+			return;
+		}
+
+		Append(SimpleLogFormatter.Format(
 			typeof(T).FullName ?? string.Empty,
 			DateTime.Now,
 			logLevel,
@@ -134,6 +142,7 @@ public class FileLoggingExecutor
 			exception,
 			message
 		));
+	}
 
 	/// <summary>
 	/// 记录跟踪日志

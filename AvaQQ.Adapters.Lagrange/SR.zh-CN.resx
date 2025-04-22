@@ -120,16 +120,7 @@
   <data name="TextConnect" xml:space="preserve">
     <value>连接</value>
   </data>
-  <data name="TextConnectFailed" xml:space="preserve">
-    <value>连接失败。</value>
-  </data>
-  <data name="TextInputAccessToken" xml:space="preserve">
-    <value>请输入鉴权令牌。。。</value>
-  </data>
-  <data name="TextInputUrl" xml:space="preserve">
-    <value>请输入URL。。。</value>
-  </data>
-  <data name="TextOnebot11ForwardWebSocketAdapter" xml:space="preserve">
-    <value>Onebot 11 - 正向WebSocket</value>
+  <data name="TextLagrangeAdapter" xml:space="preserve">
+    <value>Lagrange 适配器</value>
   </data>
 </root>

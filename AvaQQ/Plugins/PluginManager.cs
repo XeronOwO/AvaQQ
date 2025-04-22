@@ -29,10 +29,7 @@ internal class PluginManager : IPluginManager
 		{
 			FileLoggingExecutor.Information<PluginManager>("Preloading plugins...");
 
-			if (!Directory.Exists(_pluginsDirectory))
-			{
-				Directory.CreateDirectory(_pluginsDirectory);
-			}
+			Directory.CreateDirectory(_pluginsDirectory);
 
 			LoadPluginInfos();
 

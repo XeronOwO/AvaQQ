@@ -1,8 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
@@ -15,16 +18,26 @@ namespace AvaQQ.Core.Views.MainPanels;
 /// </summary>
 public partial class FriendListView : UserControl
 {
-	private readonly IAvatarCache _avatarManager;
+	private readonly IUserCache _userCache;
 
-	private readonly IFriendCache _friendManager;
+	private readonly IAvatarCache _avatarCache;
+
+	private readonly EventStation _events;
 
 	/// <summary>
 	/// 创建好友列表视图
 	/// </summary>
-	public FriendListView(IAvatarCache avatarCache, IFriendCache friendCache)
+	public FriendListView(
+		IUserCache userCache,
+		IAvatarCache avatarCache,
+		EventStation events
+		)
 	{
 		CirculationInjectionDetector<FriendListView>.Enter();
+
+		_userCache = userCache;
+		_avatarCache = avatarCache;
+		_events = events;
 
 		DataContext = new FriendListViewModel();
 		InitializeComponent();
@@ -32,230 +45,295 @@ public partial class FriendListView : UserControl
 		Loaded += FriendListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-		_avatarManager = avatarCache;
-		_friendManager = friendCache;
+
+		_entryViewHeightLazy = new(() =>
+		{
+			stackPanel.Children.Add(_testEntryView);
+			_testEntryView.Measure(Size.Infinity);
+			var desiredSize = _testEntryView.DesiredSize;
+			stackPanel.Children.Remove(_testEntryView);
+
+			return desiredSize.Height;
+		});
 
 		CirculationInjectionDetector<FriendListView>.Leave();
+
+		_events.UserAvatar.OnDone += OnUserAvatar;
+		_events.CachedGetAllFriends.OnDone += OnCachedGetAllFriends;
+	}
+
+	/// <summary>
+	/// 析构函数
+	/// </summary>
+	~FriendListView()
+	{
+		_events.UserAvatar.OnDone -= OnUserAvatar;
+		_events.CachedGetAllFriends.OnDone -= OnCachedGetAllFriends;
 	}
 
 	/// <summary>
 	/// 创建好友列表视图
 	/// </summary>
 	public FriendListView() : this(
+		DesignerServiceProviderHelper.Root.GetRequiredService<IUserCache>(),
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<IFriendCache>()
+		DesignerServiceProviderHelper.Root.GetRequiredService<EventStation>()
 		)
 	{
 	}
 
-	private async void FriendListView_Loaded(object? sender, RoutedEventArgs e)
+	private void FriendListView_Loaded(object? sender, RoutedEventArgs e)
 	{
-		CalculateEntryViewHeight();
-		CalculateScrollViewerHeight();
-		await UpdateFriendInfoListAsync();
-		UpdateFilteredFriendList();
-		UpdateDisplayedEntryList();
-		UpdateGrid();
-		UpdateEntryContent();
+		UpdateFriends(_userCache.GetUsers(v => v.HasLocalData));
 	}
 
-	private readonly List<EntryView> _displayedEntries = [];
+	#region 测量
 
-	private static EntryView CreateEntryView()
-		=> new()
+	private static readonly EntryView _testEntryView = new()
+	{
+		DataContext = new EntryViewModel()
+	};
+
+	private readonly Lazy<double> _entryViewHeightLazy;
+
+	private double EntryViewHeight => _entryViewHeightLazy.Value;
+
+	private double ScrollViewerHeight => scrollViewer.Bounds.Height;
+
+	#endregion
+
+	private static bool Compare<T>(T[] left, List<T> right)
+		where T : class
+	{
+		if (left.Length != right.Count)
 		{
-			DataContext = new EntryViewModel()
-		};
+			return false;
+		}
 
-	private static readonly EntryView _testEntryView = CreateEntryView();
+		for (int i = 0; i < left.Length; i++)
+		{
+			if (left[i] != right[i])
+			{
+				return false;
+			}
+		}
 
-	private double _entryViewHeight;
-
-	private void CalculateEntryViewHeight()
-	{
-		stackPanel.Children.Add(_testEntryView);
-		_testEntryView.Measure(Size.Infinity);
-		var desiredSize = _testEntryView.DesiredSize;
-		stackPanel.Children.Remove(_testEntryView);
-
-		_entryViewHeight = desiredSize.Height;
+		return true;
 	}
 
-	private double _scrollViewerHeight;
+	#region 好友
 
-	private void CalculateScrollViewerHeight()
+	private readonly List<CachedUserInfo> _friends = [];
+
+	private void UpdateFriends(CachedUserInfo[] users)
 	{
-		_scrollViewerHeight = scrollViewer.Bounds.Height;
-	}
+		var oldFriends = _friends.ToArray();
+		_friends.Clear();
+		_friends.AddRange(users);
 
-	/// <summary>
-	/// 原始的好友列表
-	/// </summary>
-	private readonly List<FriendInfo> _friends = [];
-
-	/// <summary>
-	/// 经过筛选后的好友列表
-	/// </summary>
-	private readonly List<FriendInfo> _filteredFriends = [];
-
-	private int _displayedEntryCount;
-
-	private void UpdateDisplayedEntryList()
-	{
-		if (_entryViewHeight == 0)
+		if (Compare(oldFriends, _friends))
 		{
 			return;
 		}
 
-		_displayedEntryCount = Math.Min(
-			(int)Math.Ceiling(_scrollViewerHeight / _entryViewHeight) + 1,
-			_filteredFriends.Count
-		);
+		UpdateFilteredFriends();
+	}
 
-		while (_displayedEntries.Count != _displayedEntryCount)
+	#endregion
+
+	#region 筛选
+
+	private string? Filter => textBoxFilter.Text;
+
+	private readonly List<CachedUserInfo> _filteredFriends = [];
+
+	private static bool FilterFriend(CachedUserInfo friend, string filter)
+	{
+		if (friend.Nickname.Contains(filter))
 		{
-			if (_displayedEntries.Count < _displayedEntryCount)
-			{
-				var view = CreateEntryView();
-				grid.Children.Add(view);
-				_displayedEntries.Add(view);
-			}
-			else
-			{
-				var entry = _displayedEntries[^1];
-				grid.Children.Remove(entry);
-				_displayedEntries.Remove(entry);
-			}
+			return true;
 		}
+		if (friend.Remark is { } remark && remark.Contains(filter))
+		{
+			return true;
+		}
+		if (friend.Uin.ToString().Contains(filter))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
-	private async Task UpdateFriendInfoListAsync()
+	private void UpdateFilteredFriends()
 	{
-		_friends.Clear();
-		var friends = await _friendManager.GetAllFriendInfosAsync();
-		//for (int i = 0; i < 1000; i++) // 压力测试
-		_friends.AddRange(friends);
-	}
-
-	private void UpdateFilteredFriendList()
-	{
+		var oldFilteredGroups = _filteredFriends.ToArray();
 		_filteredFriends.Clear();
 
-		var filter = textBoxFilter.Text;
+		var filter = Filter;
 		if (string.IsNullOrEmpty(filter))
 		{
 			_filteredFriends.AddRange(_friends);
+		}
+		else
+		{
+			foreach (var friend in _friends)
+			{
+				if (FilterFriend(friend, filter))
+				{
+					_filteredFriends.Add(friend);
+				}
+			}
+		}
+
+		if (Compare(oldFilteredGroups, _filteredFriends))
+		{
 			return;
 		}
 
-		foreach (var friend in _friends)
+		UpdateDisplayedEntries();
+	}
+
+	#endregion
+
+	#region 显示
+
+	private readonly List<EntryView> _displayedEntries = [];
+
+	private int DisplayedEntryCount
+	{
+		get
 		{
-			if (friend.Uin.ToString().Contains(filter)
-				|| friend.Nickname.Contains(filter)
-				|| friend.Remark.Contains(filter))
+			if (EntryViewHeight == 0)
 			{
-				_filteredFriends.Add(friend);
+				return 0;
 			}
+
+			return Math.Min(
+				(int)Math.Ceiling(ScrollViewerHeight / EntryViewHeight) + 1,
+				_filteredFriends.Count
+			);
 		}
 	}
 
-	private void UpdateGrid()
+	private void UpdateGrids()
 	{
-		var height = new GridLength(_entryViewHeight);
+		var count = _filteredFriends.Count;
 
-		for (int i = 0; i < Math.Min(_filteredFriends.Count, grid.RowDefinitions.Count); i++)
+		while (grid.RowDefinitions.Count < count)
 		{
-			grid.RowDefinitions[i].Height = height;
+			grid.RowDefinitions.Add(new(new GridLength(EntryViewHeight)));
 		}
 
-		while (grid.RowDefinitions.Count != _filteredFriends.Count)
+		while (grid.RowDefinitions.Count > count)
 		{
-			if (grid.RowDefinitions.Count < _filteredFriends.Count)
-			{
-				grid.RowDefinitions.Add(new(height));
-			}
-			else
-			{
-				grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
-			}
+			grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
 		}
 	}
 
-	private double _oldOffset;
-
-	private void UpdateEntryContent()
+	private void EnsureEnoughDisplayedEntries()
 	{
-		var newOffset = scrollViewer.Offset.Y;
+		var count = DisplayedEntryCount;
 
-		var oldIndex = (int)Math.Floor(_oldOffset / _entryViewHeight);
-		var newIndex = (int)Math.Floor(newOffset / _entryViewHeight);
-		while (oldIndex != newIndex)
+		while (_displayedEntries.Count < count)
 		{
-			if (oldIndex < newIndex)
+			var view = new EntryView()
 			{
-				var entry = _displayedEntries[0];
-				_displayedEntries.RemoveAt(0);
-				_displayedEntries.Add(entry);
-				++oldIndex;
-			}
-			else
-			{
-				var entry = _displayedEntries[^1];
-				_displayedEntries.RemoveAt(_displayedEntries.Count - 1);
-				_displayedEntries.Insert(0, entry);
-				--oldIndex;
-			}
+				DataContext = new EntryViewModel()
+			};
+			grid.Children.Add(view);
+			_displayedEntries.Add(view);
 		}
 
-		for (int i = 0; i < _displayedEntries.Count; i++)
+		while (_displayedEntries.Count > count)
 		{
-			var entry = _displayedEntries[i];
-			var friendIndex = newIndex + i;
-			if (friendIndex >= _filteredFriends.Count
-				|| entry.DataContext is not EntryViewModel model)
+			var entry = _displayedEntries[^1];
+			grid.Children.Remove(entry);
+			_displayedEntries.Remove(entry);
+		}
+	}
+
+	private int DisplayedEntryStart
+		=> (int)Math.Floor(scrollViewer.Offset.Y / EntryViewHeight);
+
+	private void UpdateDisplayedEntries()
+	{
+		UpdateGrids();
+		EnsureEnoughDisplayedEntries();
+
+		var start = DisplayedEntryStart;
+		var count = DisplayedEntryCount;
+
+		for (int i = 0; i < count; i++)
+		{
+			var friendIndex = start + i;
+			if (friendIndex >= _filteredFriends.Count)
 			{
 				continue;
 			}
-
 			var friend = _filteredFriends[friendIndex];
-			if (model.Id == friend.Uin)
-			{
-				continue;
-			}
-
-			model.Id = friend.Uin;
-			model.Icon = _avatarManager.GetUserAvatarAsync(friend.Uin, 40);
-			model.Title = Task.FromResult(string.IsNullOrEmpty(friend.Remark)
-				? friend.Nickname
-				: $"{friend.Remark} ({friend.Nickname})");
-
+			var entry = _displayedEntries[i];
+			var model = (EntryViewModel)entry.DataContext!;
+			model.Icon = _avatarCache.GetUserAvatar(friend.Uin, 40);
+			model.Title = friend.Nickname;
 			Grid.SetRow(entry, friendIndex);
 		}
+	}
 
-		_oldOffset = newOffset;
+	#endregion
+
+	#region 事件处理
+
+	private void TextBoxFilter_TextChanged(object? sender, TextChangedEventArgs e)
+	{
+		UpdateFilteredFriends();
 	}
 
 	private void ScrollViewer_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
 	{
 		if (e.Property == ScrollViewer.OffsetProperty)
 		{
-			UpdateEntryContent();
+			UpdateDisplayedEntries();
 		}
 		else if (e.Property == BoundsProperty)
 		{
-			CalculateScrollViewerHeight();
-			UpdateFilteredFriendList();
-			UpdateDisplayedEntryList();
-			UpdateGrid();
-			UpdateEntryContent();
+			UpdateDisplayedEntries();
 		}
 	}
 
-	private void TextBoxFilter_TextChanged(object? sender, TextChangedEventArgs e)
+	private void OnUserAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
 	{
-		UpdateFilteredFriendList();
-		UpdateDisplayedEntryList();
-		UpdateGrid();
-		UpdateEntryContent();
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			var start = DisplayedEntryStart;
+			var count = DisplayedEntryCount;
+
+			for (int i = 0; i < count; i++)
+			{
+				if (start + i >= count)
+				{
+					continue;
+				}
+
+				var user = _filteredFriends[start + i];
+				if (user.Uin != e.Id.Uin)
+				{
+					continue;
+				}
+
+				var dataContext = (EntryViewModel)_displayedEntries[i].DataContext!;
+				dataContext.Icon = e.Result;
+			}
+		});
 	}
+
+	private void OnCachedGetAllFriends(object? sender, BusEventArgs<CommonEventId, CachedUserInfo[]> e)
+	{
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			UpdateFriends(_userCache.GetUsers(v => v.HasLocalData));
+		});
+	}
+
+	#endregion
 }

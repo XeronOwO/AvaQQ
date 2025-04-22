@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AvaQQ.Adapters.Onebot11ForwardWebSocket {
+namespace AvaQQ.Adapters.Lagrange {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AvaQQ.Adapters.Onebot11ForwardWebSocket {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AvaQQ.Adapters.Onebot11ForwardWebSocket.SR", typeof(SR).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AvaQQ.Adapters.Lagrange.SR", typeof(SR).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -70,38 +70,11 @@ namespace AvaQQ.Adapters.Onebot11ForwardWebSocket {
         }
         
         /// <summary>
-        ///   查找类似 Failed to connect. 的本地化字符串。
+        ///   查找类似 Lagrange Adapter 的本地化字符串。
         /// </summary>
-        internal static string TextConnectFailed {
+        internal static string TextLagrangeAdapter {
             get {
-                return ResourceManager.GetString("TextConnectFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Input Access Token... 的本地化字符串。
-        /// </summary>
-        internal static string TextInputAccessToken {
-            get {
-                return ResourceManager.GetString("TextInputAccessToken", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Input URL... 的本地化字符串。
-        /// </summary>
-        internal static string TextInputUrl {
-            get {
-                return ResourceManager.GetString("TextInputUrl", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Onebot 11 - Forward Web Socket Adapter 的本地化字符串。
-        /// </summary>
-        internal static string TextOnebot11ForwardWebSocketAdapter {
-            get {
-                return ResourceManager.GetString("TextOnebot11ForwardWebSocketAdapter", resourceCulture);
+                return ResourceManager.GetString("TextLagrangeAdapter", resourceCulture);
             }
         }
     }

@@ -57,7 +57,7 @@ internal class GroupCategorySelection : ICategorySelection
 		{
 			_view = null;
 			_watchdog.Stop();
-			_logger.LogInformation("GroupListView has been destroyed.");
+			_logger.LogDebug("GroupListView has been destroyed.");
 		}
 	}
 
@@ -69,13 +69,13 @@ internal class GroupCategorySelection : ICategorySelection
 	public void OnSelected()
 	{
 		_watchdog.Stop();
-		_logger.LogInformation("GroupListView has been stopped from destruction.");
+		_logger.LogDebug("GroupListView has been stopped from destruction.");
 	}
 
 	public void OnDeselected()
 	{
 		_watchdog.Start(Config.Instance.UnusedViewDestructionTime);
-		_logger.LogInformation(
+		_logger.LogDebug(
 			"GroupListView has been scheduled for destruction after {Delay}.",
 			Config.Instance.UnusedViewDestructionTime
 		);

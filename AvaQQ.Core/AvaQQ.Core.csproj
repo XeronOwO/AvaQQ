@@ -48,12 +48,11 @@
 
 	<ItemGroup>
 	  <Folder Include="Logging\" />
-	  <Folder Include="Caches\" />
 	  <Folder Include="MainPanels\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="LiteDB" Version="5.0.21" />
+	  <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.4" />
 	</ItemGroup>
 	
 </Project>

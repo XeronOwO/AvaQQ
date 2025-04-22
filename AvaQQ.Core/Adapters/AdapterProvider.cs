@@ -1,27 +1,9 @@
-﻿using AvaQQ.Core.Caches;
-using AvaQQ.Core.Databases;
-using Microsoft.Extensions.DependencyInjection;
+﻿using AvaQQ.Core.Databases;
 
 namespace AvaQQ.Core.Adapters;
 
-internal class AdapterProvider : IAdapterProvider
+internal class AdapterProvider(Database database) : IAdapterProvider
 {
-	private readonly Lazy<GroupMessageDatabase> _lazyGroupMessageDatabase;
-
-	public GroupMessageDatabase GroupMessageDatabase => _lazyGroupMessageDatabase.Value;
-
-	private readonly Lazy<IGroupCache> _lazyGroupCache;
-
-	public IGroupCache GroupCache => _lazyGroupCache.Value;
-
-	public AdapterProvider(IServiceProvider serviceProvider)
-	{
-		_lazyGroupMessageDatabase = new(serviceProvider.GetRequiredService<GroupMessageDatabase>);
-		_lazyGroupCache = new(serviceProvider.GetRequiredService<IGroupCache>);
-
-		OnAdapterChanged += AdapterProvider_OnAdapterChanged;
-	}
-
 	private IAdapter? _adapter;
 
 	public IAdapter? Adapter
@@ -37,22 +19,26 @@ internal class AdapterProvider : IAdapterProvider
 			}
 
 			_adapter = @new;
-			OnAdapterChanged?.Invoke(this, new AdapterChangedEventArgs(old, @new));
+			Unregister(old);
+			Register(@new);
 		}
 	}
 
-	public event EventHandler<AdapterChangedEventArgs>? OnAdapterChanged;
-
-	private void AdapterProvider_OnAdapterChanged(object? sender, AdapterChangedEventArgs e)
+	private void Register(IAdapter? adapter)
 	{
-		if (e.Old is not null)
+		if (adapter == null)
 		{
-			e.Old.OnGroupMessage -= GroupCache.Adapter_OnGroupMessage;
+			return;
 		}
 
-		if (e.New is not null)
+		database.Initialize(adapter.Uin);
+	}
+
+	private void Unregister(IAdapter? adapter)
+	{
+		if (adapter == null)
 		{
-			e.New.OnGroupMessage += GroupCache.Adapter_OnGroupMessage;
+			return;
 		}
 	}
 

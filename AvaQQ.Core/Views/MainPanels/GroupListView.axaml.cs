@@ -1,9 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
 using AvaQQ.SDK;
@@ -20,18 +21,22 @@ public partial class GroupListView : UserControl
 
 	private readonly IAvatarCache _avatarCache;
 
+	private readonly EventStation _events;
+
 	/// <summary>
 	/// 创建群聊列表视图
 	/// </summary>
 	public GroupListView(
 		IGroupCache groupCache,
-		IAvatarCache avatarCache
+		IAvatarCache avatarCache,
+		EventStation events
 		)
 	{
 		CirculationInjectionDetector<GroupListView>.Enter();
 
 		_groupCache = groupCache;
 		_avatarCache = avatarCache;
+		_events = events;
 
 		DataContext = new GroupListViewModel();
 		InitializeComponent();
@@ -39,9 +44,30 @@ public partial class GroupListView : UserControl
 		Loaded += GroupListView_Loaded;
 		scrollViewer.PropertyChanged += ScrollViewer_PropertyChanged;
 		textBoxFilter.TextChanged += TextBoxFilter_TextChanged;
-		groupCache.OnUpdated += GroupCache_OnUpdated;
+
+		_entryViewHeightLazy = new(() =>
+		{
+			stackPanel.Children.Add(_testEntryView);
+			_testEntryView.Measure(Size.Infinity);
+			var desiredSize = _testEntryView.DesiredSize;
+			stackPanel.Children.Remove(_testEntryView);
+
+			return desiredSize.Height;
+		});
 
 		CirculationInjectionDetector<GroupListView>.Leave();
+
+		_events.GroupAvatar.OnDone += OnGroupAvatar;
+		_events.CachedGetAllJoinedGroups.OnDone += OnCachedGetAllJoinedGroups;
+	}
+
+	/// <summary>
+	/// 析构函数
+	/// </summary>
+	~GroupListView()
+	{
+		_events.GroupAvatar.OnDone -= OnGroupAvatar;
+		_events.CachedGetAllJoinedGroups.OnDone -= OnCachedGetAllJoinedGroups;
 	}
 
 	/// <summary>
@@ -49,197 +75,217 @@ public partial class GroupListView : UserControl
 	/// </summary>
 	public GroupListView() : this(
 		DesignerServiceProviderHelper.Root.GetRequiredService<IGroupCache>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>()
+		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
+		DesignerServiceProviderHelper.Root.GetRequiredService<EventStation>()
 		)
 	{
 	}
 
-	private async void GroupListView_Loaded(object? sender, RoutedEventArgs e)
+	private void GroupListView_Loaded(object? sender, RoutedEventArgs e)
 	{
-		CalculateEntryViewHeight();
-		CalculateScrollViewerHeight();
-		await UpdateGroupInfoListAsync();
-		UpdateFilteredGroupList();
-		UpdateDisplayedEntryList();
-		UpdateGrid();
-		UpdateDisplayedEntries();
+		UpdateGroups(_groupCache.GetGroups(v => v.HasLocalData));
 	}
 
-	private readonly List<EntryView> _displayedEntries = [];
+	#region 测量
 
-	private static EntryView CreateEntryView()
-		=> new()
+	private static readonly EntryView _testEntryView = new()
+	{
+		DataContext = new EntryViewModel()
+	};
+
+	private readonly Lazy<double> _entryViewHeightLazy;
+
+	private double EntryViewHeight => _entryViewHeightLazy.Value;
+
+	private double ScrollViewerHeight => scrollViewer.Bounds.Height;
+
+	#endregion
+
+	private static bool Compare<T>(T[] left, List<T> right)
+		where T : class
+	{
+		if (left.Length != right.Count)
 		{
-			DataContext = new EntryViewModel()
-		};
+			return false;
+		}
 
-	private static readonly EntryView _testEntryView = CreateEntryView();
+		for (int i = 0; i < left.Length; i++)
+		{
+			if (left[i] != right[i])
+			{
+				return false;
+			}
+		}
 
-	private double _entryViewHeight;
-
-	private void CalculateEntryViewHeight()
-	{
-		stackPanel.Children.Add(_testEntryView);
-		_testEntryView.Measure(Size.Infinity);
-		var desiredSize = _testEntryView.DesiredSize;
-		stackPanel.Children.Remove(_testEntryView);
-
-		_entryViewHeight = desiredSize.Height;
+		return true;
 	}
 
-	private double _scrollViewerHeight;
+	#region 群
 
-	private void CalculateScrollViewerHeight()
+	private readonly List<CachedGroupInfo> _groups = [];
+
+	private void UpdateGroups(CachedGroupInfo[] groups)
 	{
-		_scrollViewerHeight = scrollViewer.Bounds.Height;
-	}
+		var oldGroups = _groups.ToArray();
+		_groups.Clear();
+		_groups.AddRange(groups);
 
-	private GroupInfo[] _groups = [];
-
-	private readonly List<GroupInfo> _filteredGroups = [];
-
-	private int _displayedEntryCount;
-
-	private void UpdateDisplayedEntryList()
-	{
-		if (_entryViewHeight == 0)
+		if (Compare(oldGroups, _groups))
 		{
 			return;
 		}
 
-		_displayedEntryCount = Math.Min(
-			(int)Math.Ceiling(_scrollViewerHeight / _entryViewHeight) + 1,
-			_filteredGroups.Count
-		);
+		UpdateFilteredGroups();
+	}
 
-		while (_displayedEntries.Count != _displayedEntryCount)
+	#endregion
+
+	#region 筛选
+
+	private string? Filter => textBoxFilter.Text;
+
+	private readonly List<CachedGroupInfo> _filteredGroups = [];
+
+	private static bool FilterGroup(CachedGroupInfo group, string filter)
+	{
+		if (group.Name.Contains(filter))
 		{
-			if (_displayedEntries.Count < _displayedEntryCount)
-			{
-				var view = CreateEntryView();
-				grid.Children.Add(view);
-				_displayedEntries.Add(view);
-			}
-			else
-			{
-				var entry = _displayedEntries[^1];
-				grid.Children.Remove(entry);
-				_displayedEntries.Remove(entry);
-			}
+			return true;
 		}
+		if (group.Remark is { } remark && remark.Contains(filter))
+		{
+			return true;
+		}
+		if (group.Uin.ToString().Contains(filter))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
-	private async Task UpdateGroupInfoListAsync()
+	private void UpdateFilteredGroups()
 	{
-		_groups = [.. await _groupCache.GetAllGroupInfosAsync()];
-	}
-
-	private void UpdateFilteredGroupList()
-	{
+		var oldFilteredGroups = _filteredGroups.ToArray();
 		_filteredGroups.Clear();
 
-		var filter = textBoxFilter.Text;
+		var filter = Filter;
 		if (string.IsNullOrEmpty(filter))
 		{
 			_filteredGroups.AddRange(_groups);
+		}
+		else
+		{
+			foreach (var group in _groups)
+			{
+				if (FilterGroup(group, filter))
+				{
+					_filteredGroups.Add(group);
+				}
+			}
+		}
+
+		if (Compare(oldFilteredGroups, _filteredGroups))
+		{
 			return;
 		}
 
-		foreach (var group in _groups)
-		{
-			if (group.Uin.ToString().Contains(filter)
-				|| group.Name.Contains(filter)
-				|| group.Remark.Contains(filter))
-			{
-				_filteredGroups.Add(group);
-			}
-		}
+		UpdateDisplayedEntries();
 	}
 
-	private void UpdateGrid()
+	#endregion
+
+	#region 显示
+
+	private readonly List<EntryView> _displayedEntries = [];
+
+	private int DisplayedEntryCount
 	{
-		var height = new GridLength(_entryViewHeight);
-
-		for (int i = 0; i < Math.Min(_filteredGroups.Count, grid.RowDefinitions.Count); i++)
+		get
 		{
-			grid.RowDefinitions[i].Height = height;
-		}
+			if (EntryViewHeight == 0)
+			{
+				return 0;
+			}
 
-		while (grid.RowDefinitions.Count != _filteredGroups.Count)
-		{
-			if (grid.RowDefinitions.Count < _filteredGroups.Count)
-			{
-				grid.RowDefinitions.Add(new(height));
-			}
-			else
-			{
-				grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
-			}
+			return Math.Min(
+				(int)Math.Ceiling(ScrollViewerHeight / EntryViewHeight) + 1,
+				_filteredGroups.Count
+			);
 		}
 	}
 
-	private double _oldOffset;
+	private void UpdateGrids()
+	{
+		var count = _filteredGroups.Count;
+
+		while (grid.RowDefinitions.Count < count)
+		{
+			grid.RowDefinitions.Add(new(new GridLength(EntryViewHeight)));
+		}
+
+		while (grid.RowDefinitions.Count > count)
+		{
+			grid.RowDefinitions.RemoveAt(grid.RowDefinitions.Count - 1);
+		}
+	}
+
+	private void EnsureEnoughDisplayedEntries()
+	{
+		var count = DisplayedEntryCount;
+
+		while (_displayedEntries.Count < count)
+		{
+			var view = new EntryView()
+			{
+				DataContext = new EntryViewModel()
+			};
+			grid.Children.Add(view);
+			_displayedEntries.Add(view);
+		}
+
+		while (_displayedEntries.Count > count)
+		{
+			var entry = _displayedEntries[^1];
+			grid.Children.Remove(entry);
+			_displayedEntries.Remove(entry);
+		}
+	}
+
+	private int DisplayedEntryStart
+		=> (int)Math.Floor(scrollViewer.Offset.Y / EntryViewHeight);
 
 	private void UpdateDisplayedEntries()
 	{
-		if (_entryViewHeight <= 0)
+		UpdateGrids();
+		EnsureEnoughDisplayedEntries();
+
+		var start = DisplayedEntryStart;
+		var count = DisplayedEntryCount;
+
+		for (int i = 0; i < count; i++)
 		{
-			return;
-		}
-
-		var newOffset = scrollViewer.Offset.Y;
-
-		var oldIndex = (int)Math.Floor(_oldOffset / _entryViewHeight);
-		var newIndex = (int)Math.Floor(newOffset / _entryViewHeight);
-
-		EnsureEnoughDisplayedEntries(oldIndex, newIndex);
-		UpdateDisplayedEntryContents(newIndex);
-
-		_oldOffset = newOffset;
-	}
-
-	private void EnsureEnoughDisplayedEntries(int oldIndex, int newIndex)
-	{
-		while (oldIndex != newIndex)
-		{
-			if (oldIndex < newIndex)
-			{
-				var entry = _displayedEntries[0];
-				_displayedEntries.RemoveAt(0);
-				_displayedEntries.Add(entry);
-				++oldIndex;
-			}
-			else
-			{
-				var entry = _displayedEntries[^1];
-				_displayedEntries.RemoveAt(_displayedEntries.Count - 1);
-				_displayedEntries.Insert(0, entry);
-				--oldIndex;
-			}
-		}
-	}
-
-	private void UpdateDisplayedEntryContents(int newIndex)
-	{
-		for (int i = 0; i < _displayedEntries.Count; i++)
-		{
-			var entry = _displayedEntries[i];
-			var groupIndex = newIndex + i;
-			if (groupIndex >= _filteredGroups.Count
-				|| entry.DataContext is not EntryViewModel model)
+			var groupIndex = start + i;
+			if (groupIndex >= _filteredGroups.Count)
 			{
 				continue;
 			}
-
 			var group = _filteredGroups[groupIndex];
-
-			model.Icon = _avatarCache.GetGroupAvatarAsync(group.Uin, 40);
-			model.Title = _groupCache.GetGroupNameAsync(group.Uin);
-			model.Time = _groupCache.GetLatestMessageTime(group.Uin);
-			model.Content = _groupCache.GetLatestMessagePreviewAsync(group.Uin);
-
+			var entry = _displayedEntries[i];
+			var model = (EntryViewModel)entry.DataContext!;
+			model.Icon = _avatarCache.GetGroupAvatar(group.Uin, 40);
+			model.Title = group.Name;
 			Grid.SetRow(entry, groupIndex);
 		}
+	}
+
+	#endregion
+
+	#region 事件处理
+
+	private void TextBoxFilter_TextChanged(object? sender, TextChangedEventArgs e)
+	{
+		UpdateFilteredGroups();
 	}
 
 	private void ScrollViewer_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -250,24 +296,43 @@ public partial class GroupListView : UserControl
 		}
 		else if (e.Property == BoundsProperty)
 		{
-			CalculateScrollViewerHeight();
-			UpdateFilteredGroupList();
-			UpdateDisplayedEntryList();
-			UpdateGrid();
 			UpdateDisplayedEntries();
 		}
 	}
 
-	private void TextBoxFilter_TextChanged(object? sender, TextChangedEventArgs e)
+	private void OnGroupAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
 	{
-		UpdateFilteredGroupList();
-		UpdateDisplayedEntryList();
-		UpdateGrid();
-		UpdateDisplayedEntries();
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			var start = DisplayedEntryStart;
+			var count = DisplayedEntryCount;
+
+			for (int i = 0; i < count; i++)
+			{
+				if (start + i >= count)
+				{
+					continue;
+				}
+
+				var group = _filteredGroups[start + i];
+				if (group.Uin != e.Id.Uin)
+				{
+					continue;
+				}
+
+				var dataContext = (EntryViewModel)_displayedEntries[i].DataContext!;
+				dataContext.Icon = e.Result;
+			}
+		});
 	}
 
-	private void GroupCache_OnUpdated(object? sender, EventArgs e)
+	private void OnCachedGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId> e)
 	{
-		Dispatcher.UIThread.Invoke(UpdateDisplayedEntries);
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			UpdateGroups(_groupCache.GetGroups(v => v.HasLocalData));
+		});
 	}
+
+	#endregion
 }
