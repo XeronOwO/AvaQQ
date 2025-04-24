@@ -76,7 +76,7 @@ internal class GroupCache : IGroupCache
 
 		_events.GetAllRecordedGroups.Enqueue(
 			CommonEventId.GetAllRecordedGroups,
-			_database.GetAllRecordedGroupsAsync
+			() => _database.GetAllRecordedGroupsAsync()
 			);
 	}
 
@@ -120,7 +120,7 @@ internal class GroupCache : IGroupCache
 				{
 					_events.GetAllJoinedGroups.Enqueue(
 						CommonEventId.GetAllJoinedGroups,
-						_adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync
+						() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync()
 					);
 				}
 

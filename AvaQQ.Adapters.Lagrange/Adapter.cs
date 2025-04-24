@@ -59,7 +59,7 @@ internal class Adapter : IAdapter
 
 	public ulong Uin => _context.BotUin;
 
-	public async Task<AdaptedUserInfo?> GetUserAsync(ulong uin)
+	public async Task<AdaptedUserInfo?> GetUserAsync(ulong uin, CancellationToken token = default)
 	{
 		if (await _context.FetchUserInfo((uint)uin) is not { } user)
 		{
@@ -68,7 +68,7 @@ internal class Adapter : IAdapter
 		return new AdaptedUserInfo(user.Uin, user.Nickname, string.IsNullOrEmpty(user.Remark) ? null : user.Remark);
 	}
 
-	public async Task<AdaptedUserInfo[]> GetAllFriendsAsync()
+	public async Task<AdaptedUserInfo[]> GetAllFriendsAsync(CancellationToken token = default)
 	{
 		var result = new List<AdaptedUserInfo>();
 		foreach (var friend in await _context.FetchFriends())
@@ -78,7 +78,7 @@ internal class Adapter : IAdapter
 		return [.. result];
 	}
 
-	public async Task<AdaptedGroupInfo[]> GetAllJoinedGroupsAsync()
+	public async Task<AdaptedGroupInfo[]> GetAllJoinedGroupsAsync(CancellationToken token = default)
 	{
 		var result = new List<AdaptedGroupInfo>();
 		foreach (var group in await _context.FetchGroups(true))
@@ -88,7 +88,7 @@ internal class Adapter : IAdapter
 		return [.. result];
 	}
 
-	public async Task<AdaptedGroupInfo?> GetJoinedGroupAsync(ulong uin)
+	public async Task<AdaptedGroupInfo?> GetJoinedGroupAsync(ulong uin, CancellationToken token = default)
 	{
 		(var code, var message, var info) = await _context.FetchGroupInfo(uin);
 		if (code != 0)

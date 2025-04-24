@@ -33,11 +33,11 @@ internal class SqliteDatabase : Database
 		Context.SaveChanges();
 	}
 
-	public override Task<RecordedGroupInfo[]> GetAllRecordedGroupsAsync()
-		=> Context.Groups.ToArrayAsync();
+	public override Task<RecordedGroupInfo[]> GetAllRecordedGroupsAsync(CancellationToken token = default)
+		=> Context.Groups.ToArrayAsync(token);
 
-	public override Task<RecordedUserInfo[]> GetAllRecordedUsersAsync()
-		=> Context.Users.ToArrayAsync();
+	public override Task<RecordedUserInfo[]> GetAllRecordedUsersAsync(CancellationToken token = default)
+		=> Context.Users.ToArrayAsync(token);
 
 	#region 事件处理
 

@@ -72,7 +72,7 @@ internal class UserCache : IUserCache
 
 		_events.GetAllRecordedUsers.Enqueue(
 			CommonEventId.GetAllRecordedUsers,
-			_database.GetAllRecordedUsersAsync
+			() => _database.GetAllRecordedUsersAsync()
 			);
 	}
 
@@ -114,7 +114,7 @@ internal class UserCache : IUserCache
 			{
 				_events.GetAllFriends.Enqueue(
 					CommonEventId.GetAllFriends,
-					adapter.GetAllFriendsAsync
+					() => adapter.GetAllFriendsAsync()
 				);
 			}
 
