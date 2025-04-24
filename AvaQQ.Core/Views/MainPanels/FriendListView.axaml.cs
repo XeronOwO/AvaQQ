@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;

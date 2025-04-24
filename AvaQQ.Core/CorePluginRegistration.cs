@@ -2,7 +2,6 @@
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Events;
-using AvaQQ.Core.Logging;
 using AvaQQ.Core.MainPanels;
 using AvaQQ.Core.Views.Connecting;
 using AvaQQ.Core.Views.MainPanels;
@@ -38,7 +37,6 @@ internal static class CorePluginRegistration
 				.AddSingleton<IAppLifetimeController, AppLifetimeController>()
 				.AddSingleton<IAdapterProvider, AdapterProvider>()
 				.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
-				.AddSingleton<ILogWindowProvider, LogWindowProvider>()
 				.AddSingleton<Database, SqliteDatabase>()
 				.AddSingleton<IAvatarCache, AvatarCache>()
 				.AddSingleton<IGroupCache, GroupCache>()
