@@ -16,8 +16,6 @@ internal partial class App : AppBase, IDisposable
 
 	private readonly IAdapterProvider _adapterProvider;
 
-	private readonly IGroupCache _groupCache;
-
 	private readonly IAvatarCache _avatarCache;
 
 	private readonly ILogger<App> _logger;
@@ -25,7 +23,6 @@ internal partial class App : AppBase, IDisposable
 	public App(
 		IServiceProvider serviceProvider,
 		IAdapterProvider adapterProvider,
-		IGroupCache groupCache,
 		IAvatarCache avatarCache,
 		ILogger<App> logger
 		) : base(
@@ -35,7 +32,6 @@ internal partial class App : AppBase, IDisposable
 	{
 		_serviceProvider = serviceProvider;
 		_adapterProvider = adapterProvider;
-		_groupCache = groupCache;
 		_avatarCache = avatarCache;
 		_logger = logger;
 
@@ -45,7 +41,6 @@ internal partial class App : AppBase, IDisposable
 	public App() : this(
 		DesignerServiceProviderHelper.Root,
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterProvider>(),
-		DesignerServiceProviderHelper.Root.GetRequiredService<IGroupCache>(),
 		DesignerServiceProviderHelper.Root.GetRequiredService<IAvatarCache>(),
 		DesignerServiceProviderHelper.Root.GetRequiredService<ILogger<App>>()
 		)
