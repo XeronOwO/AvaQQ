@@ -33,7 +33,7 @@ internal static class BotContextHelper
 
 	private static BotDeviceInfo GetOrCreateBotDevice(IConfiguration configuration)
 	{
-		var path = configuration["ConfigPath:DeviceInfo"] ?? Path.Combine(Configuration.BaseDirectory, "device.json");
+		var path = configuration.GetValue("ConfigPath:DeviceInfo", Path.Combine(Configuration.BaseDirectory, "device.json"))!;
 
 		var device = File.Exists(path)
 			? JsonSerializer.Deserialize<BotDeviceInfo>(File.ReadAllText(path)) ?? BotDeviceInfo.GenerateInfo()
@@ -54,7 +54,7 @@ internal static class BotContextHelper
 
 	private static BotKeystore GetOrCreateKeyStore(IConfiguration configuration)
 	{
-		var path = configuration["ConfigPath:Keystore"] ?? Path.Combine(Configuration.BaseDirectory, "keystore.json");
+		var path = configuration.GetValue("ConfigPath:Keystore", Path.Combine(Configuration.BaseDirectory, "keystore.json"))!;
 
 		return File.Exists(path)
 			? JsonSerializer.Deserialize<BotKeystore>(File.ReadAllText(path)) ?? new()

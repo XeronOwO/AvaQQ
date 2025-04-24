@@ -87,7 +87,7 @@ public partial class AdapterSelectionView : UserControl
 			{
 				_logger.LogInformation("Logged in by QrCode.");
 
-				var keystorePath = configuration["ConfigPath:Keystore"] ?? Path.Combine(Configuration.BaseDirectory, "keystore.json");
+				var keystorePath = configuration.GetValue("ConfigPath:Keystore", Path.Combine(Configuration.BaseDirectory, "keystore.json"))!;
 				File.WriteAllText(keystorePath, JsonSerializer.Serialize(context.UpdateKeystore()));
 				_logger.LogInformation("Keystore saved.");
 
