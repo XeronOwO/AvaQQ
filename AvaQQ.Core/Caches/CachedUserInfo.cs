@@ -39,8 +39,12 @@ public class CachedUserInfo
 		{
 			Uin = info.Uin,
 			Nickname = info.Nickname,
-			Remark = null,
+			Remark = info.Remark,
 		};
+
+	/// <inheritdoc/>
+	public static implicit operator RecordedUserInfo(CachedUserInfo info)
+		=> new(info.Uin, info.Nickname, info.Remark);
 
 	/// <inheritdoc/>
 	public static implicit operator CachedUserInfo(AdaptedUserInfo info)
@@ -48,7 +52,7 @@ public class CachedUserInfo
 		{
 			Uin = info.Uin,
 			Nickname = info.Nickname,
-			Remark = null,
+			Remark = info.Remark,
 		};
 
 	/// <summary>

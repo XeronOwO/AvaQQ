@@ -43,6 +43,10 @@ public class CachedGroupInfo
 		};
 
 	/// <inheritdoc/>
+	public static implicit operator RecordedGroupInfo(CachedGroupInfo info)
+		=> new(info.Uin, info.Name, info.Remark);
+
+	/// <inheritdoc/>
 	public static implicit operator CachedGroupInfo(AdaptedGroupInfo info)
 		=> new()
 		{
