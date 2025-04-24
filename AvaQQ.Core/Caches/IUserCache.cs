@@ -5,7 +5,7 @@ namespace AvaQQ.Core.Caches;
 /// <summary>
 /// 用户缓存
 /// </summary>
-public interface IUserCache
+public interface IUserCache : IDisposable
 {
 	/// <summary>
 	/// 获取所有用户信息，包括好友、陌生人、搜索缓存的等<br/>

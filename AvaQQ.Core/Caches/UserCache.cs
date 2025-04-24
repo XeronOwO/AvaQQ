@@ -2,7 +2,6 @@
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Events;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Core.Caches;
@@ -29,14 +28,18 @@ internal class UserCache : IUserCache
 		_database = database;
 		_events = events;
 
+		_events.GetAllRecordedUsers.OnDone += OnGetAllRecordedUsers;
 		_events.GetUser.OnDone += OnGetUser;
 		_events.GetAllFriends.OnDone += OnGetAllFriends;
 	}
 
 	~UserCache()
 	{
+		_events.GetAllRecordedUsers.OnDone -= OnGetAllRecordedUsers;
 		_events.GetUser.OnDone -= OnGetUser;
 		_events.GetAllFriends.OnDone -= OnGetAllFriends;
+
+		Dispose(disposing: false);
 	}
 
 	private DateTime _getAllFriendsLastUpdateTime = DateTime.MinValue;
@@ -44,19 +47,21 @@ internal class UserCache : IUserCache
 	private bool GetAllFriendsRequiresUpdate
 		=> _getAllFriendsLastUpdateTime + Config.Instance.FriendUpdateInterval < DateTime.Now;
 
-	private struct UserInfoCache
+	private class UserInfoCache
 	{
-		public required DateTime LastUpdateTime { get; set; }
+		public DateTime LastUpdateTime { get; set; } = DateTime.MinValue;
 
-		public required CachedUserInfo? Info { get; set; }
+		public CachedUserInfo? Info { get; set; } = null;
 
-		public readonly bool RequiresUpdate
+		public bool RequiresUpdate
 			=> LastUpdateTime + Config.Instance.UserUpdateInterval < DateTime.Now;
 	}
 
-	private readonly ConcurrentDictionary<ulong, UserInfoCache> _userInfoCaches = [];
-
 	private int _isLocalUserInfosLoaded = 0;
+
+	private readonly ReaderWriterLockSlim _lock = new();
+
+	private readonly Dictionary<ulong, UserInfoCache> _caches = [];
 
 	private void LoadLocalUserInfos()
 	{
@@ -65,15 +70,36 @@ internal class UserCache : IUserCache
 			return;
 		}
 
-		foreach (var info in _database.GetAllRecordedUsers())
+		_events.GetAllRecordedUsers.Enqueue(
+			CommonEventId.GetAllRecordedUsers,
+			_database.GetAllRecordedUsersAsync
+			);
+	}
+
+	private void OnGetAllRecordedUsers(object? sender, BusEventArgs<CommonEventId, RecordedUserInfo[]> e)
+	{
+		_lock.EnterWriteLock();
+		try
 		{
-			var cache = new UserInfoCache
+			foreach (var user in e.Result)
 			{
-				LastUpdateTime = DateTime.Now,
-				Info = info,
-			};
-			cache.Info.HasLocalData = true;
-			_userInfoCaches[info.Uin] = cache;
+				if (!_caches.TryGetValue(user.Uin, out var cache))
+				{
+					_caches.Add(user.Uin, cache = new());
+				}
+
+				cache.Info ??= new()
+				{
+					Uin = user.Uin,
+					Nickname = user.Nickname,
+					Remark = user.Remark,
+				};
+				cache.Info.HasLocalData = true;
+			}
+		}
+		finally
+		{
+			_lock.ExitWriteLock();
 		}
 	}
 
@@ -88,13 +114,23 @@ internal class UserCache : IUserCache
 			{
 				_events.GetAllFriends.Enqueue(
 					CommonEventId.GetAllFriends,
-					adapter.GetAllFriendsAsync()
+					adapter.GetAllFriendsAsync
 				);
 			}
 
-			return [.. _userInfoCaches.Values
-				.Where(v => v.Info != null && predicate(v.Info))
-				.Select(v => v.Info!)];
+			CachedUserInfo[] result;
+			_lock.EnterReadLock();
+			try
+			{
+				result = [.._caches.Values
+					.Where(v => v.Info != null && predicate(v.Info))
+					.Select(v => v.Info!)];
+			}
+			finally
+			{
+				_lock.ExitReadLock();
+			}
+			return result;
 		}
 		catch (Exception e)
 		{
@@ -107,34 +143,41 @@ internal class UserCache : IUserCache
 	{
 		var now = DateTime.Now;
 		var users = new List<CachedUserInfo>();
-		foreach (var info in e.Result)
+		_lock.EnterWriteLock();
+		try
 		{
-			var cache = _userInfoCaches.AddOrUpdate(info.Uin, (_) =>
+			foreach (var info in e.Result)
 			{
-				var cache = new UserInfoCache
+				if (!_caches.TryGetValue(info.Uin, out var cache))
 				{
-					LastUpdateTime = now,
-					Info = info,
-				};
-				cache.Info.IsFriend = true;
-				return cache;
-			}, (_, cache) =>
-			{
+					_caches.Add(info.Uin, cache = new());
+				}
+
 				cache.LastUpdateTime = now;
 				if (cache.Info == null)
 				{
-					cache.Info = info;
+					cache.Info = new()
+					{
+						Uin = info.Uin,
+						Nickname = info.Nickname,
+						Remark = info.Remark,
+					};
 				}
 				else
 				{
-					cache.Info.Update(info);
+					cache.Info.Nickname = info.Nickname;
+					cache.Info.Remark = info.Remark;
 				}
 				cache.Info.IsFriend = true;
-				return cache;
-			});
-			users.Add(cache.Info!);
+				users.Add(cache.Info);
+			}
+
+			_getAllFriendsLastUpdateTime = now;
 		}
-		_getAllFriendsLastUpdateTime = now;
+		finally
+		{
+			_lock.ExitWriteLock();
+		}
 
 		_events.CachedGetAllFriends.DoneManually(CommonEventId.CachedGetAllFriends, [.. users]);
 	}
@@ -143,21 +186,36 @@ internal class UserCache : IUserCache
 	{
 		try
 		{
-			var cache = _userInfoCaches.GetOrAdd(uin, (_) => new UserInfoCache
+			_lock.EnterUpgradeableReadLock();
+			try
 			{
-				LastUpdateTime = DateTime.MinValue,
-				Info = null,
-			});
+				if (!_caches.TryGetValue(uin, out var cache))
+				{
+					_lock.EnterWriteLock();
+					try
+					{
+						_caches.Add(uin, cache = new());
+					}
+					finally
+					{
+						_lock.ExitWriteLock();
+					}
+				}
 
-			if (forceUpdate || cache.RequiresUpdate)
-			{
-				_events.GetUser.Enqueue(
-					new() { Uin = uin },
-					_adapterProvider.EnsuredAdapter.GetUserAsync(uin)
-				);
+				if (forceUpdate || cache.RequiresUpdate)
+				{
+					_events.GetUser.Enqueue(
+						new() { Uin = uin },
+						() => _adapterProvider.EnsuredAdapter.GetUserAsync(uin)
+					);
+				}
+
+				return cache.Info;
 			}
-
-			return cache.Info;
+			finally
+			{
+				_lock.ExitUpgradeableReadLock();
+			}
 		}
 		catch (Exception e)
 		{
@@ -168,25 +226,66 @@ internal class UserCache : IUserCache
 
 	private void OnGetUser(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)
 	{
-		_userInfoCaches.AddOrUpdate(e.Id.Uin, (_) =>
+		var uin = e.Id.Uin;
+
+		var now = DateTime.Now;
+		_lock.EnterWriteLock();
+		try
 		{
-			return new()
+			if (!_caches.TryGetValue(uin, out var cache))
 			{
-				LastUpdateTime = DateTime.Now,
-				Info = e.Result,
-			};
-		}, (u, cache) =>
-		{
-			cache.LastUpdateTime = DateTime.Now;
+				_caches.Add(uin, cache = new());
+			}
+			cache.LastUpdateTime = now;
+
+			if (e.Result is not { } info)
+			{
+				return;
+			}
+
 			if (cache.Info == null)
 			{
-				cache.Info = e.Result;
+				cache.Info = new()
+				{
+					Uin = info.Uin,
+					Nickname = info.Nickname,
+					Remark = info.Remark,
+				};
 			}
 			else
 			{
-				cache.Info.Update(e.Result);
+				cache.Info.Nickname = info.Nickname;
+				cache.Info.Remark = info.Remark;
 			}
-			return cache;
-		});
+		}
+		finally
+		{
+			_lock.ExitWriteLock();
+		}
 	}
+
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				_lock.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 }

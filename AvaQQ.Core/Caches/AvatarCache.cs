@@ -92,7 +92,7 @@ internal class AvatarCache : IAvatarCache
 			{
 				Uin = uin,
 				Size = size,
-			}, LoadUserAvatarFromRemoteAsync(uin, size));
+			}, () => LoadUserAvatarFromRemoteAsync(uin, size));
 		}
 
 		return avatar.Avatar;
@@ -175,7 +175,7 @@ internal class AvatarCache : IAvatarCache
 			{
 				Uin = uin,
 				Size = size,
-			}, LoadGroupAvatarFromRemoteAsync(uin, size));
+			}, () => LoadGroupAvatarFromRemoteAsync(uin, size));
 		}
 
 		return avatar.Avatar;

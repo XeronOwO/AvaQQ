@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Databases;
 
 namespace AvaQQ.Core.Events;
 
@@ -15,6 +16,11 @@ public class EventStation
 	/// 用户头像
 	/// </summary>
 	public EventBus<AvatarCacheId, Bitmap?> UserAvatar { get; set; } = new();
+
+	/// <summary>
+	/// 当从数据库中加载所有用户信息时触发
+	/// </summary>
+	public EventBus<CommonEventId, RecordedUserInfo[]> GetAllRecordedUsers { get; set; } = new();
 
 	/// <summary>
 	/// 获取所有好友
@@ -39,6 +45,11 @@ public class EventStation
 	/// 群头像
 	/// </summary>
 	public EventBus<AvatarCacheId, Bitmap?> GroupAvatar { get; set; } = new();
+
+	/// <summary>
+	/// 当从数据库中加载所有群信息时触发
+	/// </summary>
+	public EventBus<CommonEventId, RecordedGroupInfo[]> GetAllRecordedGroups { get; set; } = new();
 
 	/// <summary>
 	/// 获取加入的所有群聊

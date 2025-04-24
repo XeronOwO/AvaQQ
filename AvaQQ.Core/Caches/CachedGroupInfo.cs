@@ -1,5 +1,4 @@
-﻿using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Databases;
+﻿using AvaQQ.Core.Databases;
 
 namespace AvaQQ.Core.Caches;
 
@@ -33,41 +32,7 @@ public class CachedGroupInfo
 	/// </summary>
 	public bool IsStillIn { get; set; }
 
-	/// <inheritdoc/>
-	public static implicit operator CachedGroupInfo(RecordedGroupInfo info)
-		=> new()
-		{
-			Uin = info.Uin,
-			Name = info.Name,
-			Remark = info.Remark,
-		};
-
-	/// <inheritdoc/>
+	/// <summary/>
 	public static implicit operator RecordedGroupInfo(CachedGroupInfo info)
 		=> new(info.Uin, info.Name, info.Remark);
-
-	/// <inheritdoc/>
-	public static implicit operator CachedGroupInfo(AdaptedGroupInfo info)
-		=> new()
-		{
-			Uin = info.Uin,
-			Name = info.Name,
-			Remark = info.Remark,
-		};
-
-	/// <summary>
-	/// 更新缓存的群聊信息
-	/// </summary>
-	/// <param name="info">信息</param>
-	public void Update(AdaptedGroupInfo? info)
-	{
-		if (info == null)
-		{
-			return;
-		}
-
-		Uin = info.Value.Uin;
-		Name = info.Value.Name;
-		Remark = info.Value.Remark;
-	}
 }

@@ -32,15 +32,25 @@ public readonly struct CommonEventId : IEventId
 	/// </summary>
 	public enum EventId
 	{
+		/// <inheritdoc cref="EventStation.GetAllRecordedUsers"/>
+		GetAllRecordedUsers,
 		/// <inheritdoc cref="EventStation.GetAllFriends"/>
 		GetAllFriends,
 		/// <inheritdoc cref="EventStation.CachedGetAllFriends"/>
 		CachedGetAllFriends,
+		/// <inheritdoc cref="EventStation.GetAllRecordedGroups"/>
+		GetAllRecordedGroups,
 		/// <inheritdoc cref="EventStation.GetAllJoinedGroups"/>
 		GetAllJoinedGroups,
 		/// <inheritdoc cref="EventStation.CachedGetAllJoinedGroups"/>
 		CachedGetAllJoinedGroups,
 	}
+
+	/// <inheritdoc cref="EventStation.GetAllRecordedUsers"/>
+	public static CommonEventId GetAllRecordedUsers { get; } = new()
+	{
+		Id = EventId.GetAllRecordedUsers,
+	};
 
 	/// <inheritdoc cref="EventStation.GetAllFriends"/>
 	public static CommonEventId GetAllFriends { get; } = new()
@@ -52,6 +62,12 @@ public readonly struct CommonEventId : IEventId
 	public static CommonEventId CachedGetAllFriends { get; } = new()
 	{
 		Id = EventId.CachedGetAllFriends,
+	};
+
+	/// <inheritdoc cref="EventStation.GetAllRecordedGroups"/>
+	public static CommonEventId GetAllRecordedGroups { get; } = new()
+	{
+		Id = EventId.GetAllRecordedGroups,
 	};
 
 	/// <inheritdoc cref="EventStation.GetAllJoinedGroups"/>

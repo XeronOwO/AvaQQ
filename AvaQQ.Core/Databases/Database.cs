@@ -26,12 +26,12 @@ public abstract class Database : IDisposable
 	/// <summary>
 	/// 获取所有记录的群聊信息
 	/// </summary>
-	public abstract RecordedGroupInfo[] GetAllRecordedGroups();
+	public abstract Task<RecordedGroupInfo[]> GetAllRecordedGroupsAsync();
 
 	/// <summary>
 	/// 获取所有记录的用户信息
 	/// </summary>
-	public abstract RecordedUserInfo[] GetAllRecordedUsers();
+	public abstract Task<RecordedUserInfo[]> GetAllRecordedUsersAsync();
 
 	/// <inheritdoc/>
 	public abstract void Dispose();

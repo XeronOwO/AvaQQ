@@ -2,7 +2,6 @@
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Events;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Core.Caches;
@@ -33,14 +32,18 @@ internal class GroupCache : IGroupCache
 		_database = database;
 		_events = events;
 
+		_events.GetAllRecordedGroups.OnDone += OnGetAllRecordedGroups;
 		_events.GetAllJoinedGroups.OnDone += OnGetAllJoinedGroups;
 		_events.GetJoinedGroup.OnDone += OnGetJoinedGroup;
 	}
 
 	~GroupCache()
 	{
+		_events.GetAllRecordedGroups.OnDone -= OnGetAllRecordedGroups;
 		_events.GetAllJoinedGroups.OnDone -= OnGetAllJoinedGroups;
 		_events.GetJoinedGroup.OnDone -= OnGetJoinedGroup;
+
+		Dispose(disposing: false);
 	}
 
 	private DateTime _getAllJoinedGroupsLastUpdateTime = DateTime.MinValue;
@@ -48,19 +51,21 @@ internal class GroupCache : IGroupCache
 	private bool GetAllJoinedGroupsRequiresUpdate
 		=> _getAllJoinedGroupsLastUpdateTime + Config.Instance.GroupUpdateInterval < DateTime.Now;
 
-	private struct GroupInfoCache
+	private class GroupInfoCache
 	{
-		public required DateTime LastUpdateTime { get; set; }
+		public DateTime LastUpdateTime { get; set; } = DateTime.MinValue;
 
-		public required CachedGroupInfo? Info { get; set; }
+		public CachedGroupInfo? Info { get; set; } = null;
 
-		public readonly bool RequiresUpdate
+		public bool RequiresUpdate
 			=> LastUpdateTime + Config.Instance.GroupUpdateInterval < DateTime.Now;
 	}
 
-	private readonly ConcurrentDictionary<ulong, GroupInfoCache> _groupInfoCaches = [];
-
 	private int _isLocalGroupInfosLoaded = 0;
+
+	private readonly ReaderWriterLockSlim _lock = new();
+
+	private readonly Dictionary<ulong, GroupInfoCache> _caches = [];
 
 	private void LoadLocalGroupInfos()
 	{
@@ -69,15 +74,36 @@ internal class GroupCache : IGroupCache
 			return;
 		}
 
-		foreach (var info in _database.GetAllRecordedGroups())
+		_events.GetAllRecordedGroups.Enqueue(
+			CommonEventId.GetAllRecordedGroups,
+			_database.GetAllRecordedGroupsAsync
+			);
+	}
+
+	private void OnGetAllRecordedGroups(object? sender, BusEventArgs<CommonEventId, RecordedGroupInfo[]> e)
+	{
+		_lock.EnterWriteLock();
+		try
 		{
-			var cache = new GroupInfoCache
+			foreach (var group in e.Result)
 			{
-				LastUpdateTime = DateTime.Now,
-				Info = info,
-			};
-			cache.Info.HasLocalData = true;
-			_groupInfoCaches[info.Uin] = cache;
+				if (!_caches.TryGetValue(group.Uin, out var cache))
+				{
+					_caches.Add(group.Uin, cache = new());
+				}
+
+				cache.Info ??= new()
+				{
+					Uin = group.Uin,
+					Name = group.Name,
+					Remark = group.Remark,
+				};
+				cache.Info.HasLocalData = true;
+			}
+		}
+		finally
+		{
+			_lock.ExitWriteLock();
 		}
 	}
 
@@ -87,17 +113,25 @@ internal class GroupCache : IGroupCache
 		{
 			LoadLocalGroupInfos();
 
-			if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
+			_lock.EnterReadLock();
+			try
 			{
-				_events.GetAllJoinedGroups.Enqueue(
-					CommonEventId.GetAllJoinedGroups,
-					_adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync()
-				);
-			}
+				if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
+				{
+					_events.GetAllJoinedGroups.Enqueue(
+						CommonEventId.GetAllJoinedGroups,
+						_adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync
+					);
+				}
 
-			return [.. _groupInfoCaches.Values
-				.Where(v => v.Info != null && predicate(v.Info))
-				.Select(v => v.Info!)];
+				return [.. _caches.Values
+					.Where(v => v.Info != null && predicate(v.Info))
+					.Select(v => v.Info!)];
+			}
+			finally
+			{
+				_lock.ExitReadLock();
+			}
 		}
 		catch (Exception e)
 		{
@@ -106,27 +140,85 @@ internal class GroupCache : IGroupCache
 		}
 	}
 
+	private void OnGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId, AdaptedGroupInfo[]> e)
+	{
+		var now = DateTime.Now;
+		var groups = new List<CachedGroupInfo>();
+		_lock.EnterWriteLock();
+		try
+		{
+			foreach (var info in e.Result)
+			{
+				if (!_caches.TryGetValue(info.Uin, out var cache))
+				{
+					_caches.Add(info.Uin, cache = new());
+				}
+
+				cache.LastUpdateTime = now;
+				if (cache.Info == null)
+				{
+					cache.Info = new()
+					{
+						Uin = info.Uin,
+						Name = info.Name,
+						Remark = info.Remark,
+					};
+				}
+				else
+				{
+					cache.Info.Name = info.Name;
+					cache.Info.Remark = info.Remark;
+				}
+				cache.Info.IsStillIn = true;
+				groups.Add(cache.Info);
+			}
+
+			_getAllJoinedGroupsLastUpdateTime = now;
+		}
+		finally
+		{
+			_lock.ExitWriteLock();
+		}
+
+		_events.CachedGetAllJoinedGroups.DoneManually(CommonEventId.CachedGetAllJoinedGroups, [.. groups]);
+	}
+
 	public CachedGroupInfo? GetJoinedGroup(ulong uin, bool forceUpdate = false)
 	{
 		try
 		{
 			LoadLocalGroupInfos();
 
-			var cache = _groupInfoCaches.GetOrAdd(uin, (_) => new GroupInfoCache
+			_lock.EnterUpgradeableReadLock();
+			try
 			{
-				LastUpdateTime = DateTime.MinValue,
-				Info = null,
-			});
+				if (!_caches.TryGetValue(uin, out var cache))
+				{
+					_lock.EnterWriteLock();
+					try
+					{
+						_caches.Add(uin, cache = new());
+					}
+					finally
+					{
+						_lock.ExitWriteLock();
+					}
+				}
 
-			if (forceUpdate || cache.RequiresUpdate)
-			{
-				_events.GetJoinedGroup.Enqueue(
-					new() { Uin = uin },
-					_adapterProvider.EnsuredAdapter.GetJoinedGroupAsync(uin)
-				);
+				if (forceUpdate || cache.RequiresUpdate)
+				{
+					_events.GetJoinedGroup.Enqueue(
+						new() { Uin = uin },
+						() => _adapterProvider.EnsuredAdapter.GetJoinedGroupAsync(uin)
+					);
+				}
+
+				return cache.Info;
 			}
-
-			return cache.Info;
+			finally
+			{
+				_lock.ExitUpgradeableReadLock();
+			}
 		}
 		catch (Exception e)
 		{
@@ -135,76 +227,72 @@ internal class GroupCache : IGroupCache
 		}
 	}
 
-	private void OnGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId, AdaptedGroupInfo[]> e)
-	{
-		var now = DateTime.Now;
-		var groups = new List<CachedGroupInfo>();
-		foreach (var info in e.Result)
-		{
-			var cache = _groupInfoCaches.AddOrUpdate(info.Uin, (_) =>
-			{
-				var cache = new GroupInfoCache
-				{
-					LastUpdateTime = now,
-					Info = info,
-				};
-				cache.Info.IsStillIn = true;
-				return cache;
-			}, (_, cache) =>
-			{
-				cache.LastUpdateTime = now;
-				if (cache.Info == null)
-				{
-					cache.Info = info;
-				}
-				else
-				{
-					cache.Info.Update(info);
-				}
-				cache.Info.IsStillIn = true;
-				return cache;
-			});
-			groups.Add(cache.Info!);
-		}
-		_getAllJoinedGroupsLastUpdateTime = now;
-
-		_events.CachedGetAllJoinedGroups.DoneManually(CommonEventId.CachedGetAllJoinedGroups, [.. groups]);
-	}
-
 	private void OnGetJoinedGroup(object? sender, BusEventArgs<UinId, AdaptedGroupInfo?> e)
 	{
+		var uin = e.Id.Uin;
+
 		var now = DateTime.Now;
-		var info = e.Result;
-		var cache = _groupInfoCaches.AddOrUpdate(e.Id.Uin, (_) =>
+		GroupInfoCache? cache;
+		_lock.EnterWriteLock();
+		try
 		{
-			var cache = new GroupInfoCache
+			if (!_caches.TryGetValue(uin, out cache))
 			{
-				LastUpdateTime = now,
-				Info = info,
-			};
-			if (cache.Info != null)
-			{
-				cache.Info.IsStillIn = true;
+				_caches.Add(uin, cache = new());
 			}
-			return cache;
-		}, (_, cache) =>
-		{
 			cache.LastUpdateTime = now;
+
+			if (e.Result is not { } info)
+			{
+				return;
+			}
+
 			if (cache.Info == null)
 			{
-				cache.Info = info;
+				cache.Info = new()
+				{
+					Uin = info.Uin,
+					Name = info.Name,
+					Remark = info.Remark,
+				};
 			}
 			else
 			{
-				cache.Info.Update(info);
+				cache.Info.Name = info.Name;
+				cache.Info.Remark = info.Remark;
 			}
-			if (cache.Info != null)
-			{
-				cache.Info.IsStillIn = true;
-			}
-			return cache;
-		});
+			cache.Info.IsStillIn = true;
+		}
+		finally
+		{
+			_lock.ExitWriteLock();
+		}
 
 		_events.CachedGetJoinedGroup.DoneManually(new() { Uin = e.Id.Uin }, cache.Info);
 	}
+
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				_lock.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 }

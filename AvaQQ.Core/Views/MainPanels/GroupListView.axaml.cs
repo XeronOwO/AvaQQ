@@ -58,7 +58,8 @@ public partial class GroupListView : UserControl
 		CirculationInjectionDetector<GroupListView>.Leave();
 
 		_events.GroupAvatar.OnDone += OnGroupAvatar;
-		_events.CachedGetAllJoinedGroups.OnDone += OnCachedGetAllJoinedGroups;
+		_events.GetAllRecordedGroups.OnDone += OnGroups;
+		_events.CachedGetAllJoinedGroups.OnDone += OnGroups;
 	}
 
 	/// <summary>
@@ -67,7 +68,8 @@ public partial class GroupListView : UserControl
 	~GroupListView()
 	{
 		_events.GroupAvatar.OnDone -= OnGroupAvatar;
-		_events.CachedGetAllJoinedGroups.OnDone -= OnCachedGetAllJoinedGroups;
+		_events.GetAllRecordedGroups.OnDone -= OnGroups;
+		_events.CachedGetAllJoinedGroups.OnDone -= OnGroups;
 	}
 
 	/// <summary>
@@ -295,7 +297,7 @@ public partial class GroupListView : UserControl
 		});
 	}
 
-	private void OnCachedGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId> e)
+	private void OnGroups(object? sender, BusEventArgs<CommonEventId> e)
 	{
 		Dispatcher.UIThread.Invoke(() =>
 		{

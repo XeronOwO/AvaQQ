@@ -70,13 +70,14 @@ public class EventBus<TId, TResult> where TId : IEventId
 	/// 当车上有相同 ID 的事件时，不会加入队列，并返回 false
 	/// </summary>
 	/// <param name="id">事件 ID</param>
-	/// <param name="task">任务</param>
+	/// <param name="taskFactory">任务</param>
 	/// <returns>是否成功加入队列</returns>
-	public bool Enqueue(TId id, Task<TResult> task)
+	public bool Enqueue(TId id, Func<Task<TResult>> taskFactory)
 	{
 		var result = false;
 		_tasks.GetOrAdd(id, (_) =>
 		{
+			var task = taskFactory();
 			task.ContinueWith((t) =>
 			{
 				Done(id, t.Result);

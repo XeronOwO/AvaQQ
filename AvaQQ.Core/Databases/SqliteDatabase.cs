@@ -33,38 +33,38 @@ internal class SqliteDatabase : Database
 		Context.SaveChanges();
 	}
 
-	public override RecordedGroupInfo[] GetAllRecordedGroups()
-		=> [.. Context.Groups];
+	public override Task<RecordedGroupInfo[]> GetAllRecordedGroupsAsync()
+		=> Context.Groups.ToArrayAsync();
 
-	public override RecordedUserInfo[] GetAllRecordedUsers()
-		=> [.. Context.Users];
+	public override Task<RecordedUserInfo[]> GetAllRecordedUsersAsync()
+		=> Context.Users.ToArrayAsync();
 
 	#region 事件处理
 
-	private void OnCachedGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId, CachedGroupInfo[]> e)
+	private async void OnCachedGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId, CachedGroupInfo[]> e)
 	{
-		Context.Groups
-			.UpsertRange(e.Result.Select<CachedGroupInfo, RecordedGroupInfo>(v => v))
-			.Run();
-		Context.SaveChanges();
-
 		foreach (var info in e.Result)
 		{
 			info.HasLocalData = true;
 		}
+
+		await Context.Groups
+			.UpsertRange(e.Result.Select<CachedGroupInfo, RecordedGroupInfo>(v => v))
+			.RunAsync();
+		await Context.SaveChangesAsync();
 	}
 
-	private void OnCachedGetAllFriends(object? sender, BusEventArgs<CommonEventId, CachedUserInfo[]> e)
+	private async void OnCachedGetAllFriends(object? sender, BusEventArgs<CommonEventId, CachedUserInfo[]> e)
 	{
-		Context.Users
-			.UpsertRange(e.Result.Select<CachedUserInfo, RecordedUserInfo>(v => v))
-			.Run();
-		Context.SaveChanges();
-
 		foreach (var info in e.Result)
 		{
 			info.HasLocalData = true;
 		}
+
+		await Context.Users
+			.UpsertRange(e.Result.Select<CachedUserInfo, RecordedUserInfo>(v => v))
+			.RunAsync();
+		await Context.SaveChangesAsync();
 	}
 
 	#endregion

@@ -5,7 +5,7 @@ namespace AvaQQ.Core.Caches;
 /// <summary>
 /// 群缓存
 /// </summary>
-public interface IGroupCache
+public interface IGroupCache : IDisposable
 {
 	/// <summary>
 	/// 获取所有群聊信息，包括已加入的、已退出的、搜索缓存的等<br/>

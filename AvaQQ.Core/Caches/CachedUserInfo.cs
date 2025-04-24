@@ -1,5 +1,4 @@
-﻿using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Databases;
+﻿using AvaQQ.Core.Databases;
 
 namespace AvaQQ.Core.Caches;
 
@@ -33,41 +32,7 @@ public class CachedUserInfo
 	/// </summary>
 	public bool IsFriend { get; set; }
 
-	/// <inheritdoc/>
-	public static implicit operator CachedUserInfo(RecordedUserInfo info)
-		=> new()
-		{
-			Uin = info.Uin,
-			Nickname = info.Nickname,
-			Remark = info.Remark,
-		};
-
-	/// <inheritdoc/>
+	/// <summary/>
 	public static implicit operator RecordedUserInfo(CachedUserInfo info)
 		=> new(info.Uin, info.Nickname, info.Remark);
-
-	/// <inheritdoc/>
-	public static implicit operator CachedUserInfo(AdaptedUserInfo info)
-		=> new()
-		{
-			Uin = info.Uin,
-			Nickname = info.Nickname,
-			Remark = info.Remark,
-		};
-
-	/// <summary>
-	/// 更新缓存的用户信息
-	/// </summary>
-	/// <param name="info">信息</param>
-	public void Update(AdaptedUserInfo? info)
-	{
-		if (info == null)
-		{
-			return;
-		}
-
-		Uin = info.Value.Uin;
-		Nickname = info.Value.Nickname;
-		Remark = info.Value.Remark;
-	}
 }
