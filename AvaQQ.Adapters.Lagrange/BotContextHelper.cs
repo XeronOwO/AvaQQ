@@ -9,12 +9,12 @@ namespace AvaQQ.Adapters.Lagrange;
 
 internal static class BotContextHelper
 {
-	public static Task<BotContext> CreateBotContextAsync(IConfiguration configuration)
+	public static Task<BotContext> CreateBotContextAsync(IConfiguration configuration, CancellationToken token)
 		=> Task.Run(() => BotFactory.Create(
 			CreateBotConfig(configuration),
 			GetOrCreateBotDevice(configuration),
 			GetOrCreateKeyStore(configuration)
-			));
+			), token);
 
 	private static BotConfig CreateBotConfig(IConfiguration configuration)
 		=> new()
@@ -37,12 +37,19 @@ internal static class BotContextHelper
 
 		var device = File.Exists(path)
 			? JsonSerializer.Deserialize<BotDeviceInfo>(File.ReadAllText(path)) ?? BotDeviceInfo.GenerateInfo()
-			: BotDeviceInfo.GenerateInfo();
+			: CreateBotDevice();
 
 		var deviceJson = JsonSerializer.Serialize(device);
 		File.WriteAllText(path, deviceJson);
 
 		return device;
+	}
+
+	private static BotDeviceInfo CreateBotDevice()
+	{
+		var info = BotDeviceInfo.GenerateInfo();
+		info.DeviceName = $"AvaQQ-{info.DeviceName}";
+		return info;
 	}
 
 	private static BotKeystore GetOrCreateKeyStore(IConfiguration configuration)

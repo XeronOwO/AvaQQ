@@ -39,7 +39,7 @@ internal class Adapter : IAdapter
 		}, "{}", e.ToString());
 	}
 
-	public Task<bool> TryLoginByEasy(CancellationToken token = default)
+	public Task<bool> TryLoginByEasyAsync(CancellationToken token = default)
 	{
 		var keystore = _context.UpdateKeystore();
 		if (keystore.Session.TempPassword == null) return Task.FromResult(false);
@@ -47,7 +47,7 @@ internal class Adapter : IAdapter
 		return _context.LoginByEasy(token);
 	}
 
-	public async Task<bool> TryLoginByQrCode(Action<byte[]> qrCodeCallback, CancellationToken token = default)
+	public async Task<bool> TryLoginByQrCodeAsync(Action<byte[]> qrCodeCallback, CancellationToken token = default)
 	{
 		(string Url, byte[] QrCode)? qrCode = await _context.FetchQrCode().WaitAsync(token);
 		if (!qrCode.HasValue) return false;

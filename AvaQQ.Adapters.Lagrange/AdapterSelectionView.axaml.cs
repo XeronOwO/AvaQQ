@@ -69,11 +69,11 @@ public partial class AdapterSelectionView : UserControl
 		try
 		{
 			var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
-			var context = await BotContextHelper.CreateBotContextAsync(configuration);
+			var context = await BotContextHelper.CreateBotContextAsync(configuration, _controller.CancellationToken);
 			adapter = new Adapter(_serviceProvider, context);
 
 			_logger.LogInformation("Trying login by easy.");
-			if (await adapter.TryLoginByEasy(_controller.CancellationToken))
+			if (await adapter.TryLoginByEasyAsync(_controller.CancellationToken))
 			{
 				_logger.LogInformation("Logged in by easy.");
 
@@ -83,7 +83,7 @@ public partial class AdapterSelectionView : UserControl
 			}
 
 			_logger.LogInformation("Trying login by QrCode.");
-			if (await adapter.TryLoginByQrCode(ShowQrCode, _controller.CancellationToken))
+			if (await adapter.TryLoginByQrCodeAsync(ShowQrCode, _controller.CancellationToken))
 			{
 				_logger.LogInformation("Logged in by QrCode.");
 
