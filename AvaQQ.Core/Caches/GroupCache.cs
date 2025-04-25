@@ -1,6 +1,7 @@
 ﻿using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Events;
+using AvaQQ.Core.Utils;
 using Microsoft.Extensions.Logging;
 using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
@@ -82,28 +83,21 @@ internal class GroupCache : IGroupCache
 
 	private void OnGetAllRecordedGroups(object? sender, BusEventArgs<CommonEventId, RecordedGroupInfo[]> e)
 	{
-		_lock.EnterWriteLock();
-		try
+		using var _ = _lock.UseWriteLock();
+		foreach (var group in e.Result)
 		{
-			foreach (var group in e.Result)
+			if (!_caches.TryGetValue(group.Uin, out var cache))
 			{
-				if (!_caches.TryGetValue(group.Uin, out var cache))
-				{
-					_caches.Add(group.Uin, cache = new());
-				}
-
-				cache.Info ??= new()
-				{
-					Uin = group.Uin,
-					Name = group.Name,
-					Remark = group.Remark,
-				};
-				cache.Info.HasLocalData = true;
+				_caches.Add(group.Uin, cache = new());
 			}
-		}
-		finally
-		{
-			_lock.ExitWriteLock();
+
+			cache.Info ??= new()
+			{
+				Uin = group.Uin,
+				Name = group.Name,
+				Remark = group.Remark,
+			};
+			cache.Info.HasLocalData = true;
 		}
 	}
 
@@ -113,25 +107,18 @@ internal class GroupCache : IGroupCache
 		{
 			LoadLocalGroupInfos();
 
-			_lock.EnterReadLock();
-			try
+			using var _ = _lock.UseReadLock();
+			if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
 			{
-				if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
-				{
-					_events.GetAllJoinedGroups.Enqueue(
-						CommonEventId.GetAllJoinedGroups,
-						() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync()
-					);
-				}
+				_events.GetAllJoinedGroups.Enqueue(
+					CommonEventId.GetAllJoinedGroups,
+					() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync()
+				);
+			}
 
-				return [.. _caches.Values
+			return [.. _caches.Values
 					.Where(v => v.Info != null && predicate(v.Info))
 					.Select(v => v.Info!)];
-			}
-			finally
-			{
-				_lock.ExitReadLock();
-			}
 		}
 		catch (Exception e)
 		{
@@ -144,8 +131,7 @@ internal class GroupCache : IGroupCache
 	{
 		var now = DateTime.Now;
 		var groups = new List<CachedGroupInfo>();
-		_lock.EnterWriteLock();
-		try
+		using (var _ = _lock.UseWriteLock())
 		{
 			foreach (var info in e.Result)
 			{
@@ -175,10 +161,6 @@ internal class GroupCache : IGroupCache
 
 			_getAllJoinedGroupsLastUpdateTime = now;
 		}
-		finally
-		{
-			_lock.ExitWriteLock();
-		}
 
 		_events.CachedGetAllJoinedGroups.DoneManually(CommonEventId.CachedGetAllJoinedGroups, [.. groups]);
 	}
@@ -189,36 +171,22 @@ internal class GroupCache : IGroupCache
 		{
 			LoadLocalGroupInfos();
 
-			_lock.EnterUpgradeableReadLock();
-			try
+			using var _ = _lock.UseUpgradeableReadLock();
+			if (!_caches.TryGetValue(uin, out var cache))
 			{
-				if (!_caches.TryGetValue(uin, out var cache))
-				{
-					_lock.EnterWriteLock();
-					try
-					{
-						_caches.Add(uin, cache = new());
-					}
-					finally
-					{
-						_lock.ExitWriteLock();
-					}
-				}
-
-				if (forceUpdate || cache.RequiresUpdate)
-				{
-					_events.GetJoinedGroup.Enqueue(
-						new() { Uin = uin },
-						() => _adapterProvider.EnsuredAdapter.GetJoinedGroupAsync(uin)
-					);
-				}
-
-				return cache.Info;
+				using var __ = _lock.UseWriteLock();
+				_caches.Add(uin, cache = new());
 			}
-			finally
+
+			if (forceUpdate || cache.RequiresUpdate)
 			{
-				_lock.ExitUpgradeableReadLock();
+				_events.GetJoinedGroup.Enqueue(
+					new() { Uin = uin },
+					() => _adapterProvider.EnsuredAdapter.GetJoinedGroupAsync(uin)
+				);
 			}
+
+			return cache.Info;
 		}
 		catch (Exception e)
 		{
@@ -233,8 +201,7 @@ internal class GroupCache : IGroupCache
 
 		var now = DateTime.Now;
 		GroupInfoCache? cache;
-		_lock.EnterWriteLock();
-		try
+		using (var _ = _lock.UseWriteLock())
 		{
 			if (!_caches.TryGetValue(uin, out cache))
 			{
@@ -262,10 +229,6 @@ internal class GroupCache : IGroupCache
 				cache.Info.Remark = info.Remark;
 			}
 			cache.Info.IsStillIn = true;
-		}
-		finally
-		{
-			_lock.ExitWriteLock();
 		}
 
 		_events.CachedGetJoinedGroup.DoneManually(new() { Uin = e.Id.Uin }, cache.Info);

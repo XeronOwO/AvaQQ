@@ -1,6 +1,7 @@
 ﻿using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Events;
+using AvaQQ.Core.Utils;
 using Microsoft.Extensions.Logging;
 using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
@@ -78,28 +79,21 @@ internal class UserCache : IUserCache
 
 	private void OnGetAllRecordedUsers(object? sender, BusEventArgs<CommonEventId, RecordedUserInfo[]> e)
 	{
-		_lock.EnterWriteLock();
-		try
+		using var _ = _lock.UseWriteLock();
+		foreach (var user in e.Result)
 		{
-			foreach (var user in e.Result)
+			if (!_caches.TryGetValue(user.Uin, out var cache))
 			{
-				if (!_caches.TryGetValue(user.Uin, out var cache))
-				{
-					_caches.Add(user.Uin, cache = new());
-				}
-
-				cache.Info ??= new()
-				{
-					Uin = user.Uin,
-					Nickname = user.Nickname,
-					Remark = user.Remark,
-				};
-				cache.Info.HasLocalData = true;
+				_caches.Add(user.Uin, cache = new());
 			}
-		}
-		finally
-		{
-			_lock.ExitWriteLock();
+
+			cache.Info ??= new()
+			{
+				Uin = user.Uin,
+				Nickname = user.Nickname,
+				Remark = user.Remark,
+			};
+			cache.Info.HasLocalData = true;
 		}
 	}
 
@@ -118,19 +112,10 @@ internal class UserCache : IUserCache
 				);
 			}
 
-			CachedUserInfo[] result;
-			_lock.EnterReadLock();
-			try
-			{
-				result = [.._caches.Values
-					.Where(v => v.Info != null && predicate(v.Info))
-					.Select(v => v.Info!)];
-			}
-			finally
-			{
-				_lock.ExitReadLock();
-			}
-			return result;
+			using var _ = _lock.UseReadLock();
+			return [.._caches.Values
+				.Where(v => v.Info != null && predicate(v.Info))
+				.Select(v => v.Info!)];
 		}
 		catch (Exception e)
 		{
@@ -143,8 +128,7 @@ internal class UserCache : IUserCache
 	{
 		var now = DateTime.Now;
 		var users = new List<CachedUserInfo>();
-		_lock.EnterWriteLock();
-		try
+		using (var _ = _lock.UseWriteLock())
 		{
 			foreach (var info in e.Result)
 			{
@@ -174,10 +158,6 @@ internal class UserCache : IUserCache
 
 			_getAllFriendsLastUpdateTime = now;
 		}
-		finally
-		{
-			_lock.ExitWriteLock();
-		}
 
 		_events.CachedGetAllFriends.DoneManually(CommonEventId.CachedGetAllFriends, [.. users]);
 	}
@@ -186,36 +166,22 @@ internal class UserCache : IUserCache
 	{
 		try
 		{
-			_lock.EnterUpgradeableReadLock();
-			try
+			using var _ = _lock.UseUpgradeableReadLock();
+			if (!_caches.TryGetValue(uin, out var cache))
 			{
-				if (!_caches.TryGetValue(uin, out var cache))
-				{
-					_lock.EnterWriteLock();
-					try
-					{
-						_caches.Add(uin, cache = new());
-					}
-					finally
-					{
-						_lock.ExitWriteLock();
-					}
-				}
-
-				if (forceUpdate || cache.RequiresUpdate)
-				{
-					_events.GetUser.Enqueue(
-						new() { Uin = uin },
-						() => _adapterProvider.EnsuredAdapter.GetUserAsync(uin)
-					);
-				}
-
-				return cache.Info;
+				using var __ = _lock.UseWriteLock();
+				_caches.Add(uin, cache = new());
 			}
-			finally
+
+			if (forceUpdate || cache.RequiresUpdate)
 			{
-				_lock.ExitUpgradeableReadLock();
+				_events.GetUser.Enqueue(
+					new() { Uin = uin },
+					() => _adapterProvider.EnsuredAdapter.GetUserAsync(uin)
+				);
 			}
+
+			return cache.Info;
 		}
 		catch (Exception e)
 		{
@@ -229,38 +195,31 @@ internal class UserCache : IUserCache
 		var uin = e.Id.Uin;
 
 		var now = DateTime.Now;
-		_lock.EnterWriteLock();
-		try
+		using var _ = _lock.UseWriteLock();
+		if (!_caches.TryGetValue(uin, out var cache))
 		{
-			if (!_caches.TryGetValue(uin, out var cache))
-			{
-				_caches.Add(uin, cache = new());
-			}
-			cache.LastUpdateTime = now;
-
-			if (e.Result is not { } info)
-			{
-				return;
-			}
-
-			if (cache.Info == null)
-			{
-				cache.Info = new()
-				{
-					Uin = info.Uin,
-					Nickname = info.Nickname,
-					Remark = info.Remark,
-				};
-			}
-			else
-			{
-				cache.Info.Nickname = info.Nickname;
-				cache.Info.Remark = info.Remark;
-			}
+			_caches.Add(uin, cache = new());
 		}
-		finally
+		cache.LastUpdateTime = now;
+
+		if (e.Result is not { } info)
 		{
-			_lock.ExitWriteLock();
+			return;
+		}
+
+		if (cache.Info == null)
+		{
+			cache.Info = new()
+			{
+				Uin = info.Uin,
+				Nickname = info.Nickname,
+				Remark = info.Remark,
+			};
+		}
+		else
+		{
+			cache.Info.Nickname = info.Nickname;
+			cache.Info.Remark = info.Remark;
 		}
 	}
 
