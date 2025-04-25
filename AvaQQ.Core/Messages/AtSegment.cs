@@ -6,8 +6,7 @@
 public class AtSegment : Segment
 {
 	/// <summary>
-	/// QQ 号<br/>
-	/// 0 表示 @全体成员
+	/// QQ 号
 	/// </summary>
 	public ulong Uin { get; set; }
 }
