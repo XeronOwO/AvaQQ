@@ -2,6 +2,7 @@
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
+using AvaQQ.Core.Messages;
 
 namespace AvaQQ.Core.Events;
 
@@ -73,6 +74,11 @@ public class EventStation
 	/// 在 <see cref="GetJoinedGroup"/> 期间触发
 	/// </summary>
 	public EventBus<UinId, CachedGroupInfo?> CachedGetJoinedGroup { get; set; } = new();
+
+	/// <summary>
+	/// 当接收到群消息时触发
+	/// </summary>
+	public EventBus<CommonEventId, Message> GroupMessage { get; set; } = new();
 
 	#endregion
 }

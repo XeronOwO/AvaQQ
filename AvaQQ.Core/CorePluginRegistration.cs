@@ -40,6 +40,7 @@ internal static class CorePluginRegistration
 				.AddSingleton<Database, SqliteDatabase>()
 				.AddSingleton<IAvatarCache, AvatarCache>()
 				.AddSingleton<IGroupCache, GroupCache>()
+				.AddSingleton<IGroupMessageCache, GroupMessageCache>()
 				.AddSingleton<IUserCache, UserCache>()
 				.AddSingleton<EventStation>()
 				;

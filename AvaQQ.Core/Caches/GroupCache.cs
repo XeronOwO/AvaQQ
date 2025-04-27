@@ -38,14 +38,39 @@ internal class GroupCache : IGroupCache
 		_events.GetJoinedGroup.OnDone += OnGetJoinedGroup;
 	}
 
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			_events.GetAllRecordedGroups.OnDone -= OnGetAllRecordedGroups;
+			_events.GetAllJoinedGroups.OnDone -= OnGetAllJoinedGroups;
+			_events.GetJoinedGroup.OnDone -= OnGetJoinedGroup;
+
+			if (disposing)
+			{
+				_lock.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
 	~GroupCache()
 	{
-		_events.GetAllRecordedGroups.OnDone -= OnGetAllRecordedGroups;
-		_events.GetAllJoinedGroups.OnDone -= OnGetAllJoinedGroups;
-		_events.GetJoinedGroup.OnDone -= OnGetJoinedGroup;
-
 		Dispose(disposing: false);
 	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 
 	private DateTime _getAllJoinedGroupsLastUpdateTime = DateTime.MinValue;
 
@@ -233,29 +258,4 @@ internal class GroupCache : IGroupCache
 
 		_events.CachedGetJoinedGroup.DoneManually(new() { Uin = e.Id.Uin }, cache.Info);
 	}
-
-	#region Dispose
-
-	private bool disposedValue;
-
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				_lock.Dispose();
-			}
-
-			disposedValue = true;
-		}
-	}
-
-	public void Dispose()
-	{
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
-	}
-
-	#endregion
 }

@@ -3,10 +3,10 @@
 /// <summary>
 /// @某人片段
 /// </summary>
-public class AtSegment : Segment
+/// <param name="Uin">QQ 号</param>
+/// <param name="Name">显示名称</param>
+public record class AtSegment(ulong Uin, string Name) : ISegment
 {
-	/// <summary>
-	/// QQ 号
-	/// </summary>
-	public ulong Uin { get; set; }
+	/// <inheritdoc/>
+	public string Preview => $"@{Name} ";
 }

@@ -3,10 +3,9 @@
 /// <summary>
 /// 回复消息段
 /// </summary>
-public class ReplySegment : Segment
+/// <param name="Sequence">消息序号</param>
+public record class ReplySegment(ulong Sequence) : ISegment
 {
-	/// <summary>
-	/// 消息 ID
-	/// </summary>
-	public ulong MessageId { get; set; }
+	/// <inheritdoc/>
+	public string Preview => string.Empty;
 }

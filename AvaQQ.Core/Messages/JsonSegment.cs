@@ -3,10 +3,9 @@
 /// <summary>
 /// JSON 段
 /// </summary>
-public class JsonSegment : Segment
+/// <param name="Data">数据</param>
+public record class JsonSegment(string Data) : ISegment
 {
-	/// <summary>
-	/// 数据
-	/// </summary>
-	public string Data { get; set; } = string.Empty;
+	/// <inheritdoc/>
+	public string Preview => string.Empty;
 }

@@ -3,30 +3,15 @@
 /// <summary>
 /// 市场表情段
 /// </summary>
-public class MarketFaceSegment : Segment
+/// <param name="Url">URL</param>
+/// <param name="EmojiPackageId">表情包 ID</param>
+/// <param name="EmojiId">表情 ID</param>
+/// <param name="Key">密钥</param>
+/// <param name="Summary">简介</param>
+public record class MarketFaceSegment(
+	string Url, ulong EmojiPackageId, string EmojiId, string Key, string Summary
+	) : ISegment
 {
-	/// <summary>
-	/// URL
-	/// </summary>
-	public string Url { get; set; } = string.Empty;
-
-	/// <summary>
-	/// 表情包 ID
-	/// </summary>
-	public ulong EmojiPackageId { get; set; }
-
-	/// <summary>
-	/// 表情 ID
-	/// </summary>
-	public string EmojiId { get; set; } = string.Empty;
-
-	/// <summary>
-	/// 密钥
-	/// </summary>
-	public string Key { get; set; } = string.Empty;
-
-	/// <summary>
-	/// 简介
-	/// </summary>
-	public string Summary { get; set; } = string.Empty;
+	/// <inheritdoc/>
+	public string Preview => Summary;
 }

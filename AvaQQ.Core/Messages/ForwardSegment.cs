@@ -3,10 +3,9 @@
 /// <summary>
 /// 转发片段
 /// </summary>
-public class ForwardSegment : Segment
+/// <param name="ResId">转发消息 ID</param>
+public record class ForwardSegment(string ResId) : ISegment
 {
-	/// <summary>
-	/// 转发消息 ID
-	/// </summary>
-	public string ResId { get; set; } = string.Empty;
+	/// <inheritdoc/>
+	public string Preview => string.Empty;
 }

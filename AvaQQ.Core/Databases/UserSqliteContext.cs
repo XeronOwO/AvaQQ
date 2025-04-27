@@ -12,4 +12,8 @@ internal class UserSqliteContext(ulong uin) : DbContext
 	public DbSet<RecordedGroupInfo> Groups { get; set; }
 
 	public DbSet<RecordedUserInfo> Users { get; set; }
+
+	public DbSet<RecordedMessage> Messages { get; set; }
+
+	public DbSet<RecordedTextSegment> TextSegments { get; set; }
 }

@@ -44,6 +44,8 @@ public readonly struct CommonEventId : IEventId
 		GetAllJoinedGroups,
 		/// <inheritdoc cref="EventStation.CachedGetAllJoinedGroups"/>
 		CachedGetAllJoinedGroups,
+		/// <inheritdoc cref="EventStation.GroupMessage"/>
+		GroupMessage,
 	}
 
 	/// <inheritdoc cref="EventStation.GetAllRecordedUsers"/>
@@ -80,5 +82,11 @@ public readonly struct CommonEventId : IEventId
 	public static CommonEventId CachedGetAllJoinedGroups { get; } = new()
 	{
 		Id = EventId.CachedGetAllJoinedGroups,
+	};
+
+	/// <inheritdoc cref="EventStation.GroupMessage"/>
+	public static CommonEventId GroupMessage { get; } = new()
+	{
+		Id = EventId.GroupMessage,
 	};
 }

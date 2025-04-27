@@ -1,17 +1,14 @@
-﻿namespace AvaQQ.Core.Messages;
+﻿using System.Xml.Linq;
+
+namespace AvaQQ.Core.Messages;
 
 /// <summary>
 /// 表情片段
 /// </summary>
-public class FaceSegment : Segment
+/// <param name="Id">表情 ID</param>
+/// <param name="IsLarge">是否是大表情</param>
+public record class FaceSegment(ulong Id, bool IsLarge) : ISegment
 {
-	/// <summary>
-	/// 表情 ID
-	/// </summary>
-	public ulong Id { get; set; }
-
-	/// <summary>
-	/// 是否是大表情
-	/// </summary>
-	public bool IsLarge { get; set; }
+	/// <inheritdoc/>
+	public string Preview => string.Empty;
 }

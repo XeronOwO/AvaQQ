@@ -3,25 +3,12 @@
 /// <summary>
 /// 图片片段
 /// </summary>
-public class ImageSegment : Segment
+/// <param name="Filename">图片文件名</param>
+/// <param name="Url">图片 URL</param>
+/// <param name="SubType">子类型</param>
+/// <param name="Summary">摘要</param>
+public record class ImageSegment(string Filename, string Url, int SubType, string Summary) : ISegment
 {
-	/// <summary>
-	/// 图片文件名
-	/// </summary>
-	public string Filename { get; set; } = string.Empty;
-
-	/// <summary>
-	/// 图片 URL
-	/// </summary>
-	public string Url { get; set; } = string.Empty;
-
-	/// <summary>
-	/// 子类型
-	/// </summary>
-	public int SubType { get; set; }
-
-	/// <summary>
-	/// 摘要
-	/// </summary>
-	public string Summary { get; set; } = string.Empty;
+	/// <inheritdoc/>
+	public string Preview => Summary;
 }

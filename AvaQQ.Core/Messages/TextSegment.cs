@@ -3,10 +3,9 @@
 /// <summary>
 /// 文本片段
 /// </summary>
-public class TextSegment : Segment
+/// <param name="Text">文本</param>
+public record class TextSegment(string Text) : ISegment
 {
-	/// <summary>
-	/// 文本
-	/// </summary>
-	public string Text { get; set; } = string.Empty;
+	/// <inheritdoc/>
+	public string Preview => Text;
 }

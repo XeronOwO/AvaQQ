@@ -16,6 +16,39 @@ internal class SqliteDatabase : Database
 		_events.CachedGetAllJoinedGroups.OnDone += OnCachedGetAllJoinedGroups;
 	}
 
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			_events.CachedGetAllFriends.OnDone -= OnCachedGetAllFriends;
+			_events.CachedGetAllJoinedGroups.OnDone -= OnCachedGetAllJoinedGroups;
+
+			if (disposing)
+			{
+				_context?.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	~SqliteDatabase()
+	{
+		Dispose(disposing: false);
+	}
+
+	public override void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
+
 	private UserSqliteContext? _context;
 
 	public UserSqliteContext Context => _context ?? throw new InvalidOperationException("Database not initialized.");
@@ -65,38 +98,6 @@ internal class SqliteDatabase : Database
 			.UpsertRange(e.Result.Select<CachedUserInfo, RecordedUserInfo>(v => v))
 			.RunAsync();
 		await Context.SaveChangesAsync();
-	}
-
-	#endregion
-
-	#region Dispose
-
-	private bool disposedValue;
-
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				_context?.Dispose();
-			}
-
-			disposedValue = true;
-		}
-	}
-
-	~SqliteDatabase()
-	{
-		_events.CachedGetAllJoinedGroups.OnDone -= OnCachedGetAllJoinedGroups;
-
-		Dispose(disposing: false);
-	}
-
-	public override void Dispose()
-	{
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
 	}
 
 	#endregion

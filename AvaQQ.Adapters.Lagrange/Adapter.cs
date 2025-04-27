@@ -1,4 +1,6 @@
 ﻿using AvaQQ.Core.Adapters;
+using AvaQQ.Core.Events;
+using AvaQQ.Core.Messages;
 using Lagrange.Core;
 using Lagrange.Core.Common.Interface.Api;
 using Lagrange.Core.Event.EventArg;
@@ -13,18 +15,58 @@ internal class Adapter : IAdapter
 {
 	private readonly ILogger<Adapter> _logger;
 
+	private readonly ILogger<ISegment> _segmentLogger;
+
 	private readonly ILogger<BotContext> _botLogger;
+
+	private readonly EventStation _events;
 
 	private readonly BotContext _context;
 
 	public Adapter(IServiceProvider serviceProvider, BotContext context)
 	{
 		_logger = serviceProvider.GetRequiredService<ILogger<Adapter>>();
+		_segmentLogger = serviceProvider.GetRequiredService<ILogger<ISegment>>();
 		_botLogger = serviceProvider.GetRequiredService<ILogger<BotContext>>();
+		_events = serviceProvider.GetRequiredService<EventStation>();
 
 		_context = context;
 		_context.Invoker.OnBotLogEvent += OnBotLog;
+		_context.Invoker.OnGroupMessageReceived += OnGroupMessageReceived;
 	}
+
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			_context.Invoker.OnBotLogEvent -= OnBotLog;
+			_context.Invoker.OnGroupMessageReceived -= OnGroupMessageReceived;
+
+			if (disposing)
+			{
+				_context.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
+	~Adapter()
+	{
+		Dispose(disposing: false);
+	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 
 	private void OnBotLog(BotContext context, BotLogEvent e)
 	{
@@ -99,33 +141,8 @@ internal class Adapter : IAdapter
 		return new AdaptedGroupInfo(info.Uin, info.Name, null);
 	}
 
-	#region Dispose
-
-	private bool disposedValue;
-
-	protected virtual void Dispose(bool disposing)
+	private void OnGroupMessageReceived(BotContext context, GroupMessageEvent e)
 	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				_context.Dispose();
-			}
-
-			disposedValue = true;
-		}
+		_events.GroupMessage.DoneManually(CommonEventId.GroupMessage, e.Chain.ToMessage(_segmentLogger));
 	}
-
-	~Adapter()
-	{
-		Dispose(disposing: false);
-	}
-
-	public void Dispose()
-	{
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
-	}
-
-	#endregion
 }

@@ -34,14 +34,39 @@ internal class UserCache : IUserCache
 		_events.GetAllFriends.OnDone += OnGetAllFriends;
 	}
 
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			_events.GetAllRecordedUsers.OnDone -= OnGetAllRecordedUsers;
+			_events.GetUser.OnDone -= OnGetUser;
+			_events.GetAllFriends.OnDone -= OnGetAllFriends;
+
+			if (disposing)
+			{
+				_lock.Dispose();
+			}
+
+			disposedValue = true;
+		}
+	}
+
 	~UserCache()
 	{
-		_events.GetAllRecordedUsers.OnDone -= OnGetAllRecordedUsers;
-		_events.GetUser.OnDone -= OnGetUser;
-		_events.GetAllFriends.OnDone -= OnGetAllFriends;
-
 		Dispose(disposing: false);
 	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 
 	private DateTime _getAllFriendsLastUpdateTime = DateTime.MinValue;
 
@@ -222,29 +247,4 @@ internal class UserCache : IUserCache
 			cache.Info.Remark = info.Remark;
 		}
 	}
-
-	#region Dispose
-
-	private bool disposedValue;
-
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				_lock.Dispose();
-			}
-
-			disposedValue = true;
-		}
-	}
-
-	public void Dispose()
-	{
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
-	}
-
-	#endregion
 }
