@@ -12,8 +12,8 @@ internal class SqliteDatabase : Database
 	{
 		_events = events;
 
-		_events.CachedGetAllFriends.OnDone += OnCachedGetAllFriends;
-		_events.CachedGetAllJoinedGroups.OnDone += OnCachedGetAllJoinedGroups;
+		_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
+		_events.CachedGetAllJoinedGroups.Subscribe(OnCachedGetAllJoinedGroups);
 	}
 
 	#region Dispose
@@ -24,8 +24,8 @@ internal class SqliteDatabase : Database
 	{
 		if (!disposedValue)
 		{
-			_events.CachedGetAllFriends.OnDone -= OnCachedGetAllFriends;
-			_events.CachedGetAllJoinedGroups.OnDone -= OnCachedGetAllJoinedGroups;
+			_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
+			_events.CachedGetAllJoinedGroups.Subscribe(OnCachedGetAllJoinedGroups);
 
 			if (disposing)
 			{

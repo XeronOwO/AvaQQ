@@ -57,9 +57,9 @@ public partial class GroupListView : UserControl
 
 		CirculationInjectionDetector<GroupListView>.Leave();
 
-		_events.GroupAvatar.OnDone += OnGroupAvatar;
-		_events.GetAllRecordedGroups.OnDone += OnGroups;
-		_events.CachedGetAllJoinedGroups.OnDone += OnGroups;
+		_events.GroupAvatar.Subscribe(OnGroupAvatar);
+		_events.GetAllRecordedGroups.Subscribe(OnGroups);
+		_events.CachedGetAllJoinedGroups.Subscribe(OnGroups);
 	}
 
 	/// <summary>
@@ -67,9 +67,9 @@ public partial class GroupListView : UserControl
 	/// </summary>
 	~GroupListView()
 	{
-		_events.GroupAvatar.OnDone -= OnGroupAvatar;
-		_events.GetAllRecordedGroups.OnDone -= OnGroups;
-		_events.CachedGetAllJoinedGroups.OnDone -= OnGroups;
+		_events.GroupAvatar.Subscribe(OnGroupAvatar);
+		_events.GetAllRecordedGroups.Subscribe(OnGroups);
+		_events.CachedGetAllJoinedGroups.Subscribe(OnGroups);
 	}
 
 	/// <summary>

@@ -33,9 +33,9 @@ internal class GroupCache : IGroupCache
 		_database = database;
 		_events = events;
 
-		_events.GetAllRecordedGroups.OnDone += OnGetAllRecordedGroups;
-		_events.GetAllJoinedGroups.OnDone += OnGetAllJoinedGroups;
-		_events.GetJoinedGroup.OnDone += OnGetJoinedGroup;
+		_events.GetAllRecordedGroups.Subscribe(OnGetAllRecordedGroups);
+		_events.GetAllJoinedGroups.Subscribe(OnGetAllJoinedGroups);
+		_events.GetJoinedGroup.Subscribe(OnGetJoinedGroup);
 	}
 
 	#region Dispose
@@ -46,9 +46,9 @@ internal class GroupCache : IGroupCache
 	{
 		if (!disposedValue)
 		{
-			_events.GetAllRecordedGroups.OnDone -= OnGetAllRecordedGroups;
-			_events.GetAllJoinedGroups.OnDone -= OnGetAllJoinedGroups;
-			_events.GetJoinedGroup.OnDone -= OnGetJoinedGroup;
+			_events.GetAllRecordedGroups.Subscribe(OnGetAllRecordedGroups);
+			_events.GetAllJoinedGroups.Subscribe(OnGetAllJoinedGroups);
+			_events.GetJoinedGroup.Subscribe(OnGetJoinedGroup);
 
 			if (disposing)
 			{
@@ -100,7 +100,7 @@ internal class GroupCache : IGroupCache
 			return;
 		}
 
-		_events.GetAllRecordedGroups.Enqueue(
+		_events.GetAllRecordedGroups.Invoke(
 			CommonEventId.GetAllRecordedGroups,
 			() => _database.GetAllRecordedGroupsAsync()
 			);
@@ -135,7 +135,7 @@ internal class GroupCache : IGroupCache
 			using var _ = _lock.UseReadLock();
 			if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
 			{
-				_events.GetAllJoinedGroups.Enqueue(
+				_events.GetAllJoinedGroups.Invoke(
 					CommonEventId.GetAllJoinedGroups,
 					() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync()
 				);
@@ -187,7 +187,7 @@ internal class GroupCache : IGroupCache
 			_getAllJoinedGroupsLastUpdateTime = now;
 		}
 
-		_events.CachedGetAllJoinedGroups.DoneManually(CommonEventId.CachedGetAllJoinedGroups, [.. groups]);
+		_events.CachedGetAllJoinedGroups.Invoke(CommonEventId.CachedGetAllJoinedGroups, [.. groups]);
 	}
 
 	public CachedGroupInfo? GetJoinedGroup(ulong uin, bool forceUpdate = false)
@@ -205,7 +205,7 @@ internal class GroupCache : IGroupCache
 
 			if (forceUpdate || cache.RequiresUpdate)
 			{
-				_events.GetJoinedGroup.Enqueue(
+				_events.GetJoinedGroup.Invoke(
 					new() { Uin = uin },
 					() => _adapterProvider.EnsuredAdapter.GetJoinedGroupAsync(uin)
 				);
@@ -256,6 +256,6 @@ internal class GroupCache : IGroupCache
 			cache.Info.IsStillIn = true;
 		}
 
-		_events.CachedGetJoinedGroup.DoneManually(new() { Uin = e.Id.Uin }, cache.Info);
+		_events.CachedGetJoinedGroup.Invoke(new() { Uin = e.Id.Uin }, cache.Info);
 	}
 }

@@ -42,13 +42,6 @@ public partial class MainPanelWindow : Window
 			model.HeaderUin = adapter.Uin;
 			model.HeaderAvatar = avatarCache.GetUserAvatar(adapter.Uin, 40);
 			model.HeaderName = userCache.GetUser(adapter.Uin)?.Nickname ?? string.Empty;
-			_events.UserAvatar.OnDone += (_, e) =>
-			{
-				if (e.Id.Uin == adapter.Uin)
-				{
-					model.HeaderAvatar = e.Result;
-				}
-			};
 		}
 		DataContext = model;
 		InitializeComponent();
@@ -61,8 +54,8 @@ public partial class MainPanelWindow : Window
 
 		CirculationInjectionDetector<MainPanelWindow>.Leave();
 
-		_events.UserAvatar.OnDone += OnUserAvatar;
-		_events.GetUser.OnDone += OnGetUser;
+		_events.UserAvatar.Subscribe(OnUserAvatar);
+		_events.GetUser.Subscribe(OnGetUser);
 	}
 
 	/// <summary>
@@ -70,8 +63,8 @@ public partial class MainPanelWindow : Window
 	/// </summary>
 	~MainPanelWindow()
 	{
-		_events.UserAvatar.OnDone -= OnUserAvatar;
-		_events.GetUser.OnDone -= OnGetUser;
+		_events.UserAvatar.Subscribe(OnUserAvatar);
+		_events.GetUser.Subscribe(OnGetUser);
 	}
 
 	private void OnGetUser(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)

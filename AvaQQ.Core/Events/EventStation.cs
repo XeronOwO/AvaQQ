@@ -18,20 +18,13 @@ public class EventStation
 	/// </summary>
 	public EventBus<AvatarCacheId, Bitmap?> UserAvatar { get; set; } = new();
 
-	/// <summary>
-	/// 当从数据库中加载所有用户信息后触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.GetAllRecordedUsers"/>
 	public EventBus<CommonEventId, RecordedUserInfo[]> GetAllRecordedUsers { get; set; } = new();
 
-	/// <summary>
-	/// 当从服务器获取所有好友后触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.GetAllFriends"/>
 	public EventBus<CommonEventId, AdaptedUserInfo[]> GetAllFriends { get; set; } = new();
 
-	/// <summary>
-	/// 当从服务器获取所有好友、并更新缓存后触发<br/>
-	/// 在 <see cref="GetAllFriends"/> 期间触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.CachedGetAllFriends"/>
 	public EventBus<CommonEventId, CachedUserInfo[]> CachedGetAllFriends { get; set; } = new();
 
 	/// <summary>
@@ -48,20 +41,13 @@ public class EventStation
 	/// </summary>
 	public EventBus<AvatarCacheId, Bitmap?> GroupAvatar { get; set; } = new();
 
-	/// <summary>
-	/// 当从数据库中加载所有群信息后触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.GetAllRecordedGroups"/>
 	public EventBus<CommonEventId, RecordedGroupInfo[]> GetAllRecordedGroups { get; set; } = new();
 
-	/// <summary>
-	/// 当从服务器获取所有加入的群后触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.GetAllJoinedGroups"/>
 	public EventBus<CommonEventId, AdaptedGroupInfo[]> GetAllJoinedGroups { get; set; } = new();
 
-	/// <summary>
-	/// 当从服务器获取所有加入的群、并更新缓存后触发<br/>
-	/// 在 <see cref="GetAllJoinedGroups"/> 期间触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.CachedGetAllJoinedGroups"/>
 	public EventBus<CommonEventId, CachedGroupInfo[]> CachedGetAllJoinedGroups { get; set; } = new();
 
 	/// <summary>
@@ -75,9 +61,7 @@ public class EventStation
 	/// </summary>
 	public EventBus<UinId, CachedGroupInfo?> CachedGetJoinedGroup { get; set; } = new();
 
-	/// <summary>
-	/// 当接收到群消息时触发
-	/// </summary>
+	/// <inheritdoc cref="CommonEventId.GroupMessage"/>
 	public EventBus<CommonEventId, Message> GroupMessage { get; set; } = new();
 
 	#endregion

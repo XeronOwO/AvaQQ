@@ -14,7 +14,7 @@ internal class GroupMessageCache : IGroupMessageCache
 	{
 		_events = events;
 
-		_events.GroupMessage.OnDone += OnGroupMessage;
+		_events.GroupMessage.Subscribe(OnGroupMessage);
 	}
 
 	#region Dispose
@@ -25,7 +25,7 @@ internal class GroupMessageCache : IGroupMessageCache
 	{
 		if (!disposedValue)
 		{
-			_events.GroupMessage.OnDone -= OnGroupMessage;
+			_events.GroupMessage.Subscribe(OnGroupMessage);
 
 			if (disposing)
 			{

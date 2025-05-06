@@ -57,8 +57,8 @@ public partial class FriendListView : UserControl
 
 		CirculationInjectionDetector<FriendListView>.Leave();
 
-		_events.UserAvatar.OnDone += OnUserAvatar;
-		_events.CachedGetAllFriends.OnDone += OnCachedGetAllFriends;
+		_events.UserAvatar.Subscribe(OnUserAvatar);
+		_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
 	}
 
 	/// <summary>
@@ -66,8 +66,8 @@ public partial class FriendListView : UserControl
 	/// </summary>
 	~FriendListView()
 	{
-		_events.UserAvatar.OnDone -= OnUserAvatar;
-		_events.CachedGetAllFriends.OnDone -= OnCachedGetAllFriends;
+		_events.UserAvatar.Subscribe(OnUserAvatar);
+		_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
 	}
 
 	/// <summary>

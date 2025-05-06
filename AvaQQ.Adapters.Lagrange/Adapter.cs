@@ -143,6 +143,6 @@ internal class Adapter : IAdapter
 
 	private void OnGroupMessageReceived(BotContext context, GroupMessageEvent e)
 	{
-		_events.GroupMessage.DoneManually(CommonEventId.GroupMessage, e.Chain.ToMessage(_segmentLogger));
+		_events.GroupMessage.Invoke(CommonEventId.GroupMessage, e.Chain.ToMessage(_segmentLogger));
 	}
 }

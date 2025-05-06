@@ -29,9 +29,9 @@ internal class UserCache : IUserCache
 		_database = database;
 		_events = events;
 
-		_events.GetAllRecordedUsers.OnDone += OnGetAllRecordedUsers;
-		_events.GetUser.OnDone += OnGetUser;
-		_events.GetAllFriends.OnDone += OnGetAllFriends;
+		_events.GetAllRecordedUsers.Subscribe(OnGetAllRecordedUsers);
+		_events.GetUser.Subscribe(OnGetUser);
+		_events.GetAllFriends.Subscribe(OnGetAllFriends);
 	}
 
 	#region Dispose
@@ -42,9 +42,9 @@ internal class UserCache : IUserCache
 	{
 		if (!disposedValue)
 		{
-			_events.GetAllRecordedUsers.OnDone -= OnGetAllRecordedUsers;
-			_events.GetUser.OnDone -= OnGetUser;
-			_events.GetAllFriends.OnDone -= OnGetAllFriends;
+			_events.GetAllRecordedUsers.Subscribe(OnGetAllRecordedUsers);
+			_events.GetUser.Subscribe(OnGetUser);
+			_events.GetAllFriends.Subscribe(OnGetAllFriends);
 
 			if (disposing)
 			{
@@ -96,7 +96,7 @@ internal class UserCache : IUserCache
 			return;
 		}
 
-		_events.GetAllRecordedUsers.Enqueue(
+		_events.GetAllRecordedUsers.Invoke(
 			CommonEventId.GetAllRecordedUsers,
 			() => _database.GetAllRecordedUsersAsync()
 			);
@@ -131,7 +131,7 @@ internal class UserCache : IUserCache
 			var adapter = _adapterProvider.EnsuredAdapter;
 			if (forceUpdate || GetAllFriendsRequiresUpdate)
 			{
-				_events.GetAllFriends.Enqueue(
+				_events.GetAllFriends.Invoke(
 					CommonEventId.GetAllFriends,
 					() => adapter.GetAllFriendsAsync()
 				);
@@ -184,7 +184,7 @@ internal class UserCache : IUserCache
 			_getAllFriendsLastUpdateTime = now;
 		}
 
-		_events.CachedGetAllFriends.DoneManually(CommonEventId.CachedGetAllFriends, [.. users]);
+		_events.CachedGetAllFriends.Invoke(CommonEventId.CachedGetAllFriends, [.. users]);
 	}
 
 	public CachedUserInfo? GetUser(ulong uin, bool forceUpdate = false)
@@ -200,7 +200,7 @@ internal class UserCache : IUserCache
 
 			if (forceUpdate || cache.RequiresUpdate)
 			{
-				_events.GetUser.Enqueue(
+				_events.GetUser.Invoke(
 					new() { Uin = uin },
 					() => _adapterProvider.EnsuredAdapter.GetUserAsync(uin)
 				);

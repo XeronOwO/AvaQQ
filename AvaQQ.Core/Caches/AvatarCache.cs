@@ -41,8 +41,14 @@ internal class AvatarCache : IAvatarCache
 
 		CirculationInjectionDetector<AvatarCache>.Leave();
 
-		_events.UserAvatar.OnDone += OnUserAvatar;
-		_events.GroupAvatar.OnDone += OnGroupAvatar;
+		_events.UserAvatar.Subscribe(OnUserAvatar);
+		_events.GroupAvatar.Subscribe(OnGroupAvatar);
+	}
+
+	~AvatarCache()
+	{
+		_events.UserAvatar.Unsubscribe(OnUserAvatar);
+		_events.GroupAvatar.Unsubscribe(OnGroupAvatar);
 	}
 
 	private struct Cache : IEqualityOperators<Cache, Cache, bool>
@@ -88,7 +94,7 @@ internal class AvatarCache : IAvatarCache
 
 		if (forceUpdate || avatar.RequiresUpdate)
 		{
-			_events.UserAvatar.Enqueue(new AvatarCacheId()
+			_events.UserAvatar.Invoke(new AvatarCacheId()
 			{
 				Uin = uin,
 				Size = size,
@@ -171,7 +177,7 @@ internal class AvatarCache : IAvatarCache
 
 		if (forceUpdate || avatar.RequiresUpdate)
 		{
-			_events.GroupAvatar.Enqueue(new AvatarCacheId()
+			_events.GroupAvatar.Invoke(new AvatarCacheId()
 			{
 				Uin = uin,
 				Size = size,

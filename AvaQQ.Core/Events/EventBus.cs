@@ -15,45 +15,49 @@ public class EventBus<TId> where TId : IEventId
 	/// 当车上有相同 ID 的事件时，不会加入队列，并返回 false
 	/// </summary>
 	/// <param name="id">事件 ID</param>
-	/// <param name="task">任务</param>
+	/// <param name="taskFactory">任务</param>
 	/// <returns>是否成功加入队列</returns>
-	public bool Enqueue(TId id, Task task)
+	public bool Invoke(TId id, Func<Task> taskFactory)
 	{
 		var result = false;
 		_tasks.GetOrAdd(id, (_) =>
 		{
-			task.ContinueWith((t) =>
-			{
-				Done(id);
-			});
-
+			var task = taskFactory();
 			result = true;
-			return task;
+			return task.ContinueWith(t =>
+			{
+				Invoke(id);
+			});
 		});
 
 		return result;
 	}
 
 	/// <summary>
-	/// 当事件完成时触发
-	/// </summary>
-	public event EventHandler<BusEventArgs<TId>>? OnDone;
-
-	private void Done(TId id)
-	{
-		_tasks.Remove(id, out var _);
-
-		OnDone?.Invoke(this, new(id));
-	}
-
-	/// <summary>
-	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件，也就是直接调用 <see cref="OnDone"/>
+	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件
 	/// </summary>
 	/// <param name="id">事件 ID</param>
-	public void DoneManually(TId id)
-	{
-		OnDone?.Invoke(this, new(id));
-	}
+	public void Invoke(TId id)
+		=> Event?.Invoke(this, new(id));
+
+	/// <summary>
+	/// 当事件完成时触发
+	/// </summary>
+	private event EventHandler<BusEventArgs<TId>>? Event;
+
+	/// <summary>
+	/// 订阅事件
+	/// </summary>
+	/// <param name="handler">处理器</param>
+	public void Subscribe(EventHandler<BusEventArgs<TId>> handler)
+		=> Event += handler;
+
+	/// <summary>
+	/// 取消订阅事件
+	/// </summary>
+	/// <param name="handler">处理器</param>
+	public void Unsubscribe(EventHandler<BusEventArgs<TId>> handler)
+		=> Event -= handler;
 }
 
 /// <summary>
@@ -72,43 +76,47 @@ public class EventBus<TId, TResult> where TId : IEventId
 	/// <param name="id">事件 ID</param>
 	/// <param name="taskFactory">任务</param>
 	/// <returns>是否成功加入队列</returns>
-	public bool Enqueue(TId id, Func<Task<TResult>> taskFactory)
+	public bool Invoke(TId id, Func<Task<TResult>> taskFactory)
 	{
 		var result = false;
 		_tasks.GetOrAdd(id, (_) =>
 		{
 			var task = taskFactory();
-			task.ContinueWith((t) =>
-			{
-				Done(id, t.Result);
-			});
-
 			result = true;
-			return task;
+			return task.ContinueWith(t =>
+			{
+				Invoke(id, t.Result);
+				return t.Result;
+			});
 		});
 
 		return result;
 	}
 
 	/// <summary>
-	/// 当事件完成时触发
-	/// </summary>
-	public event EventHandler<BusEventArgs<TId, TResult>>? OnDone;
-
-	private void Done(TId id, TResult result)
-	{
-		_tasks.Remove(id, out var _);
-
-		OnDone?.Invoke(this, new(id, result));
-	}
-
-	/// <summary>
-	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件，也就是直接调用 <see cref="OnDone"/>
+	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件
 	/// </summary>
 	/// <param name="id">事件 ID</param>
 	/// <param name="result">结果</param>
-	public void DoneManually(TId id, TResult result)
-	{
-		OnDone?.Invoke(this, new(id, result));
-	}
+	public void Invoke(TId id, TResult result)
+		=> Event?.Invoke(this, new(id, result));
+
+	/// <summary>
+	/// 当事件完成时触发
+	/// </summary>
+	private event EventHandler<BusEventArgs<TId, TResult>>? Event;
+
+	/// <summary>
+	/// 订阅事件
+	/// </summary>
+	/// <param name="handler">处理器</param>
+	public void Subscribe(EventHandler<BusEventArgs<TId, TResult>> handler)
+		=> Event += handler;
+
+	/// <summary>
+	/// 取消订阅事件
+	/// </summary>
+	/// <param name="handler">处理器</param>
+	public void Unsubscribe(EventHandler<BusEventArgs<TId, TResult>> handler)
+		=> Event -= handler;
 }
