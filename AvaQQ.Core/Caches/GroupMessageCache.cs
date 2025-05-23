@@ -25,7 +25,7 @@ internal class GroupMessageCache : IGroupMessageCache
 	{
 		if (!disposedValue)
 		{
-			_events.GroupMessage.Subscribe(OnGroupMessage);
+			_events.GroupMessage.Unsubscribe(OnGroupMessage);
 
 			if (disposing)
 			{

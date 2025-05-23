@@ -66,8 +66,8 @@ public partial class FriendListView : UserControl
 	/// </summary>
 	~FriendListView()
 	{
-		_events.UserAvatar.Subscribe(OnUserAvatar);
-		_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
+		_events.UserAvatar.Unsubscribe(OnUserAvatar);
+		_events.CachedGetAllFriends.Unsubscribe(OnCachedGetAllFriends);
 	}
 
 	/// <summary>

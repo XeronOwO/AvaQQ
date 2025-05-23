@@ -63,8 +63,8 @@ public partial class MainPanelWindow : Window
 	/// </summary>
 	~MainPanelWindow()
 	{
-		_events.UserAvatar.Subscribe(OnUserAvatar);
-		_events.GetUser.Subscribe(OnGetUser);
+		_events.UserAvatar.Unsubscribe(OnUserAvatar);
+		_events.GetUser.Unsubscribe(OnGetUser);
 	}
 
 	private void OnGetUser(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)

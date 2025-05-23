@@ -24,8 +24,8 @@ internal class SqliteDatabase : Database
 	{
 		if (!disposedValue)
 		{
-			_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
-			_events.CachedGetAllJoinedGroups.Subscribe(OnCachedGetAllJoinedGroups);
+			_events.CachedGetAllFriends.Unsubscribe(OnCachedGetAllFriends);
+			_events.CachedGetAllJoinedGroups.Unsubscribe(OnCachedGetAllJoinedGroups);
 
 			if (disposing)
 			{

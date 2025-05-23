@@ -46,9 +46,9 @@ internal class GroupCache : IGroupCache
 	{
 		if (!disposedValue)
 		{
-			_events.GetAllRecordedGroups.Subscribe(OnGetAllRecordedGroups);
-			_events.GetAllJoinedGroups.Subscribe(OnGetAllJoinedGroups);
-			_events.GetJoinedGroup.Subscribe(OnGetJoinedGroup);
+			_events.GetAllRecordedGroups.Unsubscribe(OnGetAllRecordedGroups);
+			_events.GetAllJoinedGroups.Unsubscribe(OnGetAllJoinedGroups);
+			_events.GetJoinedGroup.Unsubscribe(OnGetJoinedGroup);
 
 			if (disposing)
 			{

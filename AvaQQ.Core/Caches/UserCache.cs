@@ -42,9 +42,9 @@ internal class UserCache : IUserCache
 	{
 		if (!disposedValue)
 		{
-			_events.GetAllRecordedUsers.Subscribe(OnGetAllRecordedUsers);
-			_events.GetUser.Subscribe(OnGetUser);
-			_events.GetAllFriends.Subscribe(OnGetAllFriends);
+			_events.GetAllRecordedUsers.Unsubscribe(OnGetAllRecordedUsers);
+			_events.GetUser.Unsubscribe(OnGetUser);
+			_events.GetAllFriends.Unsubscribe(OnGetAllFriends);
 
 			if (disposing)
 			{

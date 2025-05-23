@@ -67,9 +67,9 @@ public partial class GroupListView : UserControl
 	/// </summary>
 	~GroupListView()
 	{
-		_events.GroupAvatar.Subscribe(OnGroupAvatar);
-		_events.GetAllRecordedGroups.Subscribe(OnGroups);
-		_events.CachedGetAllJoinedGroups.Subscribe(OnGroups);
+		_events.GroupAvatar.Unsubscribe(OnGroupAvatar);
+		_events.GetAllRecordedGroups.Unsubscribe(OnGroups);
+		_events.CachedGetAllJoinedGroups.Unsubscribe(OnGroups);
 	}
 
 	/// <summary>
