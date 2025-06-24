@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace AvaQQ.Core.Messages;
+﻿namespace AvaQQ.Core.Messages;
 
 /// <summary>
 /// 表情片段

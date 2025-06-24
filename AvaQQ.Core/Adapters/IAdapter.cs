@@ -1,6 +1,4 @@
-﻿using AvaQQ.Core.Messages;
-
-namespace AvaQQ.Core.Adapters;
+﻿namespace AvaQQ.Core.Adapters;
 
 /// <summary>
 /// 协议适配器

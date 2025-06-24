@@ -1,6 +1,4 @@
-﻿using AvaQQ.Core.Events;
-
-namespace AvaQQ.Core.Caches;
+﻿namespace AvaQQ.Core.Caches;
 
 /// <summary>
 /// 群缓存

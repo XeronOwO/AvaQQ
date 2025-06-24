@@ -37,7 +37,7 @@ public static class ReaderWriterLockSlimExtensions
 	{
 		return new DisposableReaderLock(@lock);
 	}
-	
+
 	/// <summary>
 	/// 可升级的可自动释放的读锁
 	/// </summary>

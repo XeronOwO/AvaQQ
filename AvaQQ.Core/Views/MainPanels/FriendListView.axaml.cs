@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Events;
@@ -297,7 +296,7 @@ public partial class FriendListView : UserControl
 
 	private void OnFriendCacheAdded(object? sender, BusEventArgs<CachedUserInfo> e)
 	{
-		
+
 	}
 
 	#endregion

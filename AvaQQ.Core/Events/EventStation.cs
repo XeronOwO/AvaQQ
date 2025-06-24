@@ -14,7 +14,7 @@ public class EventStation
 	/// 当从服务器获取到用户头像时
 	/// </summary>
 	public EventBus<AvatarId, byte[]?> OnUserAvatarFetched { get; } = new();
-	
+
 	/// <summary>
 	/// 当从服务器获取到群头像时
 	/// </summary>

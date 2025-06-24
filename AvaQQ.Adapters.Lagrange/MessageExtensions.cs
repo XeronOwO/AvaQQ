@@ -9,7 +9,7 @@ internal static class MessageExtensions
 {
 	public static AtSegment ToSegment(this MentionEntity entity)
 		=> new(entity.Uin, entity.Name ?? string.Empty);
-	
+
 	public static TextSegment ToSegment(this TextEntity entity)
 		=> new(entity.Text);
 
@@ -26,7 +26,7 @@ internal static class MessageExtensions
 				return null;
 		}
 	}
-	
+
 	public static Message ToMessage(this MessageChain chain, ILogger<ISegment> logger)
 	{
 		Message message;
