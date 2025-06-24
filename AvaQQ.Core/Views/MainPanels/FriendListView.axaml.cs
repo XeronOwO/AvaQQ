@@ -57,8 +57,8 @@ public partial class FriendListView : UserControl
 
 		CirculationInjectionDetector<FriendListView>.Leave();
 
-		_events.UserAvatar.Subscribe(OnUserAvatar);
-		_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
+		_events.OnUserAvatarChanged.Subscribe(OnUserAvatarChanged);
+		_events.OnFriendCacheAdded.Subscribe(OnFriendCacheAdded);
 	}
 
 	/// <summary>
@@ -66,8 +66,8 @@ public partial class FriendListView : UserControl
 	/// </summary>
 	~FriendListView()
 	{
-		_events.UserAvatar.Unsubscribe(OnUserAvatar);
-		_events.CachedGetAllFriends.Unsubscribe(OnCachedGetAllFriends);
+		_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
+		_events.OnFriendCacheAdded.Unsubscribe(OnFriendCacheAdded);
 	}
 
 	/// <summary>
@@ -83,7 +83,7 @@ public partial class FriendListView : UserControl
 
 	private void FriendListView_Loaded(object? sender, RoutedEventArgs e)
 	{
-		UpdateFriends(_userCache.GetUsers(v => v.HasLocalData));
+		UpdateFriends(_userCache.GetFriends());
 	}
 
 	#region ≤‚¡ø
@@ -269,7 +269,7 @@ public partial class FriendListView : UserControl
 		}
 	}
 
-	private void OnUserAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
+	private void OnUserAvatarChanged(object? sender, BusEventArgs<AvatarId, AvatarChangedInfo> e)
 	{
 		Dispatcher.UIThread.Invoke(() =>
 		{
@@ -290,17 +290,14 @@ public partial class FriendListView : UserControl
 				}
 
 				var dataContext = (EntryViewModel)_displayedEntries[i].DataContext!;
-				dataContext.Icon = e.Result;
+				dataContext.Icon = e.Result.New;
 			}
 		});
 	}
 
-	private void OnCachedGetAllFriends(object? sender, BusEventArgs<CommonEventId, CachedUserInfo[]> e)
+	private void OnFriendCacheAdded(object? sender, BusEventArgs<CachedUserInfo> e)
 	{
-		Dispatcher.UIThread.Invoke(() =>
-		{
-			UpdateFriends(_userCache.GetUsers(v => v.HasLocalData));
-		});
+		
 	}
 
 	#endregion

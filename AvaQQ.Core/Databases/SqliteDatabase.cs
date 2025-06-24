@@ -12,8 +12,12 @@ internal class SqliteDatabase : Database
 	{
 		_events = events;
 
-		_events.CachedGetAllFriends.Subscribe(OnCachedGetAllFriends);
-		_events.CachedGetAllJoinedGroups.Subscribe(OnCachedGetAllJoinedGroups);
+		_events.OnNewUserCached.Subscribe(OnNewUserCached);
+		_events.OnUserNicknameChanged.Subscribe(OnUserNicknameChanged);
+		_events.OnUserRemarkChanged.Subscribe(OnUserRemarkChanged);
+		_events.OnNewGroupCached.Subscribe(OnNewGroupCached);
+		_events.OnGroupNameChanged.Subscribe(OnGroupNameChanged);
+		_events.OnGroupRemarkChanged.Subscribe(OnGroupRemarkChanged);
 	}
 
 	#region Dispose
@@ -24,8 +28,12 @@ internal class SqliteDatabase : Database
 	{
 		if (!disposedValue)
 		{
-			_events.CachedGetAllFriends.Unsubscribe(OnCachedGetAllFriends);
-			_events.CachedGetAllJoinedGroups.Unsubscribe(OnCachedGetAllJoinedGroups);
+			_events.OnNewUserCached.Unsubscribe(OnNewUserCached);
+			_events.OnUserNicknameChanged.Unsubscribe(OnUserNicknameChanged);
+			_events.OnUserRemarkChanged.Unsubscribe(OnUserRemarkChanged);
+			_events.OnNewGroupCached.Unsubscribe(OnNewGroupCached);
+			_events.OnGroupNameChanged.Unsubscribe(OnGroupNameChanged);
+			_events.OnGroupRemarkChanged.Unsubscribe(OnGroupRemarkChanged);
 
 			if (disposing)
 			{
@@ -74,28 +82,50 @@ internal class SqliteDatabase : Database
 
 	#region 事件处理
 
-	private async void OnCachedGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId, CachedGroupInfo[]> e)
+	private async void OnNewUserCached(object? sender, BusEventArgs<CachedUserInfo> e)
 	{
-		foreach (var info in e.Result)
-		{
-			info.HasLocalData = true;
-		}
-
-		await Context.Groups
-			.UpsertRange(e.Result.Select<CachedGroupInfo, RecordedGroupInfo>(v => v))
+		await Context.Users
+			.Upsert(e.Result)
 			.RunAsync();
 		await Context.SaveChangesAsync();
 	}
 
-	private async void OnCachedGetAllFriends(object? sender, BusEventArgs<CommonEventId, CachedUserInfo[]> e)
+	private async void OnUserNicknameChanged(object? sender, BusEventArgs<UserNicknameChangedInfo> e)
 	{
-		foreach (var info in e.Result)
-		{
-			info.HasLocalData = true;
-		}
-
 		await Context.Users
-			.UpsertRange(e.Result.Select<CachedUserInfo, RecordedUserInfo>(v => v))
+			.Upsert(e.Result.Cache)
+			.RunAsync();
+		await Context.SaveChangesAsync();
+	}
+
+	private async void OnUserRemarkChanged(object? sender, BusEventArgs<UserRemarkChangedInfo> e)
+	{
+		await Context.Users
+			.Upsert(e.Result.Cache)
+			.RunAsync();
+		await Context.SaveChangesAsync();
+	}
+
+	private async void OnNewGroupCached(object? sender, BusEventArgs<CachedGroupInfo> e)
+	{
+		await Context.Groups
+			.Upsert(e.Result)
+			.RunAsync();
+		await Context.SaveChangesAsync();
+	}
+
+	private async void OnGroupNameChanged(object? sender, BusEventArgs<GroupNameChangedInfo> e)
+	{
+		await Context.Groups
+			.Upsert(e.Result.Cache)
+			.RunAsync();
+		await Context.SaveChangesAsync();
+	}
+
+	private async void OnGroupRemarkChanged(object? sender, BusEventArgs<GroupRemarkChangedInfo> e)
+	{
+		await Context.Groups
+			.Upsert(e.Result.Cache)
 			.RunAsync();
 		await Context.SaveChangesAsync();
 	}

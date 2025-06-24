@@ -3,14 +3,21 @@
 /// <summary>
 /// 公交车事件参数
 /// </summary>
-/// <typeparam name="TId">ID 类型</typeparam>
-/// <param name="id">事件 ID</param>
-public class BusEventArgs<TId>(TId id) : EventArgs where TId : IEventId
+public class BusEventArgs : EventArgs
+{
+}
+
+/// <summary>
+/// 公交车事件参数
+/// </summary>
+/// <typeparam name="TResult">结果类型</typeparam>
+/// <param name="value">结果</param>
+public class BusEventArgs<TResult>(TResult value) : BusEventArgs
 {
 	/// <summary>
-	/// 事件 ID
+	/// 结果
 	/// </summary>
-	public TId Id { get; } = id;
+	public TResult Result { get; } = value;
 }
 
 /// <summary>
@@ -20,10 +27,11 @@ public class BusEventArgs<TId>(TId id) : EventArgs where TId : IEventId
 /// <typeparam name="TResult">结果类型</typeparam>
 /// <param name="id">事件 ID</param>
 /// <param name="value">结果</param>
-public class BusEventArgs<TId, TResult>(TId id, TResult value) : BusEventArgs<TId>(id) where TId : IEventId
+public class BusEventArgs<TId, TResult>(TId id, TResult value)
+	: BusEventArgs<TResult>(value) where TId : IEquatable<TId>
 {
 	/// <summary>
-	/// 结果
+	/// 事件 ID
 	/// </summary>
-	public TResult Result { get; } = value;
+	public TId Id { get; } = id;
 }

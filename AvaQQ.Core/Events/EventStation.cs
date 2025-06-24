@@ -1,5 +1,4 @@
-﻿using Avalonia.Media.Imaging;
-using AvaQQ.Core.Adapters;
+﻿using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Messages;
@@ -11,58 +10,120 @@ namespace AvaQQ.Core.Events;
 /// </summary>
 public class EventStation
 {
-	#region 用户
+	/// <summary>
+	/// 当从服务器获取到用户头像时
+	/// </summary>
+	public EventBus<AvatarId, byte[]?> OnUserAvatarFetched { get; } = new();
+	
+	/// <summary>
+	/// 当从服务器获取到群头像时
+	/// </summary>
+	public EventBus<AvatarId, byte[]?> OnGroupAvatarFetched { get; } = new();
 
 	/// <summary>
-	/// 当通过 Url 获取用户头像后触发
+	/// 当用户头像改变时<br/>
+	/// 是 <see cref="OnUserAvatarFetched"/> 的衍生事件
 	/// </summary>
-	public EventBus<AvatarCacheId, Bitmap?> UserAvatar { get; set; } = new();
-
-	/// <inheritdoc cref="CommonEventId.GetAllRecordedUsers"/>
-	public EventBus<CommonEventId, RecordedUserInfo[]> GetAllRecordedUsers { get; set; } = new();
-
-	/// <inheritdoc cref="CommonEventId.GetAllFriends"/>
-	public EventBus<CommonEventId, AdaptedUserInfo[]> GetAllFriends { get; set; } = new();
-
-	/// <inheritdoc cref="CommonEventId.CachedGetAllFriends"/>
-	public EventBus<CommonEventId, CachedUserInfo[]> CachedGetAllFriends { get; set; } = new();
+	public EventBus<AvatarId, AvatarChangedInfo> OnUserAvatarChanged { get; } = new();
 
 	/// <summary>
-	/// 当从服务器获取用户信息后触发
+	/// 当群头像改变时<br/>
+	/// 是 <see cref="OnGroupAvatarFetched"/> 的衍生事件
 	/// </summary>
-	public EventBus<UinId, AdaptedUserInfo?> GetUser { get; set; } = new();
-
-	#endregion
-
-	#region 群
+	public EventBus<AvatarId, AvatarChangedInfo> OnGroupAvatarChanged { get; } = new();
 
 	/// <summary>
-	/// 当通过 Url 获取群头像后触发
+	/// 当从本地数据库中加载用户信息时
 	/// </summary>
-	public EventBus<AvatarCacheId, Bitmap?> GroupAvatar { get; set; } = new();
+	public EventBus<RecordedUserInfo[]> OnRecordedUsersLoaded { get; } = new();
 
-	/// <inheritdoc cref="CommonEventId.GetAllRecordedGroups"/>
-	public EventBus<CommonEventId, RecordedGroupInfo[]> GetAllRecordedGroups { get; set; } = new();
+	/// <summary>
+	/// 当从本地数据库中加载群信息时
+	/// </summary>
+	public EventBus<RecordedGroupInfo[]> OnRecordedGroupsLoaded { get; } = new();
 
-	/// <inheritdoc cref="CommonEventId.GetAllJoinedGroups"/>
-	public EventBus<CommonEventId, AdaptedGroupInfo[]> GetAllJoinedGroups { get; set; } = new();
+	/// <summary>
+	/// 当从服务器获取好友列表时触发
+	/// </summary>
+	public EventBus<AdaptedUserInfo[]> OnFriendsFetched { get; } = new();
 
-	/// <inheritdoc cref="CommonEventId.CachedGetAllJoinedGroups"/>
-	public EventBus<CommonEventId, CachedGroupInfo[]> CachedGetAllJoinedGroups { get; set; } = new();
+	/// <summary>
+	/// 当从服务器获取群列表时触发
+	/// </summary>
+	public EventBus<AdaptedGroupInfo[]> OnJoinedGroupsFetched { get; } = new();
+
+	/// <summary>
+	/// 当缓存新的用户时触发<br/>
+	/// 是 <see cref="OnFriendsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<CachedUserInfo> OnNewUserCached { get; } = new();
+
+	/// <summary>
+	/// 当缓存新的群时触发<br/>
+	/// 是 <see cref="OnJoinedGroupsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<CachedGroupInfo> OnNewGroupCached { get; } = new();
+
+	/// <summary>
+	/// 当用户昵称改变时触发<br/>
+	/// 是 <see cref="OnFriendsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<UserNicknameChangedInfo> OnUserNicknameChanged { get; } = new();
+
+	/// <summary>
+	/// 当群名称改变时触发<br/>
+	/// 是 <see cref="OnJoinedGroupsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<GroupNameChangedInfo> OnGroupNameChanged { get; } = new();
+
+	/// <summary>
+	/// 当用户备注改变时触发<br/>
+	/// 是 <see cref="OnFriendsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<UserRemarkChangedInfo> OnUserRemarkChanged { get; } = new();
+
+	/// <summary>
+	/// 当群备注改变时触发<br/>
+	/// 是 <see cref="OnJoinedGroupsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<GroupRemarkChangedInfo> OnGroupRemarkChanged { get; } = new();
+
+	/// <summary>
+	///	当添加好友缓存时<br/>
+	///	是 <see cref="OnFriendsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<CachedUserInfo> OnFriendCacheAdded { get; } = new();
+
+	/// <summary>
+	/// 当添加群缓存时<br/>
+	/// 是 <see cref="OnJoinedGroupsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<CachedGroupInfo> OnGroupCacheAdded { get; } = new();
+
+	/// <summary>
+	/// 当移除好友缓存时<br/>
+	/// 是 <see cref="OnFriendsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<CachedUserInfo> OnFriendCacheRemoved { get; } = new();
+
+	/// <summary>
+	/// 当移除群缓存时<br/>
+	/// 是 <see cref="OnJoinedGroupsFetched"/> 的衍生事件
+	/// </summary>
+	public EventBus<CachedGroupInfo> OnGroupCacheRemoved { get; } = new();
+
+	/// <summary>
+	/// 当从服务器获取用户信息时触发
+	/// </summary>
+	public EventBus<UinId, AdaptedUserInfo?> OnUserFetched { get; } = new();
 
 	/// <summary>
 	/// 当从服务器获取加入的群后触发
 	/// </summary>
-	public EventBus<UinId, AdaptedGroupInfo?> GetJoinedGroup { get; set; } = new();
+	public EventBus<UinId, AdaptedGroupInfo?> OnJoinedGroupFetched { get; } = new();
 
 	/// <summary>
-	/// 当从服务器获取加入的群、并更新缓存后触发<br/>
-	/// 在 <see cref="GetJoinedGroup"/> 期间触发
+	/// 当有群消息时触发
 	/// </summary>
-	public EventBus<UinId, CachedGroupInfo?> CachedGetJoinedGroup { get; set; } = new();
-
-	/// <inheritdoc cref="CommonEventId.GroupMessage"/>
-	public EventBus<CommonEventId, Message> GroupMessage { get; set; } = new();
-
-	#endregion
+	public EventBus<Message> OnGroupMessage { get; } = new();
 }

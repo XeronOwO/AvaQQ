@@ -10,27 +10,22 @@ public class CachedUserInfo
 	/// <summary>
 	/// QQ 号
 	/// </summary>
-	public required ulong Uin { get; set; }
+	public ulong Uin { get; internal set; }
 
 	/// <summary>
 	/// 昵称
 	/// </summary>
-	public required string Nickname { get; set; }
+	public string Nickname { get; internal set; } = string.Empty;
 
 	/// <summary>
 	/// 备注
 	/// </summary>
-	public required string? Remark { get; set; }
-
-	/// <summary>
-	/// 是否有本地数据（通过数据库获取）
-	/// </summary>
-	public bool HasLocalData { get; set; }
+	public string? Remark { get; internal set; }
 
 	/// <summary>
 	/// 是否是好友（通过在线数据获取）
 	/// </summary>
-	public bool IsFriend { get; set; }
+	public bool IsFriend { get; internal set; }
 
 	/// <summary/>
 	public static implicit operator RecordedUserInfo(CachedUserInfo info)

@@ -33,9 +33,9 @@ internal class GroupCache : IGroupCache
 		_database = database;
 		_events = events;
 
-		_events.GetAllRecordedGroups.Subscribe(OnGetAllRecordedGroups);
-		_events.GetAllJoinedGroups.Subscribe(OnGetAllJoinedGroups);
-		_events.GetJoinedGroup.Subscribe(OnGetJoinedGroup);
+		_events.OnRecordedGroupsLoaded.Subscribe(OnRecordedGroupsLoaded);
+		_events.OnJoinedGroupsFetched.Subscribe(OnJoinedGroupsFetched);
+		_events.OnJoinedGroupFetched.Subscribe(OnJoinedGroupFetched);
 	}
 
 	#region Dispose
@@ -46,9 +46,9 @@ internal class GroupCache : IGroupCache
 	{
 		if (!disposedValue)
 		{
-			_events.GetAllRecordedGroups.Unsubscribe(OnGetAllRecordedGroups);
-			_events.GetAllJoinedGroups.Unsubscribe(OnGetAllJoinedGroups);
-			_events.GetJoinedGroup.Unsubscribe(OnGetJoinedGroup);
+			_events.OnRecordedGroupsLoaded.Unsubscribe(OnRecordedGroupsLoaded);
+			_events.OnJoinedGroupsFetched.Unsubscribe(OnJoinedGroupsFetched);
+			_events.OnJoinedGroupFetched.Unsubscribe(OnJoinedGroupFetched);
 
 			if (disposing)
 			{
@@ -93,6 +93,8 @@ internal class GroupCache : IGroupCache
 
 	private readonly Dictionary<ulong, GroupInfoCache> _caches = [];
 
+	private readonly Dictionary<ulong, GroupInfoCache> _joinedGroupCaches = [];
+
 	private void LoadLocalGroupInfos()
 	{
 		if (Interlocked.CompareExchange(ref _isLocalGroupInfosLoaded, 1, 0) != 0)
@@ -100,13 +102,10 @@ internal class GroupCache : IGroupCache
 			return;
 		}
 
-		_events.GetAllRecordedGroups.Invoke(
-			CommonEventId.GetAllRecordedGroups,
-			() => _database.GetAllRecordedGroupsAsync()
-			);
+		_events.OnRecordedGroupsLoaded.Invoke(() => _database.GetAllRecordedGroupsAsync());
 	}
 
-	private void OnGetAllRecordedGroups(object? sender, BusEventArgs<CommonEventId, RecordedGroupInfo[]> e)
+	private void OnRecordedGroupsLoaded(object? sender, BusEventArgs<RecordedGroupInfo[]> e)
 	{
 		using var _ = _lock.UseWriteLock();
 		foreach (var group in e.Result)
@@ -122,7 +121,6 @@ internal class GroupCache : IGroupCache
 				Name = group.Name,
 				Remark = group.Remark,
 			};
-			cache.Info.HasLocalData = true;
 		}
 	}
 
@@ -132,15 +130,12 @@ internal class GroupCache : IGroupCache
 		{
 			LoadLocalGroupInfos();
 
-			using var _ = _lock.UseReadLock();
 			if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
 			{
-				_events.GetAllJoinedGroups.Invoke(
-					CommonEventId.GetAllJoinedGroups,
-					() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync()
-				);
+				_events.OnJoinedGroupsFetched.Invoke(() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync());
 			}
 
+			using var _ = _lock.UseReadLock();
 			return [.. _caches.Values
 					.Where(v => v.Info != null && predicate(v.Info))
 					.Select(v => v.Info!)];
@@ -152,42 +147,107 @@ internal class GroupCache : IGroupCache
 		}
 	}
 
-	private void OnGetAllJoinedGroups(object? sender, BusEventArgs<CommonEventId, AdaptedGroupInfo[]> e)
+	public CachedGroupInfo[] GetJoinedGroups(bool forceUpdate = false)
 	{
-		var now = DateTime.Now;
-		var groups = new List<CachedGroupInfo>();
-		using (var _ = _lock.UseWriteLock())
+		try
 		{
-			foreach (var info in e.Result)
-			{
-				if (!_caches.TryGetValue(info.Uin, out var cache))
-				{
-					_caches.Add(info.Uin, cache = new());
-				}
+			LoadLocalGroupInfos();
 
-				cache.LastUpdateTime = now;
-				if (cache.Info == null)
-				{
-					cache.Info = new()
-					{
-						Uin = info.Uin,
-						Name = info.Name,
-						Remark = info.Remark,
-					};
-				}
-				else
-				{
-					cache.Info.Name = info.Name;
-					cache.Info.Remark = info.Remark;
-				}
-				cache.Info.IsStillIn = true;
-				groups.Add(cache.Info);
+			if (forceUpdate || GetAllJoinedGroupsRequiresUpdate)
+			{
+				_events.OnJoinedGroupsFetched.Invoke(() => _adapterProvider.EnsuredAdapter.GetAllJoinedGroupsAsync());
 			}
 
-			_getAllJoinedGroupsLastUpdateTime = now;
+			using var _ = _lock.UseReadLock();
+			return [.. _joinedGroupCaches.Values
+					.Where(v => v.Info != null)
+					.Select(v => v.Info!)];
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get groups.");
+			return [];
+		}
+	}
+
+	private void OnJoinedGroupsFetched(object? sender, BusEventArgs<AdaptedGroupInfo[]> e)
+	{
+		var now = DateTime.Now;
+		using var _ = _lock.UseWriteLock();
+
+		var joinedGroupUins = new HashSet<ulong>();
+		foreach (var info in e.Result)
+		{
+			if (!_caches.TryGetValue(info.Uin, out var cache))
+			{
+				_caches.Add(info.Uin, cache = new());
+			}
+
+			cache.LastUpdateTime = now;
+			if (cache.Info == null)
+			{
+				cache.Info = new()
+				{
+					Uin = info.Uin,
+					Name = info.Name,
+					Remark = info.Remark,
+					IsStillIn = true,
+				};
+				_events.OnNewGroupCached.Invoke(cache.Info);
+			}
+			else
+			{
+				if (info.Name != cache.Info.Name)
+				{
+					var oldName = cache.Info.Name;
+					var newName = cache.Info.Name = info.Name;
+					_events.OnGroupNameChanged.Invoke(new GroupNameChangedInfo(
+						oldName,
+						newName,
+						cache.Info
+					));
+				}
+
+				if (info.Remark != cache.Info.Remark)
+				{
+					var oldRemark = cache.Info.Remark;
+					var newRemark = cache.Info.Remark = info.Remark;
+					_events.OnGroupRemarkChanged.Invoke(new GroupRemarkChangedInfo(
+						oldRemark,
+						newRemark,
+						cache.Info
+					));
+				}
+
+				if (!cache.Info.IsStillIn)
+				{
+					cache.Info.IsStillIn = true;
+				}
+			}
+
+			if (_joinedGroupCaches.TryAdd(info.Uin, cache))
+			{
+				_events.OnGroupCacheAdded.Invoke(cache.Info);
+			}
+			joinedGroupUins.Add(info.Uin);
 		}
 
-		_events.CachedGetAllJoinedGroups.Invoke(CommonEventId.CachedGetAllJoinedGroups, [.. groups]);
+		foreach (var (uin, _) in _caches)
+		{
+			if (joinedGroupUins.Contains(uin))
+			{
+				continue;
+			}
+
+			if (_caches.TryGetValue(uin, out var cache) && cache.Info != null)
+			{
+				cache.Info.IsStillIn = false;
+				_events.OnGroupCacheRemoved.Invoke(cache.Info);
+			}
+			_joinedGroupCaches.Remove(uin);
+		}
+
+		_getAllJoinedGroupsLastUpdateTime = now;
 	}
 
 	public CachedGroupInfo? GetJoinedGroup(ulong uin, bool forceUpdate = false)
@@ -205,7 +265,7 @@ internal class GroupCache : IGroupCache
 
 			if (forceUpdate || cache.RequiresUpdate)
 			{
-				_events.GetJoinedGroup.Invoke(
+				_events.OnJoinedGroupFetched.Invoke(
 					new() { Uin = uin },
 					() => _adapterProvider.EnsuredAdapter.GetJoinedGroupAsync(uin)
 				);
@@ -220,42 +280,56 @@ internal class GroupCache : IGroupCache
 		}
 	}
 
-	private void OnGetJoinedGroup(object? sender, BusEventArgs<UinId, AdaptedGroupInfo?> e)
+	private void OnJoinedGroupFetched(object? sender, BusEventArgs<UinId, AdaptedGroupInfo?> e)
 	{
 		var uin = e.Id.Uin;
 
 		var now = DateTime.Now;
-		GroupInfoCache? cache;
-		using (var _ = _lock.UseWriteLock())
+		using var _ = _lock.UseWriteLock();
+		if (!_caches.TryGetValue(uin, out var cache))
 		{
-			if (!_caches.TryGetValue(uin, out cache))
-			{
-				_caches.Add(uin, cache = new());
-			}
-			cache.LastUpdateTime = now;
+			_caches.Add(uin, cache = new());
+		}
+		cache.LastUpdateTime = now;
 
-			if (e.Result is not { } info)
-			{
-				return;
-			}
-
-			if (cache.Info == null)
-			{
-				cache.Info = new()
-				{
-					Uin = info.Uin,
-					Name = info.Name,
-					Remark = info.Remark,
-				};
-			}
-			else
-			{
-				cache.Info.Name = info.Name;
-				cache.Info.Remark = info.Remark;
-			}
-			cache.Info.IsStillIn = true;
+		if (e.Result is not { } info)
+		{
+			return;
 		}
 
-		_events.CachedGetJoinedGroup.Invoke(new() { Uin = e.Id.Uin }, cache.Info);
+		if (cache.Info == null)
+		{
+			cache.Info = new()
+			{
+				Uin = info.Uin,
+				Name = info.Name,
+				Remark = info.Remark,
+			};
+			_events.OnNewGroupCached.Invoke(cache.Info);
+		}
+		else
+		{
+			if (info.Name != cache.Info.Name)
+			{
+				var oldName = cache.Info.Name;
+				var newName = cache.Info.Name = info.Name;
+				_events.OnGroupNameChanged.Invoke(new GroupNameChangedInfo(
+					oldName,
+					newName,
+					cache.Info
+				));
+			}
+
+			if (info.Remark != cache.Info.Remark)
+			{
+				var oldRemark = cache.Info.Remark;
+				var newRemark = cache.Info.Remark = info.Remark;
+				_events.OnGroupRemarkChanged.Invoke(new GroupRemarkChangedInfo(
+					oldRemark,
+					newRemark,
+					cache.Info
+				));
+			}
+		}
 	}
 }

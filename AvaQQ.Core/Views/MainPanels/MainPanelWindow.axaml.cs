@@ -54,8 +54,8 @@ public partial class MainPanelWindow : Window
 
 		CirculationInjectionDetector<MainPanelWindow>.Leave();
 
-		_events.UserAvatar.Subscribe(OnUserAvatar);
-		_events.GetUser.Subscribe(OnGetUser);
+		_events.OnUserAvatarChanged.Subscribe(OnUserAvatarChanged);
+		_events.OnUserFetched.Subscribe(OnUserFetched);
 	}
 
 	/// <summary>
@@ -63,11 +63,11 @@ public partial class MainPanelWindow : Window
 	/// </summary>
 	~MainPanelWindow()
 	{
-		_events.UserAvatar.Unsubscribe(OnUserAvatar);
-		_events.GetUser.Unsubscribe(OnGetUser);
+		_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
+		_events.OnUserFetched.Unsubscribe(OnUserFetched);
 	}
 
-	private void OnGetUser(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)
+	private void OnUserFetched(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)
 	{
 		if (_adapterProvider.Adapter is not { } adapter ||
 			e.Id.Uin != adapter.Uin)
@@ -86,7 +86,7 @@ public partial class MainPanelWindow : Window
 		});
 	}
 
-	private void OnUserAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
+	private void OnUserAvatarChanged(object? sender, BusEventArgs<AvatarId, AvatarChangedInfo> e)
 	{
 		if (_adapterProvider.Adapter is not { } adapter ||
 			e.Id.Uin != adapter.Uin)
@@ -101,7 +101,7 @@ public partial class MainPanelWindow : Window
 				return;
 			}
 
-			model.HeaderAvatar = e.Result;
+			model.HeaderAvatar = e.Result.New;
 		});
 	}
 

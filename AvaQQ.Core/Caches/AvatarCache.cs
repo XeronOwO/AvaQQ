@@ -5,7 +5,7 @@ using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Numerics;
+using System.Security.Cryptography;
 using Config = AvaQQ.SDK.Configuration<AvaQQ.Core.Configurations.CacheConfiguration>;
 
 namespace AvaQQ.Core.Caches;
@@ -29,9 +29,6 @@ internal class AvatarCache : IAvatarCache
 		_baseDirectory = Path.Combine(Constants.RootDirectory, "cache", "avatar");
 		_userDirectory = Path.Combine(_baseDirectory, "user");
 		_groupDirectory = Path.Combine(_baseDirectory, "group");
-		Directory.CreateDirectory(_baseDirectory);
-		Directory.CreateDirectory(_userDirectory);
-		Directory.CreateDirectory(_groupDirectory);
 
 		CirculationInjectionDetector<AvatarCache>.Enter();
 
@@ -41,90 +38,63 @@ internal class AvatarCache : IAvatarCache
 
 		CirculationInjectionDetector<AvatarCache>.Leave();
 
-		_events.UserAvatar.Subscribe(OnUserAvatar);
-		_events.GroupAvatar.Subscribe(OnGroupAvatar);
+		_events.OnUserAvatarFetched.Subscribe(OnUserAvatarFetched);
+		_events.OnGroupAvatarFetched.Subscribe(OnGroupAvatarFetched);
 	}
 
 	~AvatarCache()
 	{
-		_events.UserAvatar.Unsubscribe(OnUserAvatar);
-		_events.GroupAvatar.Unsubscribe(OnGroupAvatar);
+		_events.OnUserAvatarFetched.Unsubscribe(OnUserAvatarFetched);
+		_events.OnGroupAvatarFetched.Unsubscribe(OnGroupAvatarFetched);
 	}
 
-	private struct Cache : IEqualityOperators<Cache, Cache, bool>
+	private record struct Cache(DateTime Time, Bitmap? Avatar, byte[] Hash)
 	{
-		public required DateTime LastUpdateTime { get; set; }
+		public readonly bool RequiresUpdate => DateTime.Now > Time + Config.Instance.AvatarExpiration;
 
-		public required Bitmap? Avatar { get; set; }
-
-		public readonly bool RequiresUpdate => Avatar is null || LastUpdateTime + Config.Instance.FriendAvatarExpiration < DateTime.Now;
-
-		public static bool operator ==(Cache left, Cache right)
-			=> left.Equals(right);
-
-		public static bool operator !=(Cache left, Cache right)
-			=> !left.Equals(right);
-
-		public override readonly bool Equals(object? obj)
-		{
-			if (obj is not Cache info)
-			{
-				return false;
-			}
-			return LastUpdateTime == info.LastUpdateTime && Avatar == info.Avatar;
-		}
-
-		public override readonly int GetHashCode()
-		{
-			return HashCode.Combine(LastUpdateTime, Avatar);
-		}
+		public static readonly Cache Default = new(DateTime.MinValue, null, []);
 	}
 
 	#region 用户
 
-	private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, Cache>> _userAvatars = [];
+	private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, Cache>> _userCache = [];
 
 	public Bitmap? GetUserAvatar(ulong uin, int size = 0, bool forceUpdate = false)
 	{
-		var avatars = _userAvatars.GetOrAdd(uin, (_) => new());
-		var avatar = avatars.GetOrAdd(size, (_) =>
-		{
-			return LoadUserAvatarFromFile(uin, size);
-		});
+		var caches = _userCache.GetOrAdd(uin, _ => new());
+		var cache = caches.GetOrAdd(size, _ => LoadUserAvatarCacheFromLocal(uin, size));
 
-		if (forceUpdate || avatar.RequiresUpdate)
+		if (forceUpdate || cache.RequiresUpdate)
 		{
-			_events.UserAvatar.Invoke(new AvatarCacheId()
-			{
-				Uin = uin,
-				Size = size,
-			}, () => LoadUserAvatarFromRemoteAsync(uin, size));
+			_events.OnUserAvatarFetched.Invoke(
+				new AvatarId(uin, size),
+				() => FetchUserAvatarFromUrlAsync(uin, size)
+				);
 		}
 
-		return avatar.Avatar;
+		return cache.Avatar;
 	}
 
-	private Cache LoadUserAvatarFromFile(ulong uin, int size)
+	private Cache LoadUserAvatarCacheFromLocal(ulong uin, int size)
 	{
 		var directory = Path.Combine(_userDirectory, size.ToString());
 		Directory.CreateDirectory(directory);
 		var files = Directory.GetFiles(directory, $"{uin}.*");
 		if (files.Length == 0)
 		{
-			return default;
+			return Cache.Default;
 		}
 
 		var file = files.First();
-		var lastUpdateTime = File.GetLastWriteTime(file);
-		var bitmap = new Bitmap(file);
-		return new()
-		{
-			LastUpdateTime = lastUpdateTime,
-			Avatar = bitmap,
-		};
+		var time = File.GetLastWriteTime(file);
+		var bytes = File.ReadAllBytes(file);
+		var hash = MD5.HashData(bytes);
+		using var stream = new MemoryStream(bytes);
+		var bitmap = new Bitmap(stream);
+		return new(time, bitmap, hash);
 	}
 
-	private async Task<Bitmap?> LoadUserAvatarFromRemoteAsync(ulong uin, int size)
+	private async Task<byte[]?> FetchUserAvatarFromUrlAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -132,82 +102,94 @@ internal class AvatarCache : IAvatarCache
 
 			var response = await Shared.HttpClient.GetAsync($"https://q1.qlogo.cn/g?b=qq&nk={uin}&s={size}");
 			response.EnsureSuccessStatusCode();
-			var bytes = await response.Content.ReadAsByteArrayAsync();
-			var type = bytes.GetMediaType();
-			var file = Path.Combine(_userDirectory, size.ToString(), $"{uin}{type.GetFileExtension()}");
-			await File.WriteAllBytesAsync(file, bytes);
-			using var stream = new MemoryStream(bytes);
-			return new Bitmap(stream);
+			return await response.Content.ReadAsByteArrayAsync();
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to get user {Uin}'s avatar of size {Size}.", uin, size);
+			_logger.LogError(e, "Failed to fetch user {Uin}'s avatar of size {Size}.", uin, size);
 			return null;
 		}
 	}
 
-	private void OnUserAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
+	private void OnUserAvatarFetched(object? sender, BusEventArgs<AvatarId, byte[]?> e)
 	{
-		var avatars = _userAvatars.GetOrAdd(e.Id.Uin, (_) => new());
-		avatars.AddOrUpdate(e.Id.Size, new Cache()
+		var caches = _userCache.GetOrAdd(e.Id.Uin, _ => new());
+
+		Bitmap? oldAvatar = null;
+		Bitmap? newAvatar = null;
+		caches.AddOrUpdate(e.Id.Size, _ => throw new InvalidOperationException(), (_, oldCache) =>
 		{
-			LastUpdateTime = DateTime.Now,
-			Avatar = e.Result,
-		}, (_, info) =>
-		{
-			info.LastUpdateTime = DateTime.Now;
-			info.Avatar = e.Result;
-			return info;
+			var time = DateTime.Now;
+			if (e.Result is not { } bytes)
+			{
+				return new(time, oldCache.Avatar, oldCache.Hash);
+			}
+
+			var hash = MD5.HashData(bytes);
+			if (hash.SequenceEqual(oldCache.Hash))
+			{
+				return new(time, oldCache.Avatar, oldCache.Hash);
+			}
+
+			var directory = Path.Combine(_userDirectory, e.Id.Size.ToString());
+			Directory.CreateDirectory(directory);
+			var path = Path.Combine(directory, $"{e.Id.Uin}{bytes.GetMediaType().GetFileExtension()}");
+			File.WriteAllBytes(path, bytes);
+			using var stream = new MemoryStream(bytes);
+			var avatar = new Bitmap(stream);
+			oldAvatar = oldCache.Avatar;
+			newAvatar = avatar;
+			return new(time, avatar, hash);
 		});
+
+		if (oldAvatar != newAvatar && newAvatar != null)
+		{
+			_events.OnUserAvatarChanged.Invoke(e.Id, new AvatarChangedInfo(oldAvatar, newAvatar));
+		}
 	}
 
 	#endregion
 
 	#region 群聊
 
-	private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, Cache>> _groupAvatars = [];
+	private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, Cache>> _groupCache = [];
 
 	public Bitmap? GetGroupAvatar(ulong uin, int size = 0, bool forceUpdate = false)
 	{
-		var avatars = _groupAvatars.GetOrAdd(uin, (_) => new());
-		var avatar = avatars.GetOrAdd(size, (_) =>
-		{
-			return LoadGroupAvatarFromFile(uin, size);
-		});
+		var caches = _groupCache.GetOrAdd(uin, (_) => new());
+		var cache = caches.GetOrAdd(size, _ => LoadGroupAvatarCacheFromLocal(uin, size));
 
-		if (forceUpdate || avatar.RequiresUpdate)
+		if (forceUpdate || cache.RequiresUpdate)
 		{
-			_events.GroupAvatar.Invoke(new AvatarCacheId()
-			{
-				Uin = uin,
-				Size = size,
-			}, () => LoadGroupAvatarFromRemoteAsync(uin, size));
+			_events.OnGroupAvatarFetched.Invoke(
+				new AvatarId(uin, size),
+				() => FetchGroupAvatarFromUrlAsync(uin, size)
+				);
 		}
 
-		return avatar.Avatar;
+		return cache.Avatar;
 	}
 
-	private Cache LoadGroupAvatarFromFile(ulong uin, int size)
+	private Cache LoadGroupAvatarCacheFromLocal(ulong uin, int size)
 	{
 		var directory = Path.Combine(_groupDirectory, size.ToString());
 		Directory.CreateDirectory(directory);
 		var files = Directory.GetFiles(directory, $"{uin}.*");
 		if (files.Length == 0)
 		{
-			return default;
+			return Cache.Default;
 		}
 
 		var file = files.First();
-		var lastUpdateTime = File.GetLastWriteTime(file);
-		var bitmap = new Bitmap(file);
-		return new()
-		{
-			LastUpdateTime = lastUpdateTime,
-			Avatar = bitmap,
-		};
+		var time = File.GetLastWriteTime(file);
+		var bytes = File.ReadAllBytes(file);
+		var hash = MD5.HashData(bytes);
+		using var stream = new MemoryStream(bytes);
+		var bitmap = new Bitmap(stream);
+		return new(time, bitmap, hash);
 	}
 
-	private async Task<Bitmap?> LoadGroupAvatarFromRemoteAsync(ulong uin, int size)
+	private async Task<byte[]?> FetchGroupAvatarFromUrlAsync(ulong uin, int size)
 	{
 		try
 		{
@@ -215,40 +197,57 @@ internal class AvatarCache : IAvatarCache
 
 			var response = await Shared.HttpClient.GetAsync($"https://p.qlogo.cn/gh/{uin}/{uin}/{size}");
 			response.EnsureSuccessStatusCode();
-			var bytes = await response.Content.ReadAsByteArrayAsync();
-			var type = bytes.GetMediaType();
-			var file = Path.Combine(_groupDirectory, size.ToString(), $"{uin}{type.GetFileExtension()}");
-			await File.WriteAllBytesAsync(file, bytes);
-			using var stream = new MemoryStream(bytes);
-			return new Bitmap(stream);
+			return await response.Content.ReadAsByteArrayAsync();
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to get group {Uin}'s avatar of size {Size}.", uin, size);
+			_logger.LogError(e, "Failed to fetch group {Uin}'s avatar of size {Size}.", uin, size);
 			return null;
 		}
 	}
 
-	private void OnGroupAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
+	private void OnGroupAvatarFetched(object? sender, BusEventArgs<AvatarId, byte[]?> e)
 	{
-		var avatars = _groupAvatars.GetOrAdd(e.Id.Uin, (_) => new());
-		avatars.AddOrUpdate(e.Id.Size, new Cache()
+		var caches = _groupCache.GetOrAdd(e.Id.Uin, (_) => new());
+
+		Bitmap? oldAvatar = null;
+		Bitmap? newAvatar = null;
+		caches.AddOrUpdate(e.Id.Size, _ => throw new InvalidOperationException(), (_, oldCache) =>
 		{
-			LastUpdateTime = DateTime.Now,
-			Avatar = e.Result,
-		}, (_, info) =>
-		{
-			info.LastUpdateTime = DateTime.Now;
-			info.Avatar = e.Result;
-			return info;
+			var time = DateTime.Now;
+			if (e.Result is not { } bytes)
+			{
+				return new(time, oldCache.Avatar, oldCache.Hash);
+			}
+
+			var hash = MD5.HashData(bytes);
+			if (hash.SequenceEqual(oldCache.Hash))
+			{
+				return new(time, oldCache.Avatar, oldCache.Hash);
+			}
+
+			var directory = Path.Combine(_groupDirectory, e.Id.Size.ToString());
+			Directory.CreateDirectory(directory);
+			var path = Path.Combine(directory, $"{e.Id.Uin}{bytes.GetMediaType().GetFileExtension()}");
+			File.WriteAllBytes(path, bytes);
+			using var stream = new MemoryStream(bytes);
+			var avatar = new Bitmap(stream);
+			oldAvatar = oldCache.Avatar;
+			newAvatar = avatar;
+			return new(time, avatar, hash);
 		});
+
+		if (oldAvatar != newAvatar && newAvatar != null)
+		{
+			_events.OnGroupAvatarChanged.Invoke(e.Id, new AvatarChangedInfo(oldAvatar, newAvatar));
+		}
 	}
 
 	#endregion
 
 	public void Clear()
 	{
-		_userAvatars.Clear();
-		_groupAvatars.Clear();
+		_userCache.Clear();
+		_groupCache.Clear();
 	}
 }

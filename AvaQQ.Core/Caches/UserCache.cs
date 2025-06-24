@@ -29,9 +29,9 @@ internal class UserCache : IUserCache
 		_database = database;
 		_events = events;
 
-		_events.GetAllRecordedUsers.Subscribe(OnGetAllRecordedUsers);
-		_events.GetUser.Subscribe(OnGetUser);
-		_events.GetAllFriends.Subscribe(OnGetAllFriends);
+		_events.OnRecordedUsersLoaded.Subscribe(OnRecordedUsersLoaded);
+		_events.OnUserFetched.Subscribe(OnUserFetched);
+		_events.OnFriendsFetched.Subscribe(OnFriendsFetched);
 	}
 
 	#region Dispose
@@ -42,9 +42,9 @@ internal class UserCache : IUserCache
 	{
 		if (!disposedValue)
 		{
-			_events.GetAllRecordedUsers.Unsubscribe(OnGetAllRecordedUsers);
-			_events.GetUser.Unsubscribe(OnGetUser);
-			_events.GetAllFriends.Unsubscribe(OnGetAllFriends);
+			_events.OnRecordedUsersLoaded.Unsubscribe(OnRecordedUsersLoaded);
+			_events.OnUserFetched.Unsubscribe(OnUserFetched);
+			_events.OnFriendsFetched.Unsubscribe(OnFriendsFetched);
 
 			if (disposing)
 			{
@@ -89,6 +89,8 @@ internal class UserCache : IUserCache
 
 	private readonly Dictionary<ulong, UserInfoCache> _caches = [];
 
+	private readonly Dictionary<ulong, UserInfoCache> _friendCaches = [];
+
 	private void LoadLocalUserInfos()
 	{
 		if (Interlocked.CompareExchange(ref _isLocalUserInfosLoaded, 1, 0) != 0)
@@ -96,13 +98,10 @@ internal class UserCache : IUserCache
 			return;
 		}
 
-		_events.GetAllRecordedUsers.Invoke(
-			CommonEventId.GetAllRecordedUsers,
-			() => _database.GetAllRecordedUsersAsync()
-			);
+		_events.OnRecordedUsersLoaded.Invoke(() => _database.GetAllRecordedUsersAsync());
 	}
 
-	private void OnGetAllRecordedUsers(object? sender, BusEventArgs<CommonEventId, RecordedUserInfo[]> e)
+	private void OnRecordedUsersLoaded(object? sender, BusEventArgs<RecordedUserInfo[]> e)
 	{
 		using var _ = _lock.UseWriteLock();
 		foreach (var user in e.Result)
@@ -118,7 +117,6 @@ internal class UserCache : IUserCache
 				Nickname = user.Nickname,
 				Remark = user.Remark,
 			};
-			cache.Info.HasLocalData = true;
 		}
 	}
 
@@ -128,13 +126,9 @@ internal class UserCache : IUserCache
 		{
 			LoadLocalUserInfos();
 
-			var adapter = _adapterProvider.EnsuredAdapter;
 			if (forceUpdate || GetAllFriendsRequiresUpdate)
 			{
-				_events.GetAllFriends.Invoke(
-					CommonEventId.GetAllFriends,
-					() => adapter.GetAllFriendsAsync()
-				);
+				_events.OnFriendsFetched.Invoke(() => _adapterProvider.EnsuredAdapter.GetAllFriendsAsync());
 			}
 
 			using var _ = _lock.UseReadLock();
@@ -149,42 +143,107 @@ internal class UserCache : IUserCache
 		}
 	}
 
-	private void OnGetAllFriends(object? sender, BusEventArgs<CommonEventId, AdaptedUserInfo[]> e)
+	public CachedUserInfo[] GetFriends(bool forceUpdate = false)
 	{
-		var now = DateTime.Now;
-		var users = new List<CachedUserInfo>();
-		using (var _ = _lock.UseWriteLock())
+		try
 		{
-			foreach (var info in e.Result)
-			{
-				if (!_caches.TryGetValue(info.Uin, out var cache))
-				{
-					_caches.Add(info.Uin, cache = new());
-				}
+			LoadLocalUserInfos();
 
-				cache.LastUpdateTime = now;
-				if (cache.Info == null)
-				{
-					cache.Info = new()
-					{
-						Uin = info.Uin,
-						Nickname = info.Nickname,
-						Remark = info.Remark,
-					};
-				}
-				else
-				{
-					cache.Info.Nickname = info.Nickname;
-					cache.Info.Remark = info.Remark;
-				}
-				cache.Info.IsFriend = true;
-				users.Add(cache.Info);
+			if (forceUpdate || GetAllFriendsRequiresUpdate)
+			{
+				_events.OnFriendsFetched.Invoke(() => _adapterProvider.EnsuredAdapter.GetAllFriendsAsync());
 			}
 
-			_getAllFriendsLastUpdateTime = now;
+			using var _ = _lock.UseReadLock();
+			return [.._friendCaches.Values
+				.Where(v => v.Info != null)
+				.Select(v => v.Info!)];
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get users.");
+			return [];
+		}
+	}
+
+	private void OnFriendsFetched(object? sender, BusEventArgs<AdaptedUserInfo[]> e)
+	{
+		var now = DateTime.Now;
+		using var _ = _lock.UseWriteLock();
+
+		var friendUins = new HashSet<ulong>();
+		foreach (var info in e.Result)
+		{
+			if (!_caches.TryGetValue(info.Uin, out var cache))
+			{
+				_caches.Add(info.Uin, cache = new());
+			}
+
+			cache.LastUpdateTime = now;
+			if (cache.Info == null)
+			{
+				cache.Info = new()
+				{
+					Uin = info.Uin,
+					Nickname = info.Nickname,
+					Remark = info.Remark,
+					IsFriend = true,
+				};
+				_events.OnNewUserCached.Invoke(cache.Info);
+			}
+			else
+			{
+				if (info.Nickname != cache.Info.Nickname)
+				{
+					var oldNickname = cache.Info.Nickname;
+					var newNickname = cache.Info.Nickname = info.Nickname;
+					_events.OnUserNicknameChanged.Invoke(new UserNicknameChangedInfo(
+						oldNickname,
+						newNickname,
+						cache.Info
+					));
+				}
+
+				if (info.Remark != cache.Info.Remark)
+				{
+					var oldRemark = cache.Info.Remark;
+					var newRemark = cache.Info.Remark = info.Remark;
+					_events.OnUserRemarkChanged.Invoke(new UserRemarkChangedInfo(
+						oldRemark,
+						newRemark,
+						cache.Info
+					));
+				}
+
+				if (!cache.Info.IsFriend)
+				{
+					cache.Info.IsFriend = true;
+				}
+			}
+
+			if (_friendCaches.TryAdd(info.Uin, cache))
+			{
+				_events.OnFriendCacheAdded.Invoke(cache.Info);
+			}
+			friendUins.Add(info.Uin);
 		}
 
-		_events.CachedGetAllFriends.Invoke(CommonEventId.CachedGetAllFriends, [.. users]);
+		foreach (var (uin, _) in _friendCaches)
+		{
+			if (friendUins.Contains(uin))
+			{
+				continue;
+			}
+
+			if (_caches.TryGetValue(uin, out var cache) && cache.Info != null)
+			{
+				cache.Info.IsFriend = false;
+				_events.OnFriendCacheRemoved.Invoke(cache.Info);
+			}
+			_friendCaches.Remove(uin);
+		}
+
+		_getAllFriendsLastUpdateTime = now;
 	}
 
 	public CachedUserInfo? GetUser(ulong uin, bool forceUpdate = false)
@@ -200,8 +259,8 @@ internal class UserCache : IUserCache
 
 			if (forceUpdate || cache.RequiresUpdate)
 			{
-				_events.GetUser.Invoke(
-					new() { Uin = uin },
+				_events.OnUserFetched.Invoke(
+					new(uin),
 					() => _adapterProvider.EnsuredAdapter.GetUserAsync(uin)
 				);
 			}
@@ -215,7 +274,7 @@ internal class UserCache : IUserCache
 		}
 	}
 
-	private void OnGetUser(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)
+	private void OnUserFetched(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)
 	{
 		var uin = e.Id.Uin;
 
@@ -240,11 +299,31 @@ internal class UserCache : IUserCache
 				Nickname = info.Nickname,
 				Remark = info.Remark,
 			};
+			_events.OnNewUserCached.Invoke(cache.Info);
 		}
 		else
 		{
-			cache.Info.Nickname = info.Nickname;
-			cache.Info.Remark = info.Remark;
+			if (info.Nickname != cache.Info.Nickname)
+			{
+				var oldNickname = cache.Info.Nickname;
+				var newNickname = cache.Info.Nickname = info.Nickname;
+				_events.OnUserNicknameChanged.Invoke(new UserNicknameChangedInfo(
+					oldNickname,
+					newNickname,
+					cache.Info
+				));
+			}
+
+			if (info.Remark != cache.Info.Remark)
+			{
+				var oldRemark = cache.Info.Remark;
+				var newRemark = cache.Info.Remark = info.Remark;
+				_events.OnUserRemarkChanged.Invoke(new UserRemarkChangedInfo(
+					oldRemark,
+					newRemark,
+					cache.Info
+				));
+			}
 		}
 	}
 }

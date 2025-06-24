@@ -14,7 +14,7 @@ internal class GroupMessageCache : IGroupMessageCache
 	{
 		_events = events;
 
-		_events.GroupMessage.Subscribe(OnGroupMessage);
+		_events.OnGroupMessage.Subscribe(OnGroupMessage);
 	}
 
 	#region Dispose
@@ -25,7 +25,7 @@ internal class GroupMessageCache : IGroupMessageCache
 	{
 		if (!disposedValue)
 		{
-			_events.GroupMessage.Unsubscribe(OnGroupMessage);
+			_events.OnGroupMessage.Unsubscribe(OnGroupMessage);
 
 			if (disposing)
 			{
@@ -68,7 +68,7 @@ internal class GroupMessageCache : IGroupMessageCache
 		return string.Empty;
 	}
 
-	private void OnGroupMessage(object? sender, BusEventArgs<CommonEventId, Message> e)
+	private void OnGroupMessage(object? sender, BusEventArgs<Message> e)
 	{
 		using var _ = _previewLock.UseWriteLock();
 		_previewCaches[e.Result.GroupUin!.Value] = e.Result.Preview;

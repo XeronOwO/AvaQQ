@@ -57,9 +57,8 @@ public partial class GroupListView : UserControl
 
 		CirculationInjectionDetector<GroupListView>.Leave();
 
-		_events.GroupAvatar.Subscribe(OnGroupAvatar);
-		_events.GetAllRecordedGroups.Subscribe(OnGroups);
-		_events.CachedGetAllJoinedGroups.Subscribe(OnGroups);
+		_events.OnGroupAvatarChanged.Subscribe(OnGroupAvatarChanged);
+		_events.OnRecordedGroupsLoaded.Subscribe(OnRecordedGroupsLoaded);
 	}
 
 	/// <summary>
@@ -67,9 +66,8 @@ public partial class GroupListView : UserControl
 	/// </summary>
 	~GroupListView()
 	{
-		_events.GroupAvatar.Unsubscribe(OnGroupAvatar);
-		_events.GetAllRecordedGroups.Unsubscribe(OnGroups);
-		_events.CachedGetAllJoinedGroups.Unsubscribe(OnGroups);
+		_events.OnGroupAvatarChanged.Unsubscribe(OnGroupAvatarChanged);
+		_events.OnRecordedGroupsLoaded.Unsubscribe(OnRecordedGroupsLoaded);
 	}
 
 	/// <summary>
@@ -85,7 +83,7 @@ public partial class GroupListView : UserControl
 
 	private void GroupListView_Loaded(object? sender, RoutedEventArgs e)
 	{
-		UpdateGroups(_groupCache.GetGroups(v => v.HasLocalData));
+		UpdateGroups(_groupCache.GetJoinedGroups());
 	}
 
 	#region ≤‚¡ø
@@ -271,7 +269,7 @@ public partial class GroupListView : UserControl
 		}
 	}
 
-	private void OnGroupAvatar(object? sender, BusEventArgs<AvatarCacheId, Bitmap?> e)
+	private void OnGroupAvatarChanged(object? sender, BusEventArgs<AvatarId, AvatarChangedInfo> e)
 	{
 		Dispatcher.UIThread.Invoke(() =>
 		{
@@ -292,16 +290,16 @@ public partial class GroupListView : UserControl
 				}
 
 				var dataContext = (EntryViewModel)_displayedEntries[i].DataContext!;
-				dataContext.Icon = e.Result;
+				dataContext.Icon = e.Result.New;
 			}
 		});
 	}
 
-	private void OnGroups(object? sender, BusEventArgs<CommonEventId> e)
+	private void OnRecordedGroupsLoaded(object? sender, BusEventArgs e)
 	{
 		Dispatcher.UIThread.Invoke(() =>
 		{
-			UpdateGroups(_groupCache.GetGroups(v => v.HasLocalData));
+			UpdateGroups(_groupCache.GetJoinedGroups());
 		});
 	}
 

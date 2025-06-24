@@ -83,15 +83,23 @@ internal class Adapter : IAdapter
 
 	public Task<bool> TryLoginByEasyAsync(CancellationToken token = default)
 	{
-		var keystore = _context.UpdateKeystore();
-		if (keystore.Session.TempPassword == null) return Task.FromResult(false);
-		if (keystore.Session.TempPassword.Length == 0) return Task.FromResult(false);
-		return _context.LoginByEasy(token);
+		return Task.Run(() => // 防止阻塞 UI 线程
+		{
+			var keystore = _context.UpdateKeystore();
+			if (keystore.Session.TempPassword == null) return Task.FromResult(false);
+			if (keystore.Session.TempPassword.Length == 0) return Task.FromResult(false);
+			return _context.LoginByEasy(token);
+		}, token);
 	}
 
 	public async Task<bool> TryLoginByQrCodeAsync(Action<byte[]> qrCodeCallback, CancellationToken token = default)
 	{
-		(string Url, byte[] QrCode)? qrCode = await _context.FetchQrCode().WaitAsync(token);
+		var fetchQrCodeTask = Task.Run(() => // 防止阻塞 UI 线程
+		{
+			return _context.FetchQrCode().WaitAsync(token);
+		}, token);
+
+		(string Url, byte[] QrCode)? qrCode = await fetchQrCodeTask;
 		if (!qrCode.HasValue) return false;
 
 		qrCodeCallback(qrCode.Value.QrCode);
@@ -143,6 +151,6 @@ internal class Adapter : IAdapter
 
 	private void OnGroupMessageReceived(BotContext context, GroupMessageEvent e)
 	{
-		_events.GroupMessage.Invoke(CommonEventId.GroupMessage, e.Chain.ToMessage(_segmentLogger));
+		_events.OnGroupMessage.Invoke(e.Chain.ToMessage(_segmentLogger));
 	}
 }
