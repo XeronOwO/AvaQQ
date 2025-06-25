@@ -188,7 +188,6 @@ public class EventStation
 		}
 
 		Debug.Assert(result, "There are still some subscriptions left when exiting the application. This may cause memory leaks or other issues." +
-			" Please check the event handlers at \"logs/latest.log\" and ensure they are properly unsubscribed when no longer needed." +
-			" If you do unsubscriptions in dtor, it may cause false positives, because the dtor may not be called before the application exits.");
+			" Please check the event handlers at \"logs/latest.log\" and ensure they are properly unsubscribed when no longer needed.");
 	}
 }

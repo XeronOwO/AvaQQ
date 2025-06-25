@@ -36,12 +36,6 @@ public partial class MainPanelWindow : Window
 		_adapterProvider = adapterProvider;
 		_events = events;
 		var model = new MainPanelViewModel();
-		if (adapterProvider.Adapter is { } adapter)
-		{
-			model.HeaderUin = adapter.Uin;
-			model.HeaderAvatar = avatarCache.GetUserAvatar(adapter.Uin, 40);
-			model.HeaderName = userCache.GetUser(adapter.Uin)?.Nickname ?? string.Empty;
-		}
 		DataContext = model;
 		InitializeComponent();
 		gridMainPanelView.Children.Add(view);
@@ -60,6 +54,13 @@ public partial class MainPanelWindow : Window
 			_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
 			_events.OnUserFetched.Unsubscribe(OnUserFetched);
 		};
+
+		if (adapterProvider.Adapter is { } adapter)
+		{
+			model.HeaderUin = adapter.Uin;
+			model.HeaderAvatar = avatarCache.GetUserAvatar(adapter.Uin, 40);
+			model.HeaderName = userCache.GetUser(adapter.Uin)?.Nickname ?? string.Empty;
+		}
 	}
 
 	private void OnUserFetched(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)

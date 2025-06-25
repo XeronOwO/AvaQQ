@@ -74,6 +74,12 @@ internal partial class App : AppBase, IDisposable
 	{
 		_logger.LogInformation("App exiting.");
 
+		if (MainWindow != null)
+		{
+			MainWindow.Close();
+			MainWindow = null;
+		}
+
 		_lifetime.Stop();
 	}
 

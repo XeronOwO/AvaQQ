@@ -89,7 +89,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 		using var _ = _handlerLock.UseWriteLock();
 		if (_handlers.TryGetValue(priority, out var baseHandler))
 		{
-			baseHandler += handler;
+			_handlers[priority] = baseHandler + handler;
 		}
 		else
 		{
@@ -112,10 +112,15 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 			{
 				continue;
 			}
+
 			baseHandler -= handler;
 			if (baseHandler == null || baseHandler.GetInvocationList().Length == 0)
 			{
 				_handlers.Remove(key);
+			}
+			else
+			{
+				_handlers[key] = baseHandler;
 			}
 		}
 
@@ -217,7 +222,7 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 		using var _ = _handlerLock.UseWriteLock();
 		if (_handlers.TryGetValue(priority, out var baseHandler))
 		{
-			baseHandler += handler;
+			_handlers[priority] = baseHandler + handler;
 		}
 		else
 		{
@@ -245,6 +250,10 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 			if (baseHandler == null || baseHandler.GetInvocationList().Length == 0)
 			{
 				_handlers.Remove(key);
+			}
+			else
+			{
+				_handlers[key] = baseHandler;
 			}
 		}
 
