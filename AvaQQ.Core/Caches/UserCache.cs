@@ -13,14 +13,14 @@ internal class UserCache : IUserCache
 
 	private readonly IAdapterProvider _adapterProvider;
 
-	private readonly Database _database;
+	private readonly IDatabase _database;
 
 	private readonly EventStation _events;
 
 	public UserCache(
 		ILogger<UserCache> logger,
 		IAdapterProvider adapterProvider,
-		Database database,
+		IDatabase database,
 		EventStation events
 		)
 	{

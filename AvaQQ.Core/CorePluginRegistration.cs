@@ -37,7 +37,7 @@ internal static class CorePluginRegistration
 				.AddSingleton<IAppLifetimeController, AppLifetimeController>()
 				.AddSingleton<IAdapterProvider, AdapterProvider>()
 				.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
-				.AddSingleton<Database, SqliteDatabase>()
+				.AddSingleton<IDatabase, SqliteDatabase>()
 				.AddSingleton<IAvatarCache, AvatarCache>()
 				.AddSingleton<IGroupCache, GroupCache>()
 				.AddSingleton<IGroupMessageCache, GroupMessageCache>()

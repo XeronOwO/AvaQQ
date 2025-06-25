@@ -4,7 +4,7 @@ namespace AvaQQ.Core.Databases;
 
 internal class UserSqliteContext(ulong uin) : DbContext
 {
-	public string Path { get; } = System.IO.Path.Combine(Databases.Database.BaseDirectory, $"user-{uin}.db");
+	public string Path { get; } = System.IO.Path.Combine(Databases.IDatabase.BaseDirectory, $"user-{uin}.db");
 
 	protected override void OnConfiguring(DbContextOptionsBuilder options)
 		=> options.UseSqlite($"Data Source={Path}");

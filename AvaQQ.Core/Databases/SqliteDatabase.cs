@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AvaQQ.Core.Databases;
 
-internal class SqliteDatabase : Database
+internal class SqliteDatabase : IDatabase
 {
 	private readonly EventStation _events;
 
@@ -49,7 +49,7 @@ internal class SqliteDatabase : Database
 		Dispose(disposing: false);
 	}
 
-	public override void Dispose()
+	public void Dispose()
 	{
 		Dispose(disposing: true);
 		GC.SuppressFinalize(this);
@@ -61,7 +61,7 @@ internal class SqliteDatabase : Database
 
 	public UserSqliteContext Context => _context ?? throw new InvalidOperationException("Database not initialized.");
 
-	public override void Initialize(ulong uin)
+	public void Initialize(ulong uin)
 	{
 		if (_context != null)
 		{
@@ -74,10 +74,10 @@ internal class SqliteDatabase : Database
 		Context.SaveChanges();
 	}
 
-	public override Task<RecordedGroupInfo[]> GetAllRecordedGroupsAsync(CancellationToken token = default)
+	public Task<RecordedGroupInfo[]> GetAllRecordedGroupsAsync(CancellationToken token = default)
 		=> Context.Groups.ToArrayAsync(token);
 
-	public override Task<RecordedUserInfo[]> GetAllRecordedUsersAsync(CancellationToken token = default)
+	public Task<RecordedUserInfo[]> GetAllRecordedUsersAsync(CancellationToken token = default)
 		=> Context.Users.ToArrayAsync(token);
 
 	#region 事件处理

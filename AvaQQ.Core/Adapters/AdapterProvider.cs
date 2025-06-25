@@ -2,7 +2,7 @@
 
 namespace AvaQQ.Core.Adapters;
 
-internal class AdapterProvider(Database database) : IAdapterProvider
+internal class AdapterProvider(IDatabase database) : IAdapterProvider
 {
 	private IAdapter? _adapter;
 

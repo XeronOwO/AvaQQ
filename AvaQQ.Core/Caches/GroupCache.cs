@@ -15,7 +15,7 @@ internal class GroupCache : IGroupCache
 
 	private readonly IUserCache _userCache;
 
-	private readonly Database _database;
+	private readonly IDatabase _database;
 
 	private readonly EventStation _events;
 
@@ -23,7 +23,7 @@ internal class GroupCache : IGroupCache
 		ILogger<GroupCache> logger,
 		IAdapterProvider adapterProvider,
 		IUserCache userCache,
-		Database database,
+		IDatabase database,
 		EventStation events
 		)
 	{
