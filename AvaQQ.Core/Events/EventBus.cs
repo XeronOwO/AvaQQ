@@ -1,4 +1,6 @@
 ﻿using AvaQQ.Core.Utils;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
 namespace AvaQQ.Core.Events;
@@ -7,11 +9,15 @@ namespace AvaQQ.Core.Events;
 /// 事件公交车
 /// </summary>
 /// <typeparam name="TResult">结果类型</typeparam>
-public class EventBus<TResult>
+/// <param name="serviceProvider">服务提供者</param>
+/// <param name="name">名称</param>
+public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
 {
-	private readonly ReaderWriterLockSlim _lock = new();
+	private readonly ILogger<EventBus<TResult>> _logger = serviceProvider.GetRequiredService<ILogger<EventBus<TResult>>>();
 
-	private Task<TResult>? _task;
+	private readonly ReaderWriterLockSlim _taskLock = new();
+
+	private Task? _wrappedTask;
 
 	/// <summary>
 	/// 加入事件队列<br/>
@@ -21,24 +27,29 @@ public class EventBus<TResult>
 	/// <returns>是否成功加入队列</returns>
 	public bool Invoke(Func<Task<TResult>> taskFactory)
 	{
-		using var _ = _lock.UseUpgradeableReadLock();
-		if (_task != null)
+		using var _ = _taskLock.UseUpgradeableReadLock();
+		if (_wrappedTask != null)
 		{
+			_logger.LogTrace("[{Name}] Task already exists.", name);
 			return false;
 		}
 
-		using var __ = _lock.UseWriteLock();
-		if (_task != null)
+		using var __ = _taskLock.UseWriteLock();
+		if (_wrappedTask != null)
 		{
+			_logger.LogTrace("[{Name}] Task already exists.", name);
 			return false;
 		}
 
-		_task = taskFactory();
-		_task.ContinueWith(t =>
+		var task = taskFactory();
+		_wrappedTask = task.ContinueWith(t =>
 		{
 			Invoke(t.Result);
-			return t.Result;
+			using var ___ = _taskLock.UseWriteLock();
+			_logger.LogTrace("[{Name}] Task {TaskId} done.", name, task.Id);
+			_wrappedTask = null;
 		});
+		_logger.LogTrace("[{Name}] Task {TaskId} enqueued.", name, task.Id);
 		return true;
 	}
 
@@ -47,26 +58,64 @@ public class EventBus<TResult>
 	/// </summary>
 	/// <param name="result">结果</param>
 	public void Invoke(TResult result)
-		=> Event?.Invoke(this, new(result));
+	{
+		using var _ = _taskLock.UseReadLock();
+		foreach (var handler in Events.Values)
+		{
+			handler?.Invoke(this, new(result));
+		}
+		_logger.LogTrace("[{Name}] Invoked.", name);
+	}
+
+	private readonly ReaderWriterLockSlim _eventLock = new();
 
 	/// <summary>
 	/// 当事件完成时触发
 	/// </summary>
-	private event EventHandler<BusEventArgs<TResult>>? Event;
+	private readonly SortedDictionary<int, EventHandler<BusEventArgs<TResult>>> Events = [];
 
 	/// <summary>
 	/// 订阅事件
 	/// </summary>
 	/// <param name="handler">处理器</param>
-	public void Subscribe(EventHandler<BusEventArgs<TResult>> handler)
-		=> Event += handler;
+	/// <param name="priority">优先级</param>
+	public void Subscribe(EventHandler<BusEventArgs<TResult>> handler, int priority = 0)
+	{
+		using var _ = _eventLock.UseWriteLock();
+		if (Events.TryGetValue(priority, out var @event))
+		{
+			@event += handler;
+		}
+		else
+		{
+			Events.Add(priority, handler);
+		}
+
+		_logger.LogTrace("[{Name}] Subscribed at priority {Priority}: {Handler}", name, priority, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+	}
 
 	/// <summary>
 	/// 取消订阅事件
 	/// </summary>
 	/// <param name="handler">处理器</param>
 	public void Unsubscribe(EventHandler<BusEventArgs<TResult>> handler)
-		=> Event -= handler;
+	{
+		using var _ = _eventLock.UseWriteLock();
+		foreach (var key in Events.Keys.ToArray())
+		{
+			if (!Events.TryGetValue(key, out var @event))
+			{
+				continue;
+			}
+			@event -= handler;
+			if (@event == null || @event.GetInvocationList().Length == 0)
+			{
+				Events.Remove(key);
+			}
+		}
+
+		_logger.LogTrace("[{Name}] Unsubscribed: {Handler}", name, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+	}
 }
 
 /// <summary>
@@ -74,9 +123,13 @@ public class EventBus<TResult>
 /// </summary>
 /// <typeparam name="TId">ID 类型</typeparam>
 /// <typeparam name="TResult">结果类型</typeparam>
-public class EventBus<TId, TResult> where TId : IEquatable<TId>
+/// <param name="serviceProvider">服务提供者</param>
+/// <param name="name">名称</param>
+public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string name) where TId : IEquatable<TId>
 {
-	private readonly ConcurrentDictionary<TId, Task<TResult>> _tasks = [];
+	private readonly ILogger<EventBus<TResult>> _logger = serviceProvider.GetRequiredService<ILogger<EventBus<TResult>>>();
+
+	private readonly ConcurrentDictionary<TId, Task> _wrappedTasks = [];
 
 	/// <summary>
 	/// 加入事件队列<br/>
@@ -87,20 +140,29 @@ public class EventBus<TId, TResult> where TId : IEquatable<TId>
 	/// <returns>是否成功加入队列</returns>
 	public bool Invoke(TId id, Func<Task<TResult>> taskFactory)
 	{
-		var result = false;
-		_tasks.GetOrAdd(id, (_) =>
+		Task<TResult>? task = null;
+		_wrappedTasks.GetOrAdd(id, _ =>
 		{
-			var task = taskFactory();
-			result = true;
+			task = taskFactory();
 			return task.ContinueWith(t =>
 			{
 				Invoke(id, t.Result);
-				return t.Result;
+				_wrappedTasks.Remove(id, out Task? _);
 			});
 		});
 
-		return result;
+		if (task != null)
+		{
+			_logger.LogTrace("[{Name}] Task {TaskId} with event ID {EventId} enqueued.", name, task.Id, id);
+		}
+		else
+		{
+			_logger.LogTrace("[{Name}] Task with event ID {EventId} already exists.", name, id);
+		}
+		return task != null;
 	}
+
+	private readonly ReaderWriterLockSlim _eventLock = new();
 
 	/// <summary>
 	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件
@@ -108,24 +170,61 @@ public class EventBus<TId, TResult> where TId : IEquatable<TId>
 	/// <param name="id">事件 ID</param>
 	/// <param name="result">结果</param>
 	public void Invoke(TId id, TResult result)
-		=> Event?.Invoke(this, new(id, result));
+	{
+		using var _ = _eventLock.UseReadLock();
+		foreach (var handler in Events.Values)
+		{
+			handler?.Invoke(this, new(id, result));
+		}
+
+		_logger.LogTrace("[{Name}] Invoked event with ID {EventId}.", name, id);
+	}
 
 	/// <summary>
 	/// 当事件完成时触发
 	/// </summary>
-	private event EventHandler<BusEventArgs<TId, TResult>>? Event;
+	private readonly SortedDictionary<int, EventHandler<BusEventArgs<TId, TResult>>> Events = [];
 
 	/// <summary>
 	/// 订阅事件
 	/// </summary>
 	/// <param name="handler">处理器</param>
-	public void Subscribe(EventHandler<BusEventArgs<TId, TResult>> handler)
-		=> Event += handler;
+	/// <param name="priority">优先级</param>
+	public void Subscribe(EventHandler<BusEventArgs<TId, TResult>> handler, int priority = 0)
+	{
+		using var _ = _eventLock.UseWriteLock();
+		if (Events.ContainsKey(priority))
+		{
+			Events[priority] += handler;
+		}
+		else
+		{
+			Events.Add(priority, handler);
+		}
+
+		_logger.LogTrace("[{Name}] Subscribed at priority {Priority}: {Handler}", name, priority, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+	}
 
 	/// <summary>
 	/// 取消订阅事件
 	/// </summary>
 	/// <param name="handler">处理器</param>
 	public void Unsubscribe(EventHandler<BusEventArgs<TId, TResult>> handler)
-		=> Event -= handler;
+	{
+		using var _ = _eventLock.UseWriteLock();
+		foreach (var key in Events.Keys.ToArray())
+		{
+			if (!Events.TryGetValue(key, out var @event))
+			{
+				continue;
+			}
+			@event -= handler;
+			if (@event == null || @event.GetInvocationList().Length == 0)
+			{
+				Events.Remove(key);
+			}
+		}
+
+		_logger.LogTrace("[{Name}] Unsubscribed: {Handler}", name, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+	}
 }
