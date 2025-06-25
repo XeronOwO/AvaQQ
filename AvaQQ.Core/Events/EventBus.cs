@@ -6,12 +6,20 @@ using System.Collections.Concurrent;
 namespace AvaQQ.Core.Events;
 
 /// <summary>
+/// 事件公交车接口
+/// </summary>
+public interface IEventBus
+{
+	internal bool CheckSubscriptionsOnExit();
+}
+
+/// <summary>
 /// 事件公交车
 /// </summary>
 /// <typeparam name="TResult">结果类型</typeparam>
 /// <param name="serviceProvider">服务提供者</param>
 /// <param name="name">名称</param>
-public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
+public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : IEventBus
 {
 	private readonly ILogger<EventBus<TResult>> _logger = serviceProvider.GetRequiredService<ILogger<EventBus<TResult>>>();
 
@@ -53,6 +61,10 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
 		return true;
 	}
 
+	private readonly ReaderWriterLockSlim _handlerLock = new();
+
+	private readonly SortedDictionary<int, EventHandler<BusEventArgs<TResult>>> _handlers = [];
+
 	/// <summary>
 	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件
 	/// </summary>
@@ -60,19 +72,12 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
 	public void Invoke(TResult result)
 	{
 		using var _ = _taskLock.UseReadLock();
-		foreach (var handler in Events.Values)
+		foreach (var handler in _handlers.Values)
 		{
 			handler?.Invoke(this, new(result));
 		}
 		_logger.LogTrace("[{Name}] Invoked.", name);
 	}
-
-	private readonly ReaderWriterLockSlim _eventLock = new();
-
-	/// <summary>
-	/// 当事件完成时触发
-	/// </summary>
-	private readonly SortedDictionary<int, EventHandler<BusEventArgs<TResult>>> Events = [];
 
 	/// <summary>
 	/// 订阅事件
@@ -81,17 +86,17 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
 	/// <param name="priority">优先级</param>
 	public void Subscribe(EventHandler<BusEventArgs<TResult>> handler, int priority = 0)
 	{
-		using var _ = _eventLock.UseWriteLock();
-		if (Events.TryGetValue(priority, out var @event))
+		using var _ = _handlerLock.UseWriteLock();
+		if (_handlers.TryGetValue(priority, out var baseHandler))
 		{
-			@event += handler;
+			baseHandler += handler;
 		}
 		else
 		{
-			Events.Add(priority, handler);
+			_handlers.Add(priority, handler);
 		}
 
-		_logger.LogTrace("[{Name}] Subscribed at priority {Priority}: {Handler}", name, priority, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+		_logger.LogTrace("[{Name}] Subscribed at priority {Priority}: {Handler}", name, priority, handler.Method.GetFullName());
 	}
 
 	/// <summary>
@@ -100,21 +105,41 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
 	/// <param name="handler">处理器</param>
 	public void Unsubscribe(EventHandler<BusEventArgs<TResult>> handler)
 	{
-		using var _ = _eventLock.UseWriteLock();
-		foreach (var key in Events.Keys.ToArray())
+		using var _ = _handlerLock.UseWriteLock();
+		foreach (var key in _handlers.Keys.ToArray())
 		{
-			if (!Events.TryGetValue(key, out var @event))
+			if (!_handlers.TryGetValue(key, out var baseHandler))
 			{
 				continue;
 			}
-			@event -= handler;
-			if (@event == null || @event.GetInvocationList().Length == 0)
+			baseHandler -= handler;
+			if (baseHandler == null || baseHandler.GetInvocationList().Length == 0)
 			{
-				Events.Remove(key);
+				_handlers.Remove(key);
 			}
 		}
 
-		_logger.LogTrace("[{Name}] Unsubscribed: {Handler}", name, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+		_logger.LogTrace("[{Name}] Unsubscribed: {Handler}", name, handler.Method.GetFullName());
+	}
+
+	bool IEventBus.CheckSubscriptionsOnExit()
+	{
+		using var _ = _handlerLock.UseReadLock();
+		var result = true;
+		foreach (var handler in _handlers.Values)
+		{
+			var invocationList = handler?.GetInvocationList();
+			if (invocationList == null || invocationList.Length == 0)
+			{
+				continue;
+			}
+			foreach (var invocation in invocationList)
+			{
+				_logger.LogWarning("[{Name}] Event handler {Handler} is still subscribed when exiting.", name, invocation.Method.GetFullName());
+				result = false;
+			}
+		}
+		return result;
 	}
 }
 
@@ -125,7 +150,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name)
 /// <typeparam name="TResult">结果类型</typeparam>
 /// <param name="serviceProvider">服务提供者</param>
 /// <param name="name">名称</param>
-public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string name) where TId : IEquatable<TId>
+public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string name) : IEventBus where TId : IEquatable<TId>
 {
 	private readonly ILogger<EventBus<TResult>> _logger = serviceProvider.GetRequiredService<ILogger<EventBus<TResult>>>();
 
@@ -162,7 +187,9 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 		return task != null;
 	}
 
-	private readonly ReaderWriterLockSlim _eventLock = new();
+	private readonly ReaderWriterLockSlim _handlerLock = new();
+
+	private readonly SortedDictionary<int, EventHandler<BusEventArgs<TId, TResult>>> _handlers = [];
 
 	/// <summary>
 	/// 对于一些非异步事件，不需要加入队列，直接触发完成事件
@@ -171,8 +198,8 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 	/// <param name="result">结果</param>
 	public void Invoke(TId id, TResult result)
 	{
-		using var _ = _eventLock.UseReadLock();
-		foreach (var handler in Events.Values)
+		using var _ = _handlerLock.UseReadLock();
+		foreach (var handler in _handlers.Values)
 		{
 			handler?.Invoke(this, new(id, result));
 		}
@@ -181,28 +208,23 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 	}
 
 	/// <summary>
-	/// 当事件完成时触发
-	/// </summary>
-	private readonly SortedDictionary<int, EventHandler<BusEventArgs<TId, TResult>>> Events = [];
-
-	/// <summary>
 	/// 订阅事件
 	/// </summary>
 	/// <param name="handler">处理器</param>
 	/// <param name="priority">优先级</param>
 	public void Subscribe(EventHandler<BusEventArgs<TId, TResult>> handler, int priority = 0)
 	{
-		using var _ = _eventLock.UseWriteLock();
-		if (Events.ContainsKey(priority))
+		using var _ = _handlerLock.UseWriteLock();
+		if (_handlers.TryGetValue(priority, out var baseHandler))
 		{
-			Events[priority] += handler;
+			baseHandler += handler;
 		}
 		else
 		{
-			Events.Add(priority, handler);
+			_handlers.Add(priority, handler);
 		}
 
-		_logger.LogTrace("[{Name}] Subscribed at priority {Priority}: {Handler}", name, priority, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+		_logger.LogTrace("[{Name}] Subscribed at priority {Priority}: {Handler}", name, priority, handler.Method.GetFullName());
 	}
 
 	/// <summary>
@@ -211,20 +233,41 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 	/// <param name="handler">处理器</param>
 	public void Unsubscribe(EventHandler<BusEventArgs<TId, TResult>> handler)
 	{
-		using var _ = _eventLock.UseWriteLock();
-		foreach (var key in Events.Keys.ToArray())
+		using var _ = _handlerLock.UseWriteLock();
+		foreach (var key in _handlers.Keys.ToArray())
 		{
-			if (!Events.TryGetValue(key, out var @event))
+			if (!_handlers.TryGetValue(key, out var baseHandler))
 			{
 				continue;
 			}
-			@event -= handler;
-			if (@event == null || @event.GetInvocationList().Length == 0)
+
+			baseHandler -= handler;
+			if (baseHandler == null || baseHandler.GetInvocationList().Length == 0)
 			{
-				Events.Remove(key);
+				_handlers.Remove(key);
 			}
 		}
 
-		_logger.LogTrace("[{Name}] Unsubscribed: {Handler}", name, handler.Method.DeclaringType?.FullName + handler.Method.Name);
+		_logger.LogTrace("[{Name}] Unsubscribed: {Handler}", name, handler.Method.GetFullName());
+	}
+
+	bool IEventBus.CheckSubscriptionsOnExit()
+	{
+		using var _ = _handlerLock.UseReadLock();
+		var result = true;
+		foreach (var handler in _handlers.Values)
+		{
+			var invocationList = handler?.GetInvocationList();
+			if (invocationList == null || invocationList.Length == 0)
+			{
+				continue;
+			}
+			foreach (var invocation in invocationList)
+			{
+				_logger.LogWarning("[{Name}] Event handler {Handler} is still subscribed when exiting.", name, invocation.Method.GetFullName());
+				result = false;
+			}
+		}
+		return result;
 	}
 }

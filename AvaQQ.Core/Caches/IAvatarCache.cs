@@ -6,7 +6,7 @@ namespace AvaQQ.Core.Caches;
 /// <summary>
 /// 头像缓存
 /// </summary>
-public interface IAvatarCache
+public interface IAvatarCache : IDisposable
 {
 	/// <summary>
 	/// 获取群头像

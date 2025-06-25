@@ -42,11 +42,37 @@ internal class AvatarCache : IAvatarCache
 		_events.OnGroupAvatarFetched.Subscribe(OnGroupAvatarFetched);
 	}
 
+	#region Dispose
+
+	private bool disposedValue;
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			_events.OnUserAvatarFetched.Unsubscribe(OnUserAvatarFetched);
+			_events.OnGroupAvatarFetched.Unsubscribe(OnGroupAvatarFetched);
+
+			if (disposing)
+			{
+			}
+
+			disposedValue = true;
+		}
+	}
+
 	~AvatarCache()
 	{
-		_events.OnUserAvatarFetched.Unsubscribe(OnUserAvatarFetched);
-		_events.OnGroupAvatarFetched.Unsubscribe(OnGroupAvatarFetched);
+		Dispose(disposing: false);
 	}
+
+	public void Dispose()
+	{
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion
 
 	private record struct Cache(DateTime Time, Bitmap? Avatar, byte[] Hash)
 	{

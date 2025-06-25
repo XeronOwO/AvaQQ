@@ -58,15 +58,11 @@ public partial class FriendListView : UserControl
 
 		_events.OnUserAvatarChanged.Subscribe(OnUserAvatarChanged);
 		_events.OnFriendCacheAdded.Subscribe(OnFriendCacheAdded);
-	}
-
-	/// <summary>
-	/// Îö¹¹º¯Êý
-	/// </summary>
-	~FriendListView()
-	{
-		_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
-		_events.OnFriendCacheAdded.Unsubscribe(OnFriendCacheAdded);
+		DetachedFromLogicalTree += (_, _) =>
+		{
+			_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
+			_events.OnFriendCacheAdded.Unsubscribe(OnFriendCacheAdded);
+		};
 	}
 
 	/// <summary>

@@ -55,15 +55,11 @@ public partial class MainPanelWindow : Window
 
 		_events.OnUserAvatarChanged.Subscribe(OnUserAvatarChanged);
 		_events.OnUserFetched.Subscribe(OnUserFetched);
-	}
-
-	/// <summary>
-	/// Îö¹¹º¯Êý
-	/// </summary>
-	~MainPanelWindow()
-	{
-		_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
-		_events.OnUserFetched.Unsubscribe(OnUserFetched);
+		Closed += (_, _) =>
+		{
+			_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
+			_events.OnUserFetched.Unsubscribe(OnUserFetched);
+		};
 	}
 
 	private void OnUserFetched(object? sender, BusEventArgs<UinId, AdaptedUserInfo?> e)

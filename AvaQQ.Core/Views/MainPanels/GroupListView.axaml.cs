@@ -58,15 +58,11 @@ public partial class GroupListView : UserControl
 
 		_events.OnGroupAvatarChanged.Subscribe(OnGroupAvatarChanged);
 		_events.OnRecordedGroupsLoaded.Subscribe(OnRecordedGroupsLoaded);
-	}
-
-	/// <summary>
-	/// Îö¹¹º¯Êý
-	/// </summary>
-	~GroupListView()
-	{
-		_events.OnGroupAvatarChanged.Unsubscribe(OnGroupAvatarChanged);
-		_events.OnRecordedGroupsLoaded.Unsubscribe(OnRecordedGroupsLoaded);
+		DetachedFromLogicalTree += (_, _) =>
+		{
+			_events.OnGroupAvatarChanged.Unsubscribe(OnGroupAvatarChanged);
+			_events.OnRecordedGroupsLoaded.Unsubscribe(OnRecordedGroupsLoaded);
+		};
 	}
 
 	/// <summary>
