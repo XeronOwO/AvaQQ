@@ -57,9 +57,9 @@ internal class SqliteDatabase : IDatabase
 
 	#endregion
 
-	private UserSqliteContext? _context;
+	private DatabaseContext? _context;
 
-	public UserSqliteContext Context => _context ?? throw new InvalidOperationException("Database not initialized.");
+	public DatabaseContext Context => _context ?? throw new InvalidOperationException("Database not initialized.");
 
 	public void Initialize(ulong uin)
 	{
@@ -69,7 +69,7 @@ internal class SqliteDatabase : IDatabase
 			_context = null;
 		}
 
-		_context = new UserSqliteContext(uin);
+		_context = new DatabaseContext(uin);
 		_context.Database.EnsureCreated();
 		Context.SaveChanges();
 	}
