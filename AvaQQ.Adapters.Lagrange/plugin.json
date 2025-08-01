@@ -1,14 +1,9 @@
 {
 	"Id": "LagrangeAdapter",
-	"Name": "Lagrange Adapter",
+	"Name": "Lagrange.Core Adapter",
 	"Description": "Lagrange.Core Adapter",
 	"Authors": [ "XeronOwO" ],
 	"Version": "1.0.0",
 	"Assemblies": [ "AvaQQ.Adapters.Lagrange.dll" ],
-	"Dependencies": [
-		{
-			"Id": "AvaQQ.Core",
-			"Version": "1.0.0"
-		}
-	]
+	"Dependencies": []
 }

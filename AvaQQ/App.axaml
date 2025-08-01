@@ -1,0 +1,25 @@
+﻿<Application x:Class="AvaQQ.App"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:AvaQQ.ViewModels"
+             x:DataType="vm:AppViewModel"
+             RequestedThemeVariant="Default">
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://AvaQQ/Assets/Theme.Styles.axaml" />
+    </Application.Styles>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Clicked="TrayIcon_Clicked"
+                      Icon="avares://AvaQQ/Assets/logo.ico"
+                      ToolTipText="{Binding AppName}">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Click="NativeMenuItemExit_Click" Header="{Binding TextExit}" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
+</Application>

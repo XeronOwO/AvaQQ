@@ -19,6 +19,7 @@ public interface IEventBus
 /// <typeparam name="TResult">结果类型</typeparam>
 /// <param name="serviceProvider">服务提供者</param>
 /// <param name="name">名称</param>
+/// <param name="ensureUIThread">确保调用事件处理器时使用的是UI线程</param>
 public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : IEventBus
 {
 	private readonly ILogger<EventBus<TResult>> _logger = serviceProvider.GetRequiredService<ILogger<EventBus<TResult>>>();
@@ -35,14 +36,14 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 	/// <returns>是否成功加入队列</returns>
 	public bool Invoke(Func<Task<TResult>> taskFactory)
 	{
-		using var _ = _taskLock.UseUpgradeableReadLock();
+		using var lock1 = _taskLock.UseUpgradeableReadLock();
 		if (_wrappedTask != null)
 		{
 			_logger.LogTrace("[{Name}] Task already exists.", name);
 			return false;
 		}
 
-		using var __ = _taskLock.UseWriteLock();
+		using var lock2 = _taskLock.UseWriteLock();
 		if (_wrappedTask != null)
 		{
 			_logger.LogTrace("[{Name}] Task already exists.", name);
@@ -53,7 +54,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 		_wrappedTask = task.ContinueWith(t =>
 		{
 			Invoke(t.Result);
-			using var ___ = _taskLock.UseWriteLock();
+			using var lock3 = _taskLock.UseWriteLock();
 			_logger.LogTrace("[{Name}] Task {TaskId} done.", name, task.Id);
 			_wrappedTask = null;
 		});
@@ -71,7 +72,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 	/// <param name="result">结果</param>
 	public void Invoke(TResult result)
 	{
-		using var _ = _taskLock.UseReadLock();
+		using var @lock = _taskLock.UseReadLock();
 		foreach (var handler in _handlers.Values)
 		{
 			handler?.Invoke(this, new(result));
@@ -86,7 +87,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 	/// <param name="priority">优先级</param>
 	public void Subscribe(EventHandler<BusEventArgs<TResult>> handler, int priority = 0)
 	{
-		using var _ = _handlerLock.UseWriteLock();
+		using var @lock = _handlerLock.UseWriteLock();
 		if (_handlers.TryGetValue(priority, out var baseHandler))
 		{
 			_handlers[priority] = baseHandler + handler;
@@ -105,7 +106,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 	/// <param name="handler">处理器</param>
 	public void Unsubscribe(EventHandler<BusEventArgs<TResult>> handler)
 	{
-		using var _ = _handlerLock.UseWriteLock();
+		using var @lock = _handlerLock.UseWriteLock();
 		foreach (var key in _handlers.Keys.ToArray())
 		{
 			if (!_handlers.TryGetValue(key, out var baseHandler))
@@ -129,7 +130,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 
 	bool IEventBus.CheckSubscriptionsOnExit()
 	{
-		using var _ = _handlerLock.UseReadLock();
+		using var @lock = _handlerLock.UseReadLock();
 		var result = true;
 		foreach (var handler in _handlers.Values)
 		{
@@ -155,6 +156,7 @@ public class EventBus<TResult>(IServiceProvider serviceProvider, string name) : 
 /// <typeparam name="TResult">结果类型</typeparam>
 /// <param name="serviceProvider">服务提供者</param>
 /// <param name="name">名称</param>
+/// <param name="ensureUIThread">确保调用事件处理器时使用的是UI线程</param>
 public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string name) : IEventBus where TId : IEquatable<TId>
 {
 	private readonly ILogger<EventBus<TResult>> _logger = serviceProvider.GetRequiredService<ILogger<EventBus<TResult>>>();
@@ -203,7 +205,7 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 	/// <param name="result">结果</param>
 	public void Invoke(TId id, TResult result)
 	{
-		using var _ = _handlerLock.UseReadLock();
+		using var @lock = _handlerLock.UseReadLock();
 		foreach (var handler in _handlers.Values)
 		{
 			handler?.Invoke(this, new(id, result));
@@ -219,7 +221,7 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 	/// <param name="priority">优先级</param>
 	public void Subscribe(EventHandler<BusEventArgs<TId, TResult>> handler, int priority = 0)
 	{
-		using var _ = _handlerLock.UseWriteLock();
+		using var @lock = _handlerLock.UseWriteLock();
 		if (_handlers.TryGetValue(priority, out var baseHandler))
 		{
 			_handlers[priority] = baseHandler + handler;
@@ -238,7 +240,7 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 	/// <param name="handler">处理器</param>
 	public void Unsubscribe(EventHandler<BusEventArgs<TId, TResult>> handler)
 	{
-		using var _ = _handlerLock.UseWriteLock();
+		using var @lock = _handlerLock.UseWriteLock();
 		foreach (var key in _handlers.Keys.ToArray())
 		{
 			if (!_handlers.TryGetValue(key, out var baseHandler))
@@ -262,7 +264,7 @@ public class EventBus<TId, TResult>(IServiceProvider serviceProvider, string nam
 
 	bool IEventBus.CheckSubscriptionsOnExit()
 	{
-		using var _ = _handlerLock.UseReadLock();
+		using var @lock = _handlerLock.UseReadLock();
 		var result = true;
 		foreach (var handler in _handlers.Values)
 		{

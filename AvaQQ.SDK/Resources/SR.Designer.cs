@@ -70,6 +70,24 @@ namespace AvaQQ.SDK.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Expected key of type {0}, but got {1}. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionEventBusKeyType {
+            get {
+                return ResourceManager.GetString("ExceptionEventBusKeyType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Expected result of type {0}, but got {1}. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionEventBusResultType {
+            get {
+                return ResourceManager.GetString("ExceptionEventBusResultType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Failed to load configuration: &quot;{0}&quot;. 的本地化字符串。
         /// </summary>
         internal static string ExceptionFailedToLoadConfiguration {

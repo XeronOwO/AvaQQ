@@ -1,6 +1,5 @@
 ﻿using Avalonia.Markup.Xaml;
 using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Caches;
 using AvaQQ.Core.ViewModels;
 using AvaQQ.Core.Views.Connecting;
 using AvaQQ.Core.Views.MainPanels;
@@ -27,7 +26,7 @@ internal partial class App : AppBase, IDisposable
 		ILogger<App> logger
 		) : base(
 			serviceProvider.GetRequiredService<ILogger<AppBase>>(),
-			serviceProvider.GetRequiredService<IAppLifetimeController>()
+			serviceProvider.GetRequiredService<IAppLifetime>()
 			)
 	{
 		_serviceProvider = serviceProvider;

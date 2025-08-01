@@ -120,6 +120,12 @@
   <data name="ExceptionCurrentApplicationIsNull" xml:space="preserve">
     <value>Current application is null.</value>
   </data>
+  <data name="ExceptionEventBusResultType" xml:space="preserve">
+    <value>Expected result of type {0}, but got {1}.</value>
+  </data>
+  <data name="ExceptionEventBusKeyType" xml:space="preserve">
+    <value>Expected key of type {0}, but got {1}.</value>
+  </data>
   <data name="ExceptionFailedToLoadConfiguration" xml:space="preserve">
     <value>Failed to load configuration: "{0}".</value>
   </data>

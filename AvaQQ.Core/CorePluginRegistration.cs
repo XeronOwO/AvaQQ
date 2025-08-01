@@ -1,5 +1,4 @@
 ﻿using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Caches;
 using AvaQQ.Core.Databases;
 using AvaQQ.Core.Events;
 using AvaQQ.Core.MainPanels;
@@ -34,14 +33,11 @@ internal static class CorePluginRegistration
 				.AddTransient<MainPanelView>()
 				.AddScoped<MainPanelWindow>()
 				// 其它单例服务
-				.AddSingleton<IAppLifetimeController, AppLifetimeController>()
+				.AddSingleton<IAppLifetime, AppLifetimeController>()
 				.AddSingleton<IAdapterProvider, AdapterProvider>()
 				.AddSingleton<IAdapterSelectionProvider, AdapterSelectionProvider>()
 				.AddSingleton<IDatabase, SqliteDatabase>()
-				.AddSingleton<IAvatarCache, AvatarCache>()
-				.AddSingleton<IGroupCache, GroupCache>()
-				.AddSingleton<IGroupMessageCache, GroupMessageCache>()
-				.AddSingleton<IUserCache, UserCache>()
+				.AddSingleton<IAvatarCacheProvider, AvatarCacheProvider>()
 				.AddSingleton<EventStation>()
 				;
 		});

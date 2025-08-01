@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Threading;
 using AvaQQ.Core.Adapters;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Entities;
 using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
@@ -47,11 +48,11 @@ public partial class MainPanelWindow : Window
 
 		CirculationInjectionDetector<MainPanelWindow>.Leave();
 
-		_events.OnUserAvatarChanged.Subscribe(OnUserAvatarChanged);
+		_events.OnAvatarChanged.Subscribe(OnUserAvatarChanged);
 		_events.OnUserFetched.Subscribe(OnUserFetched);
 		Closed += (_, _) =>
 		{
-			_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
+			_events.OnAvatarChanged.Unsubscribe(OnUserAvatarChanged);
 			_events.OnUserFetched.Unsubscribe(OnUserFetched);
 		};
 

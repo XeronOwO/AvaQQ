@@ -1,5 +1,4 @@
 ﻿using Avalonia.Media.Imaging;
-using AvaQQ.Core.Caches;
 
 namespace AvaQQ.Core.Events;
 

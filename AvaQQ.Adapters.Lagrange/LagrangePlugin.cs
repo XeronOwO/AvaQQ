@@ -1,44 +1,34 @@
-﻿using AvaQQ.Core.Adapters;
-using AvaQQ.SDK;
-using AvaQQ.SDK.Logging;
+﻿using AvaQQ.SDK;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace AvaQQ.Adapters.Lagrange;
 
 public class LagrangePlugin : Plugin
 {
-	public override void OnPreLoad(IHostBuilder hostBuilder)
-	{
-		hostBuilder.ConfigureServices(services =>
-		{
-			services.AddScoped<AdapterSelection>()
-				.AddScoped<AdapterSelectionView>();
-		});
-
-		FileLoggingExecutor.Information<LagrangePlugin>($"{nameof(LagrangePlugin)} preloaded.");
-	}
-
 	private ILogger<LagrangePlugin> _logger = null!;
 
-	public override void OnLoad(IServiceProvider services)
+	public override void OnPreLoad()
 	{
-		_logger = services.GetRequiredService<ILogger<LagrangePlugin>>();
+		_logger = AppBase.Current.Services.GetRequiredService<ILogger<LagrangePlugin>>();
+		var viewProvider = AppBase.Current.Services.GetRequiredService<IAdapterViewProvider>();
+		viewProvider.Register(new AdapterViewImpl());
 
-		services.GetRequiredService<IAdapterSelectionProvider>()
-			.Register<AdapterSelection>();
-
-		_logger.LogInformation($"{nameof(LagrangePlugin)} loaded.");
+		_logger.LogInformation($"{nameof(LagrangePlugin)} preloaded");
 	}
 
-	public override void OnPostLoad(IServiceProvider services)
+	public override void OnLoad()
 	{
-		_logger.LogInformation($"{nameof(LagrangePlugin)} post loaded.");
+		_logger.LogInformation($"{nameof(LagrangePlugin)} loaded");
+	}
+
+	public override void OnPostLoad()
+	{
+		_logger.LogInformation($"{nameof(LagrangePlugin)} post loaded");
 	}
 
 	public override void OnUnload()
 	{
-		_logger.LogInformation($"{nameof(LagrangePlugin)} unloaded.");
+		_logger.LogInformation($"{nameof(LagrangePlugin)} unloaded");
 	}
 }

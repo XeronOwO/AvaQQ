@@ -117,10 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>AvaQQ</value>
+  </data>
+  <data name="ExceptionOpenConnectWindow_AdapterAlreadySet" xml:space="preserve">
+    <value>无法打开 ConnectWindow，因为适配器已经设置过了。</value>
+  </data>
+  <data name="ExceptionOpenMainWindow_AdapterIsNull" xml:space="preserve">
+    <value>无法打开 MainWindow，因为适配器是 null。</value>
+  </data>
+  <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
+    <value>找不到ID为 '{0}' 的依赖插件。</value>
+  </data>
+  <data name="MenuTextExit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="TextConnect" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="ExceptionEventBusNotFound" xml:space="preserve">
+    <value>无法找到名为 '{0}' 且分类为 '{1}' 的事件公交车。</value>
+  </data>
   <data name="ExceptionCircularReferenceDetected" xml:space="preserve">
     <value>加载插件时发现循环引用。</value>
   </data>
-  <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
-    <value>找不到ID为 "{0}" 的依赖插件。</value>
+  <data name="ExceptionOnlySupportedInDesignMode" xml:space="preserve">
+    <value>该操作只支持设计模式。</value>
+  </data>
+  <data name="ExceptionNotInitialized" xml:space="preserve">
+    <value>{0} 未初始化。</value>
+  </data>
+  <data name="ExceptionEventBusCast" xml:space="preserve">
+    <value>无法将名为 '{0}' 且分类为 '{1}' 的事件公交车从原类型 {3} 转换为 {2}。</value>
+  </data>
+  <data name="ExceptionAdapterIsNull" xml:space="preserve">
+    <value>适配器为 null。</value>
   </data>
 </root>

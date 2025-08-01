@@ -1,5 +1,4 @@
-﻿using AvaQQ.Core.Caches;
-using AvaQQ.Core.Events;
+﻿using AvaQQ.Core.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace AvaQQ.Core.Databases;

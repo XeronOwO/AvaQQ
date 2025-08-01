@@ -61,6 +61,24 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
+        ///   查找类似 AvaQQ 的本地化字符串。
+        /// </summary>
+        internal static string AppName {
+            get {
+                return ResourceManager.GetString("AppName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Adapter is null. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionAdapterIsNull {
+            get {
+                return ResourceManager.GetString("ExceptionAdapterIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Circular reference detected while loading plugin. 的本地化字符串。
         /// </summary>
         internal static string ExceptionCircularReferenceDetected {
@@ -70,11 +88,83 @@ namespace AvaQQ.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Plugin dependency with id &quot;{0}&quot; not found. 的本地化字符串。
+        ///   查找类似 Failed to cast event bus with name &apos;{0}&apos; and category &apos;{1}&apos; to {2} from original type {3}. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionEventBusCast {
+            get {
+                return ResourceManager.GetString("ExceptionEventBusCast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Event bus with name &apos;{0}&apos; and category &apos;{1}&apos; not found. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionEventBusNotFound {
+            get {
+                return ResourceManager.GetString("ExceptionEventBusNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} is not initialized. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionNotInitialized {
+            get {
+                return ResourceManager.GetString("ExceptionNotInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This operation is only supported in design mode. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionOnlySupportedInDesignMode {
+            get {
+                return ResourceManager.GetString("ExceptionOnlySupportedInDesignMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cannot open ConnectWindow, because adapter is already set. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionOpenConnectWindow_AdapterAlreadySet {
+            get {
+                return ResourceManager.GetString("ExceptionOpenConnectWindow_AdapterAlreadySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cannot open MainWindow, because adapter is null. 的本地化字符串。
+        /// </summary>
+        internal static string ExceptionOpenMainWindow_AdapterIsNull {
+            get {
+                return ResourceManager.GetString("ExceptionOpenMainWindow_AdapterIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Plugin dependency with id &apos;{0}&apos; not found. 的本地化字符串。
         /// </summary>
         internal static string ExceptionPluginDependencyNotFound {
             get {
                 return ResourceManager.GetString("ExceptionPluginDependencyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Exit 的本地化字符串。
+        /// </summary>
+        internal static string MenuTextExit {
+            get {
+                return ResourceManager.GetString("MenuTextExit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Connect 的本地化字符串。
+        /// </summary>
+        internal static string TextConnect {
+            get {
+                return ResourceManager.GetString("TextConnect", resourceCulture);
             }
         }
     }

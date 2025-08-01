@@ -1,10 +1,9 @@
-﻿using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Events;
-using AvaQQ.Core.Messages;
+﻿using AvaQQ.Adapters.Lagrange.Utils;
+using AvaQQ.SDK;
+using AvaQQ.SDK.Entities;
 using Lagrange.Core;
 using Lagrange.Core.Common.Interface.Api;
 using Lagrange.Core.Event.EventArg;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using LagrangeLogLevel = Lagrange.Core.Event.EventArg.LogLevel;
 using MicrosoftLogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -15,22 +14,16 @@ internal class Adapter : IAdapter
 {
 	private readonly ILogger<Adapter> _logger;
 
-	private readonly ILogger<ISegment> _segmentLogger;
-
-	private readonly ILogger<BotContext> _botLogger;
-
-	private readonly EventStation _events;
+	private readonly ILoggerProvider _loggerProvider;
 
 	private readonly BotContext _context;
 
-	public Adapter(IServiceProvider serviceProvider, BotContext context)
+	public Adapter(ILogger<Adapter> logger, ILoggerProvider loggerProvider, BotContext context)
 	{
-		_logger = serviceProvider.GetRequiredService<ILogger<Adapter>>();
-		_segmentLogger = serviceProvider.GetRequiredService<ILogger<ISegment>>();
-		_botLogger = serviceProvider.GetRequiredService<ILogger<BotContext>>();
-		_events = serviceProvider.GetRequiredService<EventStation>();
-
+		_logger = logger;
+		_loggerProvider = loggerProvider;
 		_context = context;
+
 		_context.Invoker.OnBotLogEvent += OnBotLog;
 		_context.Invoker.OnGroupMessageReceived += OnGroupMessageReceived;
 	}
@@ -70,7 +63,7 @@ internal class Adapter : IAdapter
 
 	private void OnBotLog(BotContext context, BotLogEvent e)
 	{
-		_botLogger.Log(e.Level switch
+		_loggerProvider.CreateLogger(e.Tag).Log(e.Level switch
 		{
 			LagrangeLogLevel.Debug => MicrosoftLogLevel.Trace,
 			LagrangeLogLevel.Verbose => MicrosoftLogLevel.Information,
@@ -111,46 +104,98 @@ internal class Adapter : IAdapter
 
 	public async Task<AdaptedUserInfo?> GetUserAsync(ulong uin, CancellationToken token = default)
 	{
-		if (await _context.FetchUserInfo((uint)uin) is not { } user)
+		try
 		{
+			if (await _context.FetchUserInfo((uint)uin).WithCancellationToken(token) is not { } user)
+			{
+				return null;
+			}
+			return new AdaptedUserInfo(user.Uin, user.Nickname, string.IsNullOrEmpty(user.Remark) ? null : user.Remark);
+		}
+		catch (OperationCanceledException)
+		{
+			_logger.LogWarning("Fetching user info of {Uin} was cancelled", uin);
 			return null;
 		}
-		return new AdaptedUserInfo(user.Uin, user.Nickname, string.IsNullOrEmpty(user.Remark) ? null : user.Remark);
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get user info of {Uin}", uin);
+			return null;
+		}
 	}
 
 	public async Task<AdaptedUserInfo[]> GetAllFriendsAsync(CancellationToken token = default)
 	{
-		var result = new List<AdaptedUserInfo>();
-		foreach (var friend in await _context.FetchFriends())
+		try
 		{
-			result.Add(new(friend.Uin, friend.Nickname, string.IsNullOrEmpty(friend.Remarks) ? null : friend.Remarks));
+			var result = new List<AdaptedUserInfo>();
+			foreach (var friend in await _context.FetchFriends().WithCancellationToken(token))
+			{
+				result.Add(new(friend.Uin, friend.Nickname, string.IsNullOrEmpty(friend.Remarks) ? null : friend.Remarks));
+			}
+			return [.. result];
 		}
-		return [.. result];
+		catch (OperationCanceledException)
+		{
+			_logger.LogWarning("Fetching all friends was cancelled");
+			return [];
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get all friends");
+			return [];
+		}
 	}
 
 	public async Task<AdaptedGroupInfo[]> GetAllJoinedGroupsAsync(CancellationToken token = default)
 	{
-		var result = new List<AdaptedGroupInfo>();
-		foreach (var group in await _context.FetchGroups(true))
+		try
 		{
-			result.Add(new(group.GroupUin, group.GroupName, string.IsNullOrEmpty(group.GroupRemark) ? null : group.GroupRemark));
+			var result = new List<AdaptedGroupInfo>();
+			foreach (var group in await _context.FetchGroups(true).WithCancellationToken(token))
+			{
+				result.Add(new(group.GroupUin, group.GroupName, string.IsNullOrEmpty(group.GroupRemark) ? null : group.GroupRemark));
+			}
+			return [.. result];
 		}
-		return [.. result];
+		catch (OperationCanceledException)
+		{
+			_logger.LogWarning("Fetching all joined groups was cancelled");
+			return [];
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get all joined groups");
+			return [];
+		}
 	}
 
 	public async Task<AdaptedGroupInfo?> GetJoinedGroupAsync(ulong uin, CancellationToken token = default)
 	{
-		(var code, var message, var info) = await _context.FetchGroupInfo(uin);
-		if (code != 0)
+		try
 		{
-			_logger.LogError("Failed to get group: code={Code}, message={Message}", code, message);
+			(var code, var message, var info) = await _context.FetchGroupInfo(uin).WithCancellationToken(token);
+			if (code != 0)
+			{
+				_logger.LogError("Failed to get group: code={Code}, message={Message}", code, message);
+				return null;
+			}
+			return new AdaptedGroupInfo(info.Uin, info.Name, null);
+		}
+		catch (OperationCanceledException)
+		{
+			_logger.LogWarning("Fetching group info of {Uin} was cancelled", uin);
 			return null;
 		}
-		return new AdaptedGroupInfo(info.Uin, info.Name, null);
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to get group info of {Uin}", uin);
+			return null;
+		}
 	}
 
 	private void OnGroupMessageReceived(BotContext context, GroupMessageEvent e)
 	{
-		_events.OnGroupMessage.Invoke(e.Chain.ToMessage(_segmentLogger));
+		
 	}
 }

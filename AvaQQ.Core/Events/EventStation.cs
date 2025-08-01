@@ -1,7 +1,5 @@
 ﻿using AvaQQ.Core.Adapters;
-using AvaQQ.Core.Caches;
-using AvaQQ.Core.Databases;
-using AvaQQ.Core.Messages;
+using AvaQQ.Core.Entities;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Runtime.Loader;
@@ -24,10 +22,7 @@ public class EventStation
 	{
 		_logger = logger;
 
-		OnUserAvatarFetched = new(serviceProvider, nameof(OnUserAvatarFetched));
-		OnGroupAvatarFetched = new(serviceProvider, nameof(OnGroupAvatarFetched));
-		OnUserAvatarChanged = new(serviceProvider, nameof(OnUserAvatarChanged));
-		OnGroupAvatarChanged = new(serviceProvider, nameof(OnGroupAvatarChanged));
+		OnAvatarChanged = new(serviceProvider, nameof(OnAvatarChanged));
 		OnRecordedUsersLoaded = new(serviceProvider, nameof(OnRecordedUsersLoaded));
 		OnRecordedGroupsLoaded = new(serviceProvider, nameof(OnRecordedGroupsLoaded));
 		OnFriendsFetched = new(serviceProvider, nameof(OnFriendsFetched));
@@ -53,26 +48,9 @@ public class EventStation
 	}
 
 	/// <summary>
-	/// 当从服务器获取到用户头像时
+	/// 当头像改变时
 	/// </summary>
-	public EventBus<AvatarId, byte[]?> OnUserAvatarFetched { get; }
-
-	/// <summary>
-	/// 当从服务器获取到群头像时
-	/// </summary>
-	public EventBus<AvatarId, byte[]?> OnGroupAvatarFetched { get; }
-
-	/// <summary>
-	/// 当用户头像改变时<br/>
-	/// 是 <see cref="OnUserAvatarFetched"/> 的衍生事件
-	/// </summary>
-	public EventBus<AvatarId, AvatarChangedInfo> OnUserAvatarChanged { get; }
-
-	/// <summary>
-	/// 当群头像改变时<br/>
-	/// 是 <see cref="OnGroupAvatarFetched"/> 的衍生事件
-	/// </summary>
-	public EventBus<AvatarId, AvatarChangedInfo> OnGroupAvatarChanged { get; }
+	public EventBus<AvatarId, AvatarChangedInfo> OnAvatarChanged { get; }
 
 	/// <summary>
 	/// 当从本地数据库中加载用户信息时

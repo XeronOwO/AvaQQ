@@ -1,0 +1,101 @@
+﻿<UserControl x:Class="AvaQQ.Views.Main.EntryView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:AvaQQ.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AvaQQ.ViewModels.Main"
+             d:DesignHeight="100"
+             d:DesignWidth="300"
+             x:DataType="vm:EntryViewModel"
+             mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:EntryViewModel />
+    </Design.DataContext>
+    <UserControl.Resources>
+        <c:DateTimeOffsetConverter x:Key="DateTimeOffsetConverter" />
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="UserControl > Grid">
+            <Setter Property="Background" Value="White" />
+        </Style>
+        <Style Selector="UserControl > Grid:pointerover">
+            <Setter Property="Background" Value="#F5FFFFFF" />
+        </Style>
+        <Style Selector="UserControl > Grid:selected">
+            <Setter Property="Background" Value="#33009CFF" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="*" RowDefinitions="auto">
+        <Grid.Transitions>
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.5" />
+            </Transitions>
+        </Grid.Transitions>
+
+        <Grid Grid.Row="0"
+              Grid.Column="0"
+              Margin="10"
+              ColumnDefinitions="auto,10,*"
+              RowDefinitions="*">
+
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Width="40"
+                   Height="40"
+                   Source="{Binding Image}">
+                <Image.Clip>
+                    <EllipseGeometry Center="20,20"
+                                     RadiusX="20"
+                                     RadiusY="20" />
+                </Image.Clip>
+            </Image>
+
+            <Grid Grid.Row="0"
+                  Grid.Column="2"
+                  ColumnDefinitions="*"
+                  RowDefinitions="auto,*,auto">
+                <Grid Grid.Row="0"
+                      Grid.Column="0"
+                      ColumnDefinitions="*,10,auto"
+                      RowDefinitions="*">
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               Text="{Binding Title}" />
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="2"
+                               VerticalAlignment="Center"
+                               FontSize="10"
+                               Foreground="Gray"
+                               Text="{Binding Time, Converter={StaticResource DateTimeOffsetConverter}}" />
+                </Grid>
+
+                <Grid Grid.Row="2"
+                      Grid.Column="0"
+                      ColumnDefinitions="*,auto"
+                      RowDefinitions="*">
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="Gray"
+                               Text="{Binding Preview}" />
+                    <Border Grid.Row="0"
+                            Grid.Column="1"
+                            Background="{Binding UnreadBackgroundBrush}"
+                            CornerRadius="12"
+                            IsVisible="{Binding UnreadVisible}">
+                        <TextBlock Margin="5,0"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   Text="{Binding UnreadCountText}" />
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

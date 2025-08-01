@@ -1,11 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using AvaQQ.Plugins;
 using AvaQQ.SDK;
-using AvaQQ.SDK.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace AvaQQ.Desktop;
 
@@ -18,42 +15,33 @@ internal class Program
 	public static void Main(string[] args)
 		=> Host.CreateDefaultBuilder(args)
 			.ConfigureLogging(logging =>
-				logging.ClearProviders()
-					.AddFileLogger()
+				logging.ConfigureAvaQQLogger()
 			)
 			.ConfigureServices(services =>
 				services.AddHostedService<AppService>()
 			)
-			.ConfigurePlugins()
+			.ConfigureAvaQQ()
 			.Build()
 			.Run();
 
 	// Avalonia configuration, don't remove; also used by visual designer.
 	public static AppBuilder BuildAvaloniaApp()
-	{
-		return AppBuilder.Configure(() =>
-			{
-				var builder = Host.CreateDefaultBuilder()
-					.ConfigureLogging(logging =>
-						logging.ClearProviders()
-							.AddFileLogger()
-					)
-					.ConfigureServices(services =>
-						services.AddHostedService<AppService>()
-					)
-					.ConfigurePlugins()
-					.Build();
-				DesignerServiceProviderHelper.Root = builder.Services.GetRequiredService<IServiceProvider>();
+		=> AppBuilder.Configure(() =>
+		{
+			var host = Host.CreateDefaultBuilder()
+				.ConfigureLogging(logging =>
+					logging.ConfigureAvaQQLogger()
+				)
+				.ConfigureServices(services =>
+					services.AddHostedService<AppService>()
+				)
+				.ConfigureAvaQQ()
+				.Build();
 
-				var pluginManager = builder.Services.GetRequiredService<IPluginManager>();
-				pluginManager.LoadPlugins(builder.Services);
-				pluginManager.PostLoadPlugins(builder.Services);
-
-				return builder.Services.GetRequiredService<AppBase>();
-			})
-			.UsePlatformDetect()
-			.WithInterFont()
-			.LogToTrace()
-			.UseReactiveUI();
-	}
+			return host.Services.GetRequiredService<AppBase>();
+		})
+		.UsePlatformDetect()
+		.WithInterFont()
+		.LogToTrace()
+		.UseReactiveUI();
 }

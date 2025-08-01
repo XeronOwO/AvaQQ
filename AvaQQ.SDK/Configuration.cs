@@ -5,16 +5,10 @@ using System.Text.Json;
 
 namespace AvaQQ.SDK;
 
-/// <summary>
-/// 配置管理器
-/// </summary>
 public abstract class Configuration
 {
 	private static readonly string _baseDirectory;
 
-	/// <summary>
-	/// 配置文件存储目录
-	/// </summary>
 	public static string BaseDirectory => _baseDirectory;
 
 	static Configuration()
@@ -24,10 +18,6 @@ public abstract class Configuration
 	}
 }
 
-/// <summary>
-/// 配置管理器
-/// </summary>
-/// <typeparam name="T">配置数据结构</typeparam>
 public class Configuration<T> : Configuration
 	where T : class, new()
 {
@@ -35,10 +25,6 @@ public class Configuration<T> : Configuration
 
 	private static string? _name;
 
-	/// <summary>
-	/// 获取或设置配置文件的名称。<br/>
-	/// 默认值为类型的名称，去除后缀 "Configuration" 并转换为蛇形命名法。
-	/// </summary>
 	[AllowNull]
 	public static string Name
 	{
@@ -67,16 +53,10 @@ public class Configuration<T> : Configuration
 		set => _name = value;
 	}
 
-	/// <summary>
-	/// 获取配置文件的路径。
-	/// </summary>
 	public static string ConfigPath { get; } = Path.Combine(BaseDirectory, Name);
 
 	private static Lazy<T> _lazyInstance;
 
-	/// <summary>
-	/// 获取配置的实例。
-	/// </summary>
 	public static T Instance => _lazyInstance.Value;
 
 	static Configuration()
@@ -84,9 +64,6 @@ public class Configuration<T> : Configuration
 		Reload();
 	}
 
-	/// <summary>
-	/// 重新加载配置。
-	/// </summary>
 	[MemberNotNull(nameof(_lazyInstance))]
 	public static void Reload()
 	{
@@ -112,9 +89,6 @@ public class Configuration<T> : Configuration
 		return result;
 	}
 
-	/// <summary>
-	/// 保存配置。
-	/// </summary>
 	public static void Save()
 	{
 		SaveInternal(Instance);

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Entities;
 using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;

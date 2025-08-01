@@ -1,29 +1,12 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿namespace AvaQQ.SDK;
 
-namespace AvaQQ.SDK;
-
-/// <summary>
-/// 插件管理器接口
-/// </summary>
 public interface IPluginManager
 {
-	/// <summary>
-	/// 预加载插件
-	/// </summary>
-	void PreloadPlugins(IHostBuilder hostBuilder);
+	void PreloadPlugins();
 
-	/// <summary>
-	/// 加载插件
-	/// </summary>
-	void LoadPlugins(IServiceProvider serviceProvider);
+	void LoadPlugins();
 
-	/// <summary>
-	/// 后加载插件
-	/// </summary>
-	void PostLoadPlugins(IServiceProvider serviceProvider);
+	void PostLoadPlugins();
 
-	/// <summary>
-	/// 卸载插件
-	/// </summary>
-	void UnloadPlugins(IServiceProvider serviceProvider);
+	void UnloadPlugins();
 }

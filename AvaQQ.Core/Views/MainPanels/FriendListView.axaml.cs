@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AvaQQ.Core.Caches;
+using AvaQQ.Core.Entities;
 using AvaQQ.Core.Events;
 using AvaQQ.Core.Utils;
 using AvaQQ.Core.ViewModels.MainPanels;
@@ -56,11 +57,11 @@ public partial class FriendListView : UserControl
 
 		CirculationInjectionDetector<FriendListView>.Leave();
 
-		_events.OnUserAvatarChanged.Subscribe(OnUserAvatarChanged);
+		_events.OnAvatarChanged.Subscribe(OnUserAvatarChanged);
 		_events.OnFriendCacheAdded.Subscribe(OnFriendCacheAdded);
 		DetachedFromLogicalTree += (_, _) =>
 		{
-			_events.OnUserAvatarChanged.Unsubscribe(OnUserAvatarChanged);
+			_events.OnAvatarChanged.Unsubscribe(OnUserAvatarChanged);
 			_events.OnFriendCacheAdded.Unsubscribe(OnFriendCacheAdded);
 		};
 	}

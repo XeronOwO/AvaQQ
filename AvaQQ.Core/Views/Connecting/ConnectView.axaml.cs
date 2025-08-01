@@ -14,14 +14,14 @@ public partial class ConnectView : UserControl
 {
 	private readonly IServiceProvider _serviceProvider;
 
-	private readonly IAdapterSelectionProvider _adapterSelectionProvider;
+	private readonly Adapters.IAdapterSelectionProvider _adapterSelectionProvider;
 
 	/// <summary>
 	/// 创建连接视图
 	/// </summary>
 	public ConnectView(
 		IServiceProvider serviceProvider,
-		IAdapterSelectionProvider adapterSelectionProvider
+		Adapters.IAdapterSelectionProvider adapterSelectionProvider
 		)
 	{
 		CirculationInjectionDetector<ConnectView>.Enter();
@@ -50,7 +50,7 @@ public partial class ConnectView : UserControl
 	/// </summary>
 	public ConnectView() : this(
 		DesignerServiceProviderHelper.Root,
-		DesignerServiceProviderHelper.Root.GetRequiredService<IAdapterSelectionProvider>()
+		DesignerServiceProviderHelper.Root.GetRequiredService<Adapters.IAdapterSelectionProvider>()
 		)
 	{
 	}
@@ -59,7 +59,7 @@ public partial class ConnectView : UserControl
 	{
 		Config.Instance.SelectedAdapter = string.Empty;
 
-		if (adapterSelector.SelectedItem is not IAdapterSelection selection)
+		if (adapterSelector.SelectedItem is not Adapters.IAdapterSelection selection)
 		{
 			return;
 		}
@@ -80,7 +80,7 @@ public partial class ConnectView : UserControl
 		{
 			foreach (var item in e.RemovedItems)
 			{
-				if (item is IAdapterSelection selection)
+				if (item is Adapters.IAdapterSelection selection)
 				{
 					selection.OnDeselected();
 				}
@@ -93,7 +93,7 @@ public partial class ConnectView : UserControl
 		{
 			foreach (var item in e.AddedItems)
 			{
-				if (item is IAdapterSelection selection)
+				if (item is Adapters.IAdapterSelection selection)
 				{
 					selection.OnSelected();
 				}

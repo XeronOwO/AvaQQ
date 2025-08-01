@@ -117,10 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>AvaQQ</value>
+  </data>
+  <data name="ExceptionOpenConnectWindow_AdapterAlreadySet" xml:space="preserve">
+    <value>Cannot open ConnectWindow, because adapter is already set.</value>
+  </data>
+  <data name="ExceptionOpenMainWindow_AdapterIsNull" xml:space="preserve">
+    <value>Cannot open MainWindow, because adapter is null.</value>
+  </data>
+  <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
+    <value>Plugin dependency with id '{0}' not found.</value>
+  </data>
+  <data name="MenuTextExit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="TextConnect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ExceptionEventBusNotFound" xml:space="preserve">
+    <value>Event bus with name '{0}' and category '{1}' not found.</value>
+  </data>
   <data name="ExceptionCircularReferenceDetected" xml:space="preserve">
     <value>Circular reference detected while loading plugin.</value>
   </data>
-  <data name="ExceptionPluginDependencyNotFound" xml:space="preserve">
-    <value>Plugin dependency with id "{0}" not found.</value>
+  <data name="ExceptionOnlySupportedInDesignMode" xml:space="preserve">
+    <value>This operation is only supported in design mode.</value>
+  </data>
+  <data name="ExceptionNotInitialized" xml:space="preserve">
+    <value>{0} is not initialized.</value>
+  </data>
+  <data name="ExceptionEventBusCast" xml:space="preserve">
+    <value>Failed to cast event bus with name '{0}' and category '{1}' to {2} from original type {3}.</value>
+  </data>
+  <data name="ExceptionAdapterIsNull" xml:space="preserve">
+    <value>Adapter is null.</value>
   </data>
 </root>

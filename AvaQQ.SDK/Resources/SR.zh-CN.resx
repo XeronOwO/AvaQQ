@@ -120,6 +120,12 @@
   <data name="ExceptionCurrentApplicationIsNull" xml:space="preserve">
     <value>当前应用为 null。</value>
   </data>
+  <data name="ExceptionEventBusResultType" xml:space="preserve">
+    <value>期望的结果类型为 {0}，但得到了 {1}。</value>
+  </data>
+  <data name="ExceptionEventBusKeyType" xml:space="preserve">
+    <value>期望的键类型为 {0}，但得到了 {1}。</value>
+  </data>
   <data name="ExceptionFailedToLoadConfiguration" xml:space="preserve">
     <value>配置文件 "{0}" 加载失败。</value>
   </data>

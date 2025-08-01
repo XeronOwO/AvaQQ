@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="AvaQQ.Views.Main.MainView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AvaQQ.ViewModels.Main"
+             d:DesignHeight="600"
+             d:DesignWidth="300"
+             x:DataType="vm:MainViewModel"
+             mc:Ignorable="d">
+    <Grid ColumnDefinitions="*" RowDefinitions="auto,auto,*">
+        <!--  Header  -->
+        <Grid Grid.Row="0"
+              Grid.Column="0"
+              Margin="50,10"
+              ColumnDefinitions="auto,*"
+              RowDefinitions="auto">
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Width="40"
+                   Height="40"
+                   Margin="10"
+                   Source="{Binding Avatar}">
+                <Image.Clip>
+                    <EllipseGeometry Center="20,20"
+                                     RadiusX="20"
+                                     RadiusY="20" />
+                </Image.Clip>
+            </Image>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       Text="{Binding Nickname}" />
+        </Grid>
+
+        <!--  Splitter  -->
+        <Rectangle Grid.Row="1"
+                   Grid.Column="0"
+                   Height="3"
+                   Fill="{DynamicResource ControlBrush}" />
+
+        <!--  Category  -->
+
+        <!--  Content  -->
+    </Grid>
+</UserControl>

@@ -10,34 +10,26 @@ namespace AvaQQ.Desktop;
 internal class AppService(
 	IServiceProvider serviceProvider,
 	IHost host,
-	IAppLifetimeController lifetime,
+	IAppLifetime lifetime,
 	IPluginManager pluginManager
 	) : BackgroundService
 {
 	private AppBuilder BuildAvaloniaApp()
-	{
-		return AppBuilder.Configure(serviceProvider.GetRequiredService<AppBase>)
+		=> AppBuilder.Configure(serviceProvider.GetRequiredService<AppBase>)
 			.UsePlatformDetect()
 			.WithInterFont()
 			.LogToTrace()
 			.UseReactiveUI();
-	}
 
 	protected override Task ExecuteAsync(CancellationToken stoppingToken)
-	{
-		//DesignerServiceProviderHelper.Root = serviceProvider;
-
-		return Task.Run(() =>
+		=> Task.Run(() =>
 		{
-			pluginManager.LoadPlugins(serviceProvider);
-			pluginManager.PostLoadPlugins(serviceProvider);
-
-			BuildAvaloniaApp().Start((Application application, string[] args) =>
+			BuildAvaloniaApp().Start((application, args) =>
 			{
 				if (application is AppBase app)
 				{
-					app.Run(lifetime.CancellationToken);
-					pluginManager.UnloadPlugins(serviceProvider);
+					app.Run(lifetime.Token);
+					pluginManager.UnloadPlugins();
 					// Clean tray icon
 					TrayIcons? trays = TrayIcon.GetIcons(application);
 					if (trays != null)
@@ -51,5 +43,4 @@ internal class AppService(
 				}
 			}, Environment.GetCommandLineArgs());
 		}, stoppingToken);
-	}
 }
