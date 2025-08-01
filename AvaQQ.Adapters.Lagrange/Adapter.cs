@@ -196,6 +196,6 @@ internal class Adapter : IAdapter
 
 	private void OnGroupMessageReceived(BotContext context, GroupMessageEvent e)
 	{
-		
+
 	}
 }
